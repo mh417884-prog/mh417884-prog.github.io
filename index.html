@@ -33,7 +33,7 @@
 <meta name="twitter:image:alt" content="Mufti Muhammad Hassan"/>
 <meta name="robots" content="index, follow"/>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://learnwithmuftihassan.com/#person","name":"Mufti Muhammad Hassan","alternateName":"Sadheer Khan","url":"https://learnwithmuftihassan.com/","jobTitle":"PhD Candidate, Founder & Academic Director Madrasa.pk","image":"https://learnwithmuftihassan.com/assets/mufti-portrait.webp","alumniOf":[{"@type":"CollegeOrUniversity","name":"International Islamic University Malaysia (IIUM)"},{"@type":"CollegeOrUniversity","name":"Jamia-tur-Rasheed Karachi"}],"email":"mailto:k.sadheer@live.iium.edu.my","sameAs":["https://www.youtube.com/@Learnwithmuftihassan","https://www.facebook.com/learnwithmuftihassan","https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u"]},{"@type":"WebSite","@id":"https://learnwithmuftihassan.com/#website","url":"https://learnwithmuftihassan.com/","name":"Learn with Mufti Hassan","inLanguage":["en","ur"],"publisher":{"@id":"https://learnwithmuftihassan.com/#organization"}},{"@type":"Organization","@id":"https://learnwithmuftihassan.com/#organization","name":"Learn with Mufti Hassan","url":"https://learnwithmuftihassan.com/","logo":"https://learnwithmuftihassan.com/assets/mufti-portrait.webp","founder":{"@id":"https://learnwithmuftihassan.com/#person"},"sameAs":["https://www.youtube.com/@Learnwithmuftihassan","https://www.facebook.com/learnwithmuftihassan","https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u"]}]}
+{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://learnwithmuftihassan.com/#person","name":"Mufti Muhammad Hassan","alternateName":"Sadheer Khan","url":"https://learnwithmuftihassan.com/","jobTitle":"PhD Candidate, Founder & Academic Director Madrasa.pk","image":"https://learnwithmuftihassan.com/assets/mufti-portrait.webp","alumniOf":[{"@type":"CollegeOrUniversity","name":"International Islamic University Malaysia (IIUM)"},{"@type":"CollegeOrUniversity","name":"Jamia-tur-Rasheed Karachi"}],"email":"mailto:k.sadheer@live.iium.edu.my","sameAs":["https://www.youtube.com/@Learnwithmuftihassan","https://www.facebook.com/learnwithmuftihassan","https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u","https://scholar.google.com/citations?user=kTFpaIYAAAAJ&hl=en","https://www.linkedin.com/in/mufti-muhammad-hassan-"]},{"@type":"WebSite","@id":"https://learnwithmuftihassan.com/#website","url":"https://learnwithmuftihassan.com/","name":"Learn with Mufti Hassan","inLanguage":["en","ur"],"publisher":{"@id":"https://learnwithmuftihassan.com/#organization"}},{"@type":"Organization","@id":"https://learnwithmuftihassan.com/#organization","name":"Learn with Mufti Hassan","url":"https://learnwithmuftihassan.com/","logo":"https://learnwithmuftihassan.com/assets/mufti-portrait.webp","founder":{"@id":"https://learnwithmuftihassan.com/#person"},"sameAs":["https://www.youtube.com/@Learnwithmuftihassan","https://www.facebook.com/learnwithmuftihassan","https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u"]}]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -70,12 +70,12 @@ nav.links a:hover{background:var(--chip)}
 .socials{display:flex;gap:8px;align-items:center}
 .soc{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;text-decoration:none;flex:0 0 38px}
 .soc svg{width:20px;height:20px;fill:currentColor;display:block}
-.soc.yt{background:#ff0000}.soc.fb{background:#1877f2}.soc.wa{background:#25d366}.soc.tt{background:#000000}
+.soc.yt{background:#ff0000}.soc.fb{background:#1877f2}.soc.wa{background:#25d366}.soc.tt{background:#000000}.soc.li{background:#0a66c2}
 .soc:hover{opacity:.85}
 .follow-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
 .fsoc{display:inline-flex;align-items:center;gap:9px;color:#fff!important;text-decoration:none;font-weight:800;padding:11px 18px;border-radius:6px;font-size:.92rem}
 .fsoc svg{width:20px;height:20px;fill:currentColor;display:block}
-.fsoc.yt{background:#ff0000}.fsoc.fb{background:#1877f2}.fsoc.wa{background:#25d366}.fsoc.tt{background:#000000}
+.fsoc.yt{background:#ff0000}.fsoc.fb{background:#1877f2}.fsoc.wa{background:#25d366}.fsoc.tt{background:#000000}.fsoc.li{background:#0a66c2}
 .fsoc:hover{opacity:.88}
 .ctabtn{background:var(--emerald);color:#fff!important;text-decoration:none;font-weight:800;padding:9px 16px;border-radius:6px}
 .menuBtn{display:none;margin-left:auto;background:none;border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer;color:var(--ink);font-weight:700}
@@ -166,10 +166,14 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
   <button class="menuBtn" id="menuBtn" aria-label="Menu">☰ Menu</button>
   <nav class="links" id="navLinks">
     <a href="#about" data-i18n="n_about">About · تعارف</a>
+    <a href="#phd" data-i18n="n_phd">PhD Research · پی ایچ ڈی تحقیق</a>
+    <a href="#skills" data-i18n="n_skills">Skills &amp; Expertise · مہارتیں</a>
     <a href="#madrasa" data-i18n="n_madrasa">Madrasa.pk 2000 Lessons</a>
     <a href="#playlists" data-i18n="n_play">Playlists</a>
     <a href="#recommended" data-i18n="n_rec">Recommended</a>
     <a href="#research" data-i18n="n_res">Research</a>
+    <a href="#articles" data-i18n="n_articles">Research Articles · تحقیقی مقالات</a>
+    <a href="#system" data-i18n="n_system">Madrasa Education System · مدرسہ ایجوکیشن سسٹم</a>
     <a href="#conferences" data-i18n="n_conf">Conferences</a>
     <a href="#services" data-i18n="n_svc">Courses &amp; Services</a>
     <a class="ctabtn" href="#contact" data-i18n="n_contact">Contact</a>
@@ -179,6 +183,7 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
     <a class="soc fb" href="https://www.facebook.com/learnwithmuftihassan" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
     <a class="soc wa" href="https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u" target="_blank" rel="noopener" aria-label="WhatsApp Channel" title="WhatsApp Channel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg></a>
     <a class="soc tt" href="https://www.tiktok.com/@learnwithmuftihassan" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+    <a class="soc li" href="https://www.linkedin.com/in/mufti-muhammad-hassan-" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
   </div>
   <button class="langbtn" id="langBtn">اردو / EN</button>
 </div></header>
@@ -243,6 +248,53 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
     <div class="card"><h3>Lecturer — Dars-e-Nizami (2018–Present)</h3><p>Advanced seminars in Nahw &amp; Sarf, Fiqh, Usul al-Fiqh and Tafseer for senior cohorts; supervision of research dissertations and applied fatwa drafting.</p></div>
     <div class="card"><h3>PBL Consultant &amp; Master Trainer (2022–Present)</h3><p>Faculty development workshops on PBL and constructivist models; curriculum modernisation consultancy drawing on Jamia-tur-Rasheed, Ghazali University and Minhaj-ul-Quran.</p></div>
     <div class="card"><h3>Founder &amp; Academic Director — Madrasa.pk (2019–Present)</h3><p>Pakistan's open-access digital LMS for the Dars-e-Nizami curriculum — filming, sequencing and preserving its modular scholarly lectures.</p></div>
+  </div>
+</div></section>
+
+<!-- PHD RESEARCH -->
+<section class="alt" id="phd"><div class="wrap">
+  <div class="sec-head"><span class="k">PhD Research · پی ایچ ڈی تحقیق</span>
+  <h2>PhD Research — <span class="ur">پی ایچ ڈی تحقیق</span></h2>
+  <p>Doctoral research at the International Islamic University Malaysia (IIUM), Kuala Lumpur, Malaysia.</p></div>
+  <div class="card">
+    <h3>PhD in Islamic Studies / Education — In Progress</h3>
+    <p style="color:var(--ink)"><b>International Islamic University Malaysia (IIUM)</b> · Kuala Lumpur, Malaysia</p>
+    <p><b>Dissertation Title:</b> <em>The Constructivist Approach to Project-Based Learning and Integration of Modern Education in Pakistani Madrassas: A Case Study of Jamiatul Rashid and Minhaj-ul-Quran</em></p>
+    <p><b>Supervisors:</b> Assoc. Prof. Dr. Ahmad El-Muhammady &amp; Dr. Wan Ahmad Fauzi Wan Husain</p>
+    <p style="color:var(--ink)">This research investigates how Project-Based Learning can be operationalised in Pakistani madrasahs — Jamia-tur-Rasheed (Karachi) and Minhaj-ul-Quran (Lahore) — to modernise the curriculum while preserving theological integrity.</p>
+    <p style="margin-bottom:4px"><b>Areas of Focus</b></p>
+    <span class="tag">Constructivist Pedagogy</span><span class="tag">Project-Based Learning (PBL)</span><span class="tag">Madrasah Curricular Reform</span><span class="tag">Institutional Adaptation</span>
+  </div>
+</div></section>
+
+<!-- SKILLS & EXPERTISE -->
+<section id="skills"><div class="wrap">
+  <div class="sec-head"><span class="k">Skills &amp; Expertise · مہارتیں</span>
+  <h2>Skills &amp; Expertise — <span class="ur">مہارتیں</span></h2>
+  <p>Areas of specialization and competence, as recorded in the academic CV.</p></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Areas of Specialization</h3>
+      <ul style="margin:0;padding-left:20px;color:var(--muted);display:grid;gap:8px">
+        <li>Islamic Jurisprudence (Fiqh) &amp; Legal Theory (Usul al-Fiqh)</li>
+        <li>Constructivist Pedagogy &amp; Curriculum Design</li>
+        <li>Project-Based Learning (PBL) in Religious Education</li>
+        <li>Madrasah Educational Reform &amp; Policy</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Areas of Competence</h3>
+      <ul style="margin:0;padding-left:20px;color:var(--muted);display:grid;gap:8px">
+        <li>Halal Regulatory Frameworks &amp; Maqasid al-Shari'ah</li>
+        <li>Qualitative Research Methodologies (case study, ethnography, interviews, thematic coding)</li>
+        <li>AI &amp; Educational Technology (NotebookLM, LLMs, LMS/Moodle, Zotero, Mendeley, multimedia production)</li>
+        <li>Classical Islamic Sciences (Tafseer, Hadith, Arabic Nahw/Sarf)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <h3>Languages</h3>
+    <span class="tag">Arabic — scholarly / classical fluency</span><span class="tag">English — full academic proficiency</span><span class="tag">Urdu / Pashto — native / bilingual</span><span class="tag">Malay — elementary / working</span>
   </div>
 </div></section>
 
@@ -348,6 +400,58 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
   <p class="small" id="pubEmpty" hidden>No article matches your search.</p>
 </div></section>
 
+<!-- RESEARCH ARTICLES -->
+<section class="alt" id="articles"><div class="wrap">
+  <div class="sec-head"><span class="k">Research Articles · تحقیقی مقالات</span>
+  <h2>Research Articles — <span class="ur">تحقیقی مقالات</span></h2>
+  <p>Peer-reviewed journal articles by Mufti Muhammad Hassan (Khan S.), listed exactly as they appear in his academic CV and grouped by publication status.</p></div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="margin:0 0 6px;color:var(--emerald)">Published</h3>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Khan S., El Muhammady, A., &amp; Husain, W. A. F. W. (2026). Epistemological continuity and pedagogical reform: Operationalising project-based learning in Pakistani Madrasah. <em>BITARA International Journal of Civilizational Studies and Human Sciences</em>.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Rahman, S. K. B. T., El-Muhammady, A., &amp; El-Muhammady, B. M. U. (2025). Reimagining Madrassa education: Integrating constructivist and Islamic philosophies with project-based learning. <em>ASSAJ (Asian Social Science and Arts Journal)</em>, 4(1), 3642–3654.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Samad, A., Khan S., &amp; ul Din, S. Z. (2025). A comparative analysis of Islamic and conventional credit cards in Pakistan under the light of Maqasid Al-Shariah. <em>ASSAJ (Asian Social Science and Arts Journal)</em>, 4(2), 2655–2666.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Majeed, A., Khan, A., Khan S., &amp; Khan, A. U. D. (2025). Prophet Shu'ayb (peace be upon him) and his multiple messages: An analytical study of the differing descriptions and the destruction of his people in light of the Qur'an. <em>Journal of Religion and Society</em>, 4(1), 763–769.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Satti, H. B. H., Khan S., &amp; Khan, A. U. D. (2025). A Shari'ah-based review of family court judgments on Khula and dissolution of marriage. <em>ASSAJ (Asian Social Science and Arts Journal)</em>, 4(1), 3816–3830.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Jamil, A., &amp; Khan S. (2025). An analytical and literary study of the Quranic commentary and the interpretation of the Quran. <em>ASSAJ (Asian Social Science and Arts Journal)</em>, 4(1), 3831–3845.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Ajmal, M., Khan S., &amp; Khan, A. U. D. (2025). A thematic study of the Hadith 'La darar wa la dirar' regarding environmental balance. <em>Journal of Religion and Society</em>, 4(1), 770–776.</p></div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="margin:0 0 6px;color:var(--emerald)">In Press</h3>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Khan S., &amp; El Muhammady, A. (In Press). Navigating tradition and innovation: Institutional and cultural determinants of pedagogical reform in Pakistani Madrasahs. <em>Journal of Towhidic Epistemology and Integration of Knowledge</em>.</p></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 6px;color:var(--emerald)">Under Review / In Preparation</h3>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Khan S. (Under Review). New developments in Madrassa education: A comparative analysis of project-based learning approaches at Minhaj-ul-Quran and Jamia-tur-Rasheed. <em>Journal of Islamic Thought and Integration</em>.</p></div>
+    <div class="pub"><p style="color:var(--ink);font-size:.95rem">Khan S. (In Preparation). Constructivist epistemologies and the revival of Ta'dib: Re-evaluating Syed Muhammad Naquib al-Attas's educational philosophy for 21st-century madrasahs.</p></div>
+  </div>
+
+  <p style="margin-top:16px"><a class="btn" href="https://scholar.google.com/citations?user=kTFpaIYAAAAJ&hl=en" target="_blank" rel="noopener" style="background:var(--emerald);color:#fff">Google Scholar</a></p>
+</div></section>
+
+<!-- MADRASA EDUCATION SYSTEM -->
+<section id="system"><div class="wrap">
+  <div class="sec-head"><span class="k">Madrasa Education System · مدرسہ ایجوکیشن سسٹم</span>
+  <h2>Madrasa Education System — <span class="ur">مدرسہ ایجوکیشن سسٹم</span></h2></div>
+  <div class="card" style="margin-bottom:18px">
+    <p style="color:var(--ink)">This page is the home for Mufti Hassan's writings on the Madrasa Education System. The work grows out of his doctoral research on Project-Based Learning in Pakistani madrasahs — with case studies of Jamia-tur-Rasheed (Karachi) and Minhaj-ul-Quran (Lahore) — and explores constructivist pedagogy, curriculum reform, teacher training and institution-building: how madrasahs can modernise their teaching and organisation without compromising their theological foundations.</p>
+    <p class="ur" dir="rtl" lang="ur" style="text-align:right;color:var(--ink);margin:14px 0 0">یہ صفحہ مدرسہ ایجوکیشن سسٹم پر مفتی محمد حسن کی تحریروں کا مرکز ہے۔ یہ کام ان کی اس پی ایچ ڈی تحقیق سے نکلتا ہے جو پاکستانی مدارس میں پروجیکٹ بیسڈ لرننگ پر ہے — جس میں جامعۃ الرشید کراچی اور منہاج القرآن لاہور کا خصوصی مطالعہ شامل ہے۔ ان تحریروں میں تعمیری تدریسی طریقے (کنسٹرکٹوسٹ پیڈاگوجی)، نصابی اصلاح، اساتذہ کی تربیت اور ادارہ سازی جیسے موضوعات زیرِ بحث آئیں گے: مدارس اپنے دینی و مسلکی تشخص کو برقرار رکھتے ہوئے تدریس اور تنظیم کو کیسے جدید بنا سکتے ہیں۔</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>English Writings</h3>
+      <p>Coming soon — new writings will appear here as they are published.</p>
+    </div>
+    <div class="card">
+      <h3 class="ur" dir="rtl" lang="ur" style="text-align:right">اردو تحریریں</h3>
+      <p>Coming soon — new writings will appear here as they are published.</p>
+      <p class="ur" dir="rtl" lang="ur" style="text-align:right;color:var(--ink);margin:0">جلد آ رہا ہے — نئی تحریریں شائع ہوتے ہی یہاں پیش کی جائیں گی۔</p>
+    </div>
+  </div>
+</div></section>
+
 <!-- CONFERENCES -->
 <section id="conferences"><div class="wrap">
   <div class="sec-head"><span class="k">Conferences · کانفرنسز</span>
@@ -433,8 +537,9 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
     <p>This site may in future display advertisements through Google AdSense. Google may use cookies to personalise the ads you see, based on your visits to this and other websites. You can manage or turn off ad personalisation at any time in your Google Ads Settings: <a href="https://adssettings.google.com" target="_blank" rel="noopener">adssettings.google.com</a>.</p>
 
     <h3>Contact</h3>
-    <p>If you have any questions about this Privacy Policy, you can reach the site owner through the social channels linked on this website:</p>
+    <p>If you have any questions about this Privacy Policy, you can reach the site owner by email at <a href="mailto:mh417884@gmail.com">mh417884@gmail.com</a> or through the social channels linked on this website:</p>
     <ul>
+      <li>Email: <a href="mailto:mh417884@gmail.com">mh417884@gmail.com</a></li>
       <li><a href="https://www.youtube.com/@Learnwithmuftihassan" target="_blank" rel="noopener">YouTube — Learn with Mufti Hassan</a></li>
       <li><a href="https://www.facebook.com/learnwithmuftihassan" target="_blank" rel="noopener">Facebook Page</a></li>
       <li><a href="https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u" target="_blank" rel="noopener">WhatsApp Channel</a></li>
@@ -450,8 +555,17 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
 <footer><div class="wrap">
   <div class="cols">
     <div><h4>Learn with Mufti Hassan</h4><p style="margin:0">Bridging Tradition &amp; Technology · <span class="ur">روایت اور جدیدیت کا سنگم</span><br/>Mufti Muhammad Hassan (Sadheer Khan) — IIUM PhD Candidate, Founder Madrasa.pk.</p></div>
-    <div><h4>Explore</h4><ul><li><a href="#about">About / CV</a></li><li><a href="#madrasa">Madrasa.pk — 2000 Lessons</a></li><li><a href="#playlists">YouTube Playlists</a></li><li><a href="#research">Research Articles</a></li><li><a href="#privacy">Privacy Policy</a></li></ul></div>
+    <div><h4>Explore</h4><ul><li><a href="#about">About / CV</a></li><li><a href="#madrasa">Madrasa.pk — 2000 Lessons</a></li><li><a href="#playlists">YouTube Playlists</a></li><li><a href="#research">Research Articles</a></li><li><a href="#articles">Research Articles · تحقیقی مقالات</a></li><li><a href="#system">Madrasa Education System · مدرسہ ایجوکیشن سسٹم</a></li><li><a href="#privacy">Privacy Policy</a></li></ul></div>
     <div><h4>Connect</h4><ul><li><a href="https://www.youtube.com/@Learnwithmuftihassan" target="_blank" rel="noopener">YouTube</a></li><li><a href="https://www.facebook.com/learnwithmuftihassan" target="_blank" rel="noopener">Facebook</a></li><li><a href="mailto:k.sadheer@live.iium.edu.my">k.sadheer@live.iium.edu.my</a></li><li><a href="mailto:mh417884@gmail.com">mh417884@gmail.com</a></li></ul></div>
+  </div>
+  <div style="margin-top:26px">
+    <h4>Contact · <span class="ur">رابطہ کریں</span></h4>
+    <ul style="list-style:none;margin:0;padding:0;display:grid;gap:7px">
+      <li>📞 <a href="tel:+60182772016">+60182772016</a> (Malaysia)</li>
+      <li>📞 <a href="tel:+923439357535">+923439357535</a> (Pakistan)</li>
+      <li>✉️ <a href="mailto:mh417884@gmail.com">mh417884@gmail.com</a></li>
+      <li>✉️ <a href="mailto:muftihassan2026@gmail.com">muftihassan2026@gmail.com</a></li>
+    </ul>
   </div>
   <div style="margin-top:26px">
     <h4>Follow · <span class="ur">رابطہ کریں</span></h4>
@@ -460,6 +574,7 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
       <a class="fsoc fb" href="https://www.facebook.com/learnwithmuftihassan" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>
       <a class="fsoc wa" href="https://whatsapp.com/channel/0029Vb82SLFAInPuEcsjc50u" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>WhatsApp Channel</a>
       <a class="fsoc tt" href="https://www.tiktok.com/@learnwithmuftihassan" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>TikTok</a>
+      <a class="fsoc li" href="https://www.linkedin.com/in/mufti-muhammad-hassan-" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
     </div>
   </div>
   <p style="border-top:1px solid rgba(255,255,255,.2);padding-top:14px;margin-top:22px;font-size:.82rem">© 2026 learnwithmuftihassan.com — Mufti Muhammad Hassan. Content from the official academic CV. SEO-ready build for GoDaddy domain publishing.</p>
@@ -521,10 +636,14 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
   var dict={
     brandsub:{en:'Bridging Tradition & Technology',ur:'روایت اور جدیدیت کا سنگم'},
     n_about:{en:'About · تعارف',ur:'تعارف'},
+    n_phd:{en:'PhD Research · پی ایچ ڈی تحقیق',ur:'پی ایچ ڈی تحقیق'},
+    n_skills:{en:'Skills & Expertise · مہارتیں',ur:'مہارتیں و مہارت'},
     n_madrasa:{en:'Madrasa.pk 2000 Lessons',ur:'مدرسہ ڈاٹ پی کے — 2000 اسباق'},
     n_play:{en:'Playlists',ur:'پلے لسٹس'},
     n_rec:{en:'Recommended',ur:'تجویز کردہ'},
     n_res:{en:'Research',ur:'تحقیقی مقالات'},
+    n_articles:{en:'Research Articles · تحقیقی مقالات',ur:'تحقیقی مقالات'},
+    n_system:{en:'Madrasa Education System · مدرسہ ایجوکیشن سسٹم',ur:'مدرسہ ایجوکیشن سسٹم'},
     n_conf:{en:'Conferences',ur:'کانفرنسز'},
     n_svc:{en:'Courses & Services',ur:'کورسز و خدمات'},
     n_contact:{en:'Contact',ur:'رابطہ'},

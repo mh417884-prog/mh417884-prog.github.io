@@ -234,7 +234,7 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
       <p data-i18n="bio_1">An accomplished Islamic jurist, educational researcher, and reformer with over 16 years of immersive experience spanning the traditional Dars-e-Nizami seminary ecosystem and contemporary higher education.</p>
       <p data-i18n="bio_2">His doctoral research at the International Islamic University Malaysia (IIUM) investigates the institutional operationalisation of Project-Based Learning (PBL) across premier Pakistani madrasahs — Jamia-tur-Rasheed (Karachi) and Minhaj-ul-Quran (Lahore) — to formulate an evidence-based framework for curriculum modernisation and state–madrasah harmonisation without compromising theological integrity.</p>
       <p data-i18n="bio_3">As Founder and Academic Director of Madrasa.pk, he has curated an open-access repository of scholarly lectures, and advances AI literacy and digital research methods for traditional scholars and university researchers through international workshops and public scholarship.</p>
-      <p class="ur" style="color:var(--ink)">ڈاکٹر مفتی محمد حسن — جامعۃ الرشید کراچی سے فارغ التحصیل، تخصّص فی الفقہ والافتاء، اور انٹرنیشنل اسلامک یونیورسٹی ملائیشیا (IIUM) سے پی ایچ ڈی مکمل کی۔ مدرسہ ڈاٹ پی کے کے بانی و علمی ڈائریکٹر؛ درسِ نظامی کی تدریس، فنِ تحقیق، اور اہلِ علم کے لیے AI و ڈیجیٹل مہارتوں کی تربیت ان کی پہچان ہے۔</p>
+      <p class="ur" dir="rtl" lang="ur" style="color:var(--ink);text-align:right">ڈاکٹر مفتی محمد حسن — جامعۃ الرشید کراچی سے فارغ التحصیل، تخصّص فی الفقہ والافتاء، اور انٹرنیشنل اسلامک یونیورسٹی ملائیشیا (<span dir="ltr">IIUM</span>) سے پی ایچ ڈی (تھیسز مکمل، وایوہ باقی)۔ مدرسہ ڈاٹ پی کے کے بانی و علمی ڈائریکٹر؛ درسِ نظامی کی تدریس، فنِ تحقیق، اور اہلِ علم کے لیے <span dir="ltr">AI</span> و ڈیجیٹل مہارتوں کی تربیت ان کی پہچان ہے۔</p>
       
     </div>
     <div>
@@ -693,6 +693,7 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
     document.documentElement.lang = urdu?'ur':'en';
     document.querySelectorAll('[data-i18n]').forEach(function(el){
       var k=el.getAttribute('data-i18n'); if(dict[k]) el.textContent = urdu?dict[k].ur:dict[k].en;
+      if(k==='hero_lead'){el.dir = urdu?'rtl':'ltr'; el.style.textAlign = urdu?'right':'left';}
     });
     this.textContent = urdu?'EN / اردو':'اردو / EN';
   });

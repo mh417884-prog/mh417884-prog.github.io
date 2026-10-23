@@ -69,8 +69,11 @@ nav.links{display:flex;gap:6px;margin-left:0;flex-wrap:nowrap;overflow-x:auto;sc
 nav.links::-webkit-scrollbar{display:none}
 nav.links::after{content:"";position:sticky;right:0;flex:0 0 44px;margin-left:-44px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(201,162,39,.30));pointer-events:none}
 .navscroll{position:sticky;right:6px;flex:0 0 34px;width:34px;height:34px;margin-left:-40px;border-radius:50%;border:1px solid #c9a227;background:linear-gradient(180deg,#e9c35c,#c9a227);color:#231a02;font-size:22px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(10,31,68,.25);z-index:2;display:grid;place-items:center}
-.navscroll{display:none}
-.navscroll.on{display:block}
+.navbtns{display:none;position:sticky;right:6px;flex:0 0 auto;margin-left:-88px;gap:4px;align-items:center;z-index:3}
+nav.links.has-overflow .navbtns{display:flex}
+.navbtns .navscroll{position:static;margin:0}
+.navscroll.dim{opacity:.35;pointer-events:none}
+nav.links:not(.has-overflow)::after{display:none}
 nav.links a{color:#0a1f44;text-decoration:none;font-weight:700;font-size:.82rem;padding:7px 13px;border-radius:999px;background:#eef2fa;border:1px solid #dbe2f0;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
 nav.links a:hover{background:#0a1f44;color:#fff;border-color:#0a1f44}
 nav.links a.ctabtn{background:linear-gradient(180deg,#e9c35c,#c9a227);border-color:#c9a227;color:#231a02!important}
@@ -159,7 +162,7 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
   .stats .wrap{grid-template-columns:repeat(2,1fr)} .grid2,.grid3{grid-template-columns:1fr}
   footer .cols{grid-template-columns:1fr} nav.links{display:none;width:100%;flex-direction:column;padding-bottom:10px}
   nav.links::after{display:none}
-  nav.links .navscroll{display:none}
+  nav.links .navscroll{display:none}nav.links .navbtns{display:none}
   nav.links.open{display:flex}.menuBtn{display:block}.nav{flex-wrap:wrap}
   .hero h1{font-size:2rem}.conf{grid-template-columns:1fr;gap:4px}
 }
@@ -185,7 +188,7 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
     <a href="#conferences" data-i18n="n_conf">Conferences</a>
     <a href="#services" data-i18n="n_svc">Courses &amp; Services</a>
     <a class="ctabtn" href="#contact" data-i18n="n_contact">Contact</a>
-  <button class="navscroll" id="navScroll" aria-label="Scroll navigation" title="More">›</button></nav>
+  <span class="navbtns"><button class="navscroll" id="navPrev" aria-label="Scroll navigation back" title="Back">‹</button><button class="navscroll" id="navScroll" aria-label="Scroll navigation forward" title="More">›</button></span></nav>
   <div class="socials">
     <a class="soc app" href="/research-app/" aria-label="Research App — for University Students" title="Research App — for University Students"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 5.5C10.3 3.9 7.6 3.2 3 3.2v14.5c4.6 0 7.3.7 9 2.3 1.7-1.6 4.4-2.3 9-2.3V3.2c-4.6 0-7.3.7-9 2.3zM10.5 17.2c-1.6-.9-3.6-1.3-6-1.3V4.9c2.4 0 4.4.4 6 1.3v11zM19.5 15.9c-2.4 0-4.4.4-6 1.3V6.2c1.6-.9 3.6-1.3 6-1.3v11z"/></svg></a> <a class="soc yt" href="https://www.youtube.com/@Learnwithmuftihassan" target="_blank" rel="noopener" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
     <a class="soc fb" href="https://www.facebook.com/learnwithmuftihassan" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
@@ -560,6 +563,6 @@ footer h4{color:#fff;margin:0 0 10px} footer ul{list-style:none;margin:0;padding
   });
 })();
 </script>
-<script>(function(){var btn=document.getElementById("navScroll"),n=document.getElementById("navLinks");if(!btn||!n)return;function atEnd(){return n.scrollLeft+n.clientWidth>=n.scrollWidth-10}function sync(){var overflow=n.scrollWidth-n.clientWidth>8;btn.classList.toggle("on",overflow);btn.textContent=(overflow&&atEnd())?"\u2039":"\u203A"}btn.addEventListener("click",function(){if(atEnd()){n.scrollTo({left:0,behavior:"smooth"})}else{n.scrollBy({left:Math.max(240,Math.round(n.clientWidth*0.6)),behavior:"smooth"})}setTimeout(sync,500)});n.addEventListener("scroll",function(){requestAnimationFrame(sync)},{passive:true});window.addEventListener("resize",sync);window.addEventListener("load",sync);if(window.MutationObserver){new MutationObserver(function(){setTimeout(sync,60)}).observe(n,{subtree:true,childList:true,characterData:true})}sync();})();</script>
+<script>(function(){var n=document.getElementById("navLinks"),prev=document.getElementById("navPrev"),next=document.getElementById("navScroll");if(!n||!next)return;function atEnd(){return n.scrollLeft+n.clientWidth>=n.scrollWidth-10}function sync(){var overflow=n.scrollWidth-n.clientWidth>1;n.classList.toggle("has-overflow",overflow);if(prev)prev.classList.toggle("dim",n.scrollLeft<=1);next.classList.toggle("dim",atEnd())}function step(dir){var d=Math.max(240,Math.round(n.clientWidth*0.6))*dir;n.scrollBy({left:d,behavior:"smooth"});setTimeout(sync,500)}if(prev)prev.addEventListener("click",function(){step(-1)});next.addEventListener("click",function(){step(1)});n.addEventListener("scroll",function(){requestAnimationFrame(sync)},{passive:true});window.addEventListener("resize",sync);window.addEventListener("load",sync);if(window.MutationObserver){new MutationObserver(function(){setTimeout(sync,60)}).observe(n,{subtree:true,childList:true,characterData:true})}sync();})();</script>
 </body>
 </html>

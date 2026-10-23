@@ -764,7 +764,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <p class="small" id="opps-intro"></p>
   <div id="opps-special" hidden>
     <button class="spec-box" id="news-box-malaysia"><span class="ic">🇲🇾</span><span><b>Malaysian Universities News</b><span class="sub">Jobs, scholarships, conferences &amp; admissions in Malaysia</span></span><span class="chev">›</span></button>
-    <button class="spec-box" id="news-box-iium"><span class="ic">🎓</span><span><b>IIUM — Special</b><span class="sub">News, scholarships, conferences &amp; jobs from the International Islamic University Malaysia</span></span><span class="chev">›</span></button>
+    <button class="spec-box" id="news-box-iium"><span class="ic">🎓</span><span><b>IIUM — Special</b><span class="sub">News, scholarships, conferences, journals &amp; jobs from the International Islamic University Malaysia</span></span><span class="chev">›</span></button>
   </div>
   <div id="opps-list"></div>
   <div class="card" id="opps-schol-help" hidden>
@@ -810,6 +810,25 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div id="iium-list-conference"></div>
   <h3 class="mysec-h">💼 IIUM Jobs</h3>
   <div id="iium-list-job"></div>
+  <h3 class="mysec-h">📚 IIUM Research Journals</h3>
+  <p class="small">IIUM's own journals — tap a title to open its official site. <b>Free / open access</b> is marked only where the journal itself is free to read.</p>
+  <div id="iium-journals"></div>
+  <h3 class="mysec-h" style="font-size:15.5px">More IIUM journals</h3>
+  <p class="small">Also on the official IIUM Journal Publication Unit list — open them through the IIUM Journals portal.</p>
+  <div id="iium-journals-more"></div>
+  <h3 class="mysec-h">💼 Jobs for International Students in Malaysia</h3>
+  <div class="card">
+    <p style="margin:0 0 6px"><b>The rules (from EMGS — Education Malaysia Global Services):</b></p>
+    <p id="iium-intl-summary" style="margin:0 0 8px"></p>
+    <a class="btn sm ghost" id="iium-intl-source" href="#" target="_blank" rel="noopener" style="margin-bottom:0">Source: EMGS FAQ ↗</a>
+  </div>
+  <div id="iium-list-myjob"></div>
+  <h3 class="mysec-h">🔗 IIUM Key Links</h3>
+  <div class="card">
+    <a class="btn sm" href="https://www.iium.edu.my" target="_blank" rel="noopener">🎓 IIUM — main website ↗</a>
+    <a class="btn sm" href="https://journals.iium.edu.my" target="_blank" rel="noopener">📚 IIUM Journals portal ↗</a>
+    <a class="btn sm ghost" href="https://educationmalaysia.gov.my" target="_blank" rel="noopener" style="margin-bottom:0">🛂 EMGS — Education Malaysia ↗</a>
+  </div>
 </section>
 
 <!-- ================= TOOLKIT ================= -->
@@ -2735,6 +2754,15 @@ function renderMalaysia(){
   document.getElementById("my-apply-steps").innerHTML = APPLY_STEPS_MY.map(st => "<li>" + esc(st) + "</li>").join("");
   attachOppListeners("#view-malaysia", renderMalaysia);
 }
+const IIUM_JOURNALS = [{"free": null, "name": "Intellectual Discourse", "note": "Islamic thought, culture & civilisation; indexed in Scopus & ESCI", "url": "https://journals.iium.edu.my/intdiscourse/index.php/id"}, {"free": null, "name": "IIUM Law Journal", "note": "Law — civil & Shari'ah law; indexed in Scopus & ESCI", "url": "https://journals.iium.edu.my/iiumlj/index.php/iiumlj/"}, {"free": null, "name": "Al-Shajarah", "note": "Islamic thought, civilisation & Malay world studies (ISTAC)", "url": "https://journals.iium.edu.my/shajarah/index.php/shaj/information/librarians"}, {"free": true, "name": "At-Tajdid", "note": "Islamic thought & social sciences; Arabic and English", "url": "https://journals.iium.edu.my/at-tajdid/index.php/Tajdid/about"}, {"free": true, "name": "IIUM Engineering Journal", "note": "Engineering & applied sciences; indexed in Scopus", "url": "https://journals.iium.edu.my/ejournal/index.php/iiumej"}, {"free": true, "name": "IIUM Medical Journal Malaysia", "note": "Medicine, medical ethics & health sciences (Kulliyyah of Medicine)", "url": "https://journals.iium.edu.my/kom/index.php/imjm"}, {"free": true, "name": "International Journal of Economics, Management and Accounting", "note": "Economics, management & accounting; no submission or publication charges", "url": "https://journals.iium.edu.my/enmjournal/index.php/enmj/"}, {"free": null, "name": "Asiatic: IIUM Journal of English Language and Literature", "note": "English language & literature — Asian writing in English", "url": "http://journals.iium.edu.my/asiatic/index.php/AJELL/about"}, {"free": null, "name": "Journal of Linguistic and Literary Studies", "note": "Linguistics & literary studies, incl. Arabic literature", "url": "https://journals.iium.edu.my/arabiclang/index.php/jlls/about/aboutThisPublishingSystem"}, {"free": null, "name": "IIUM Journal of Case Studies in Management", "note": "Management teaching case studies", "url": "https://journals.iium.edu.my/ijcsm/index.php/jcsm/index"}, {"free": true, "name": "Journal of Architecture, Planning and Construction Management", "note": "Architecture, planning & built environment (KAED)", "url": "https://journals.iium.edu.my/kaed/index.php/japcm/index"}, {"free": true, "name": "Revelation and Science", "note": "Integration of science and revelation (Kulliyyah of Science)", "url": "https://journals.iium.edu.my/revival/index.php/revival/about"}, {"free": true, "name": "Journal of Islamic Finance", "note": "Islamic banking, finance & economics", "url": "https://journals.iium.edu.my/iiibf-journal/index.php/jif/about"}, {"free": false, "name": "IIUM Journal of Educational Studies", "note": "Education studies (Kulliyyah of Education); RM100 submission fee", "url": "https://journals.iium.edu.my/ijes/index.php/iejs/announcement/view/4"}, {"free": true, "name": "International Journal on Perceptive and Cognitive Computing", "note": "Computing — perceptive & cognitive computing (KICT)", "url": "https://journals.iium.edu.my/kict/index.php/IJPCC/announcement/view/1"}, {"free": true, "name": "International Journal of Allied Health Sciences", "note": "Allied health sciences; no article processing charges", "url": "https://journals.iium.edu.my/ijahs/index.php/IJAHS/copyrightpolicy"}, {"free": false, "name": "Al-Risalah: Journal of Islamic Revealed Knowledge and Human Sciences", "note": "Islamic revealed knowledge & human sciences — postgraduate journal", "url": "https://journals.iium.edu.my/al-risalah/index.php/al-risalah/"}, {"free": true, "name": "International Journal of Fiqh and Usul al-Fiqh Studies (IJFUS)", "note": "Fiqh & usul al-fiqh; Arabic and English", "url": "https://journals.iium.edu.my/al-fiqh/index.php/al-fiqh/"}, {"free": null, "name": "IIUM Journal of Religion and Civilisational Studies", "note": "Religion & civilisational studies", "url": "https://journals.iium.edu.my/irkh/index.php/ijrcs"}, {"free": true, "name": "IIUM Journal of Human Sciences", "note": "Behavioural & human sciences; English-language journal", "url": "https://journals.iium.edu.my/irkh/index.php/ijohs/"}, {"free": true, "name": "Journal of Information Systems and Digital Technologies", "note": "Information systems & digital technologies (KICT)", "url": "https://journals.iium.edu.my/kict/index.php/jisdt/index"}, {"free": null, "name": "Halalsphere", "note": "Halal research — science, Shariah & industry (INHART)", "url": "https://journals.iium.edu.my/inst/index.php/hs"}];
+const IIUM_JOURNALS_MORE = ["Journal of Islam in Asia", "Al-Itqan", "Al-Burhan", "International Journal of Care Scholars", "Chemical & Natural Resources Engineering Journal", "International Journal of Al-Turath in Islamic Wealth & Finance", "Journal of Pharmacy", "IIUM Journal of Orofacial & Health Sciences", "Design Ideals Journal", "International Journal on Integration of Knowledge", "Journal of Islamic Social Finance", "Journal of Contemporary Tourism & Hospitality", "Journal of Planetary Survival", "Journal of Photonics & Quantum Technologies"];
+const IIUM_INTL_WORK = {"source": "https://educationmalaysia.gov.my/get-in-touch/faq", "summary": "International students in Malaysia may work part-time for a maximum of 20 hours per week, and only during semester breaks or holidays of more than 7 days. Permitted workplaces are restaurants, petrol kiosks, mini markets, hotels and the student's own institution campus; working as a cashier is not permitted. Prior approval from the Immigration Department is required, and the part-time work application must be made through the educational institution.", "verifiedOn": "2026-10-24"};
+function journalRow(j){
+  return '<div class="opp-card"><h3 style="font-size:16.5px"><a href="' + esc(j.url) + '" target="_blank" rel="noopener">' + esc(j.name) + ' ↗</a></h3>'
+    + (j.note ? '<div class="opp-meta">' + esc(j.note) + '</div>' : '')
+    + (j.free === true ? '<div style="margin-top:6px"><span class="tag scholarship">Free / open access</span></div>' : '')
+    + '</div>';
+}
 function renderIIUM(){
   const items = visibleNews().filter(isIIUM).sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
   const by = c => items.filter(n => catOf(n) === c);
@@ -2742,6 +2770,12 @@ function renderIIUM(){
   feedInto("iium-list-scholarship", by("scholarship"));
   feedInto("iium-list-conference", by("conference"));
   feedInto("iium-list-job", by("job"));
+  document.getElementById("iium-journals").innerHTML = IIUM_JOURNALS.map(journalRow).join("");
+  document.getElementById("iium-journals-more").innerHTML = IIUM_JOURNALS_MORE.map(name =>
+    '<div class="opp-card"><h3 style="font-size:16.5px"><a href="https://journals.iium.edu.my" target="_blank" rel="noopener">' + esc(name) + ' ↗</a></h3><div class="opp-meta">via IIUM Journals portal</div></div>').join("");
+  document.getElementById("iium-intl-summary").textContent = IIUM_INTL_WORK.summary;
+  document.getElementById("iium-intl-source").href = IIUM_INTL_WORK.source;
+  feedInto("iium-list-myjob", visibleNews().filter(n => isMalaysia(n) && catOf(n) === "job").sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt))));
   attachOppListeners("#view-iium", renderIIUM);
 }
 

@@ -104,6 +104,22 @@ p{margin-bottom:10px}
 .btn-google .gmark{display:inline-flex;flex:0 0 auto}
 .or-divider{display:flex;align-items:center;gap:12px;margin:14px 0 2px;color:#8494A7;font-size:13.5px}
 .or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+/* Breaking-news band (home + admin) */
+.brk-wrap{margin:12px 0 0;background:var(--navy);border-radius:12px;padding:10px 12px 8px;color:#fff}
+.brk-band{display:flex;flex-direction:column;align-items:stretch;gap:6px;cursor:pointer;border-radius:8px}
+.brk-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brk-line{display:flex;align-items:center;gap:8px;min-width:0}
+.brk-band:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.brk-tag{flex:0 0 auto;background:var(--gold);color:#2E2303;font-weight:800;font-size:11px;letter-spacing:.03em;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.brk-main{flex:1 1 auto;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brk-cat{font-weight:700}
+.brk-chip{flex:0 0 auto;background:rgba(255,255,255,.13);border:1px solid rgba(201,162,39,.7);color:#F7E08B;font-size:12px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.brk-new{flex:0 0 auto;background:#fff;color:var(--navy);font-size:10.5px;font-weight:800;letter-spacing:.05em;padding:2px 6px;border-radius:5px}
+.brk-nav{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:4px}
+.brk-arrow{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(201,162,39,.55);width:32px;height:26px;border-radius:7px;font-size:17px;line-height:1;cursor:pointer;padding:0}
+.brk-dots{display:flex;gap:5px;align-items:center}
+.brk-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
+.brk-dot.on{background:var(--gold)}
 
 /* ---------- Cards (14px radius, thin gold accent bar on section cards) ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
@@ -639,7 +655,18 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <button class="refresh-btn hbtn" id="home-refresh-btn" aria-label="Refresh the app" title="Refresh"><span class="rf-ic" aria-hidden="true">⟳</span></button>
     <button class="hbtn" id="hdr-layout-btn" aria-label="Layout: Auto — tap to switch layout" title="Layout: Auto"><span class="ly-ic" aria-hidden="true">🔁</span></button>
   </div>
-  <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
+  <div class="brk-wrap" id="home-breaking" hidden>
+        <div class="brk-band" id="home-brk-band" role="button" tabindex="0" aria-label="Latest announcement — open">
+          <div class="brk-top"><span class="brk-tag">BREAKING · <span class="urn">تازہ ترین</span></span><span class="brk-new" id="home-brk-new" hidden>NEW</span></div>
+          <div class="brk-line"><span class="brk-main"><span class="brk-cat" id="home-brk-cat"></span> <span id="home-brk-title"></span></span><span class="brk-chip" id="home-brk-chip" hidden></span></div>
+        </div>
+        <div class="brk-nav" id="home-brk-nav" hidden>
+          <button class="brk-arrow" id="home-brk-prev" aria-label="Previous announcement">&lsaquo;</button>
+          <span class="brk-dots" id="home-brk-dots"></span>
+          <button class="brk-arrow" id="home-brk-next" aria-label="Next announcement">&rsaquo;</button>
+        </div>
+      </div>
+      <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
 
   <div class="hub-grid">
     <button class="hub-card" id="hub-space-btn"><span class="cnt" id="hub-space-badge" hidden>0</span><span class="ic">👤</span><b>My Space</b><span class="sub">Profile, ID card, progress &amp; certificates</span></button>
@@ -1130,7 +1157,18 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <section class="view" id="view-admin">
   <div class="topbar"><span style="width:44px"></span><div class="ttl">Admin Panel</div><button class="tbtn" id="admin-logout">Log out</button></div>
   <p>Assalamu alaikum, Mufti. <span class="small">New registrations, members, postings and student requests — all in one place.</span></p>
-  <div class="stat-row">
+  <div class="brk-wrap" id="adm-breaking" hidden>
+        <div class="brk-band" id="adm-brk-band" role="button" tabindex="0" aria-label="Latest announcement — open">
+          <div class="brk-top"><span class="brk-tag">BREAKING · <span class="urn">تازہ ترین</span></span><span class="brk-new" id="adm-brk-new" hidden>NEW</span></div>
+          <div class="brk-line"><span class="brk-main"><span class="brk-cat" id="adm-brk-cat"></span> <span id="adm-brk-title"></span></span><span class="brk-chip" id="adm-brk-chip" hidden></span></div>
+        </div>
+        <div class="brk-nav" id="adm-brk-nav" hidden>
+          <button class="brk-arrow" id="adm-brk-prev" aria-label="Previous announcement">&lsaquo;</button>
+          <span class="brk-dots" id="adm-brk-dots"></span>
+          <button class="brk-arrow" id="adm-brk-next" aria-label="Next announcement">&rsaquo;</button>
+        </div>
+      </div>
+        <div class="stat-row">
     <div class="stat-chip"><b id="adm-stat-total">0</b>Total members</div>
     <div class="stat-chip"><b id="adm-stat-week">0</b>Joined this week</div>
   </div>
@@ -1733,7 +1771,13 @@ function seedDB(){
         university:"University of the Punjab", dept:"Electrical Engineering", degree:"BS / BSc (Undergraduate)", country:"Pakistan", city:"Lahore", whatsapp:"+92 321 0000000",
         gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:new Date(t-86400000*1).toISOString(), fcmTokens:[] }
     ],
-    news: SOURCE_CARDS.map((s,i)=> Object.assign({id:"src-"+i, createdAt:new Date(t-86400000*(i+2)).toISOString()}, s)),
+    news: SOURCE_CARDS.map((s,i)=> Object.assign({id:"src-"+i, createdAt:new Date(t-86400000*(i+2)).toISOString()}, s)).concat([
+      { id:"post-demo-1", kind:"post", cat:"scholarship", title:"T\u00fcrkiye Scholarships 2027 \u2014 applications now open", org:"YTB \u2014 T\u00fcrkiye Burslari", country:"T\u00fcrkiye", deadline:"20 February 2027", link:"https://www.turkiyeburslari.gov.tr", details:"Fully funded undergraduate, master\u2019s and PhD scholarships in T\u00fcrkiye \u2014 tuition, monthly stipend, accommodation and airfare covered.", createdAt:new Date(t-86400000*1).toISOString() },
+      { id:"post-demo-2", kind:"post", cat:"job", title:"Research Assistant \u2014 AI in Education Lab", org:"University of Karachi", country:"Pakistan", deadline:"", link:"", details:"Part-time research assistant for an HEC-funded project on AI tools in university teaching. MS/MPhil students preferred.", createdAt:new Date(t-86400000*2).toISOString() },
+      { id:"post-demo-3", kind:"post", cat:"conference", title:"International Conference on Islamic Finance 2027 \u2014 call for papers", org:"International Islamic University Malaysia (IIUM)", country:"Malaysia", deadline:"15 January 2027", link:"", details:"Abstracts are invited on Islamic finance, fintech and sustainable development. Best-paper award for doctoral researchers.", createdAt:new Date(t-86400000*3).toISOString() },
+      { id:"post-demo-4", kind:"post", cat:"job", title:"Junior Lecturer \u2014 Computer Science", org:"COMSATS University Islamabad", country:"Pakistan", deadline:"30 November 2026", link:"", details:"Visiting faculty position for the spring semester. MS in Computer Science or a related field required.", createdAt:new Date(t-86400000*5).toISOString() },
+      { id:"post-demo-5", kind:"post", cat:"news", title:"Admissions notice \u2014 spring intake at partner universities", org:"Research with Mufti Hassan", country:"Worldwide", deadline:"", link:"", details:"General announcement \u2014 news-category items never appear in the breaking band.", createdAt:new Date(t-3600000).toISOString() }
+    ]),
     requests:[
       { id:"rq-seed-1", email:"student@demo.local", name:"Ayesha Khan (demo student)", topic:"Choosing a thesis topic in NLP for Urdu", type:"Thesis / dissertation", lang:"English",
         message:"I have shortlisted three topics but cannot decide which one has enough data available to be practical.",
@@ -2526,6 +2570,58 @@ function renderOpps(cat){
     + (items.length ? "" : '<div class="empty">Nothing here yet — new posts appear as soon as they are published.</div>');
   attachOppListeners();
 }
+/* ---------- Breaking-news band (home + admin share one renderer) ---------- */
+const BRK = { home:{ i:0, items:[] }, adm:{ i:0, items:[] } };
+function breakingItems(){
+  const dl = n => { const t = Date.parse((n && (n.deadline || n.expiresAt)) || ""); return isNaN(t) ? Infinity : t; };
+  return visibleNews()
+    .filter(n => n.kind !== "source" && ["job","scholarship","conference"].indexOf(catOf(n)) >= 0)
+    .slice()
+    .sort((a,b)=>{
+      const ca = Date.parse(a.createdAt || ""), cb = Date.parse(b.createdAt || "");
+      const ta = isNaN(ca) ? 0 : ca, tb = isNaN(cb) ? 0 : cb;
+      if(tb !== ta) return tb - ta;              // newest first; no createdAt (0) sorts last
+      return dl(a) - dl(b);                     // tie-break: earliest deadline first
+    })
+    .slice(0, 5);
+}
+function brkDeadlineText(n){
+  const raw = (n && (n.deadline || n.expiresAt)) || "";
+  if(!raw) return "";
+  const t = Date.parse(raw);
+  return isNaN(t) ? String(raw) : fmtDate(new Date(t).toISOString());
+}
+function renderBrkInto(p){
+  const wrap = document.getElementById(p + "-breaking"); if(!wrap) return;
+  const st = BRK[p]; if(!st) return;
+  st.items = breakingItems();
+  if(st.i >= st.items.length) st.i = Math.max(0, st.items.length - 1);
+  if(!st.items.length){ wrap.hidden = true; return; }
+  wrap.hidden = false;
+  const n = st.items[st.i];
+  const LBL = { job:"\u{1F4BC} Jobs", scholarship:"\u{1F393} Scholarship", conference:"\u{1F3A4} Conference" };
+  document.getElementById(p + "-brk-cat").textContent = LBL[catOf(n)] || "\u{1F4F0} News";
+  document.getElementById(p + "-brk-title").textContent = n.title || "";
+  const chip = document.getElementById(p + "-brk-chip");
+  const d = brkDeadlineText(n);
+  chip.hidden = !d; chip.textContent = d ? ("\u23F0 " + d) : "";
+  const ct = Date.parse(n.createdAt || "");
+  const age = Date.now() - ct;
+  document.getElementById(p + "-brk-new").hidden = !( !isNaN(ct) && age >= -86400000 && age <= 7*86400000 );
+  document.getElementById(p + "-brk-nav").hidden = st.items.length < 2;
+  document.getElementById(p + "-brk-dots").innerHTML = st.items.map((_,k)=> '<span class="brk-dot' + (k === st.i ? " on" : "") + '"></span>').join("");
+}
+function renderBreaking(){ renderBrkInto("home"); renderBrkInto("adm"); }
+function brkGo(p, d){
+  const st = BRK[p]; if(!st || st.items.length < 2) return;
+  st.i = (st.i + d + st.items.length) % st.items.length;
+  renderBrkInto(p);
+}
+function brkOpen(p){
+  const st = BRK[p]; const n = st && st.items[st.i]; if(!n) return;
+  renderOpps(catOf(n)); showView("view-opps");
+}
+
 function renderHome(){
   if(!ME) return;
   maybeIssueCertificates();
@@ -2550,6 +2646,7 @@ function renderHome(){
   document.getElementById("tile-layout-sub").textContent = layoutLabel();
   document.getElementById("demo-note-home").hidden = !DEMO_MODE;
   renderTopStrip();
+  renderBreaking();
 }
 function renderDisciplines(){
   document.getElementById("discipline-list").innerHTML = '<div class="tile-grid disc-grid">' + DISCIPLINES.map(d =>
@@ -2792,6 +2889,7 @@ function renderAdmin(){
   document.querySelectorAll("[data-anote]").forEach(b => b.addEventListener("click", ()=> adminWorkNote(b.dataset.owner, b.dataset.anote)));
   document.querySelectorAll("[data-afeat]").forEach(b => b.addEventListener("click", ()=> adminToggleFeatured(b.dataset.owner, b.dataset.afeat)));
   document.getElementById("demo-note-admin").hidden = !DEMO_MODE;
+  renderBreaking();
 }
 function renderAdminMembers(){
   const q = (document.getElementById("adm-search").value || "").toLowerCase();
@@ -3383,6 +3481,17 @@ function wire(){
   }
   $("demo-note-welcome").hidden = !DEMO_MODE;
   $("demo-helpers").hidden = !DEMO_MODE;
+  ["home","adm"].forEach(p => {
+    const bandEl = $(p + "-brk-band"); if(!bandEl) return;
+    $(p + "-brk-prev").addEventListener("click", ()=> brkGo(p, -1));
+    $(p + "-brk-next").addEventListener("click", ()=> brkGo(p, 1));
+    bandEl.addEventListener("click", ()=> brkOpen(p));
+    bandEl.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); brkOpen(p); } });
+    let tx = null;
+    bandEl.addEventListener("touchstart", e => { tx = e.changedTouches[0].clientX; }, { passive:true });
+    bandEl.addEventListener("touchend", e => { if(tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null; if(Math.abs(dx) > 40) brkGo(p, dx < 0 ? 1 : -1); }, { passive:true });
+  });
+
 
   /* ---- Register ---- */
   $("reg-form").addEventListener("submit", async e => {

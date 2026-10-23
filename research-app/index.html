@@ -162,14 +162,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 
 /* ---------- Home hubs ---------- */
 .home-head{
-  margin:0 -16px 6px;padding:18px 16px 14px;color:#fff;
+  margin:0 -16px 6px;padding:12px 8px 10px;color:#fff;
   background:linear-gradient(160deg,var(--navy-l),var(--navy) 55%,var(--navy-d));
-  display:flex;align-items:center;gap:8px;
+  display:flex;align-items:center;gap:4px;
 }
 .home-head .ttl{flex:1;min-width:0}
-.home-head .ttl .appname{font-size:17px;font-weight:700;line-height:1.3}
+.home-head .ttl .appname{font-size:clamp(11px,3.2vw,15.5px);font-weight:700;line-height:1.25;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .home-head .ttl .brand{font-size:13px;color:var(--gold-l);letter-spacing:.04em;text-transform:uppercase}
-.home-head img.logo{width:44px;height:44px;border-radius:12px;background:#fff;padding:3px;flex:0 0 auto}
+.home-head img.logo{width:30px;height:30px;border-radius:9px;background:#fff;padding:2px;flex:0 0 auto}
+.home-head .iconbtn{min-width:34px;min-height:34px;width:34px;height:34px;font-size:16px}
+.home-head .avatar-dot{width:34px;height:34px;font-size:14.5px}
+.home-head .hbtn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;min-width:34px;min-height:34px;padding:0;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.10);color:#fff;font-family:inherit;font-size:16px;cursor:pointer;flex:0 0 auto;line-height:1}
+.home-head .hbtn:active{background:rgba(255,255,255,.24)}
 .iconbtn{
   position:relative;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff;
   border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;font-size:19px;
@@ -234,7 +238,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .footer-note{font-size:12.5px;color:var(--mut);text-align:center;padding:10px 8px 0}
 /* ---------- Welcome hero + refresh controls ---------- */
 .hero{
-  position:relative;margin:0 -16px;padding:34px 20px 28px;text-align:center;color:#fff;
+  position:relative;margin:0 -16px;padding:64px 20px 28px;text-align:center;color:#fff;
   background:linear-gradient(165deg,var(--navy-l),var(--navy) 55%,var(--navy-d));
   border-radius:0 0 26px 26px;
 }
@@ -254,12 +258,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .refresh-btn .rf-ic{display:inline-block;font-size:17px;line-height:1}
 .refresh-btn.spinning .rf-ic{animation:rfspin .65s ease}
 @keyframes rfspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.hero-refresh{position:absolute;top:12px;right:12px;z-index:5}
-.home-head .refresh-btn{flex-direction:column;gap:1px;padding:5px 10px;border-radius:12px;font-size:10.5px;min-width:54px}
-.home-head .refresh-btn .rf-ic{font-size:16px}
-.home-head .layout-btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:44px;padding:5px 8px;border-radius:12px;font-size:10.5px;min-width:50px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.10);color:#fff;font-family:inherit;font-weight:600;cursor:pointer;flex:0 0 auto;line-height:1.2}
-.home-head .layout-btn:active{background:rgba(255,255,255,.24)}
-.home-head .layout-btn .ly-ic{font-size:16px;line-height:1}
+.hero-actions{position:absolute;top:12px;right:12px;z-index:5;display:flex;gap:8px}
+.home-head .hbtn .ly-ic{font-size:16px;line-height:1}
 .notice-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:var(--radius);padding:16px;margin:18px 0 12px}
 .notice-card p:last-child{margin-bottom:0}
 .guide-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:18px 0 12px}
@@ -404,7 +404,10 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <!-- ================= WELCOME ================= -->
 <section class="view" id="view-welcome">
   <div class="hero">
-    <button class="refresh-btn hero-refresh" id="welcome-refresh-btn" aria-label="Refresh the app"><span class="rf-ic" aria-hidden="true">⟳</span> Refresh</button>
+    <div class="hero-actions">
+      <button class="refresh-btn" id="hero-layout" aria-label="Switch layout between Auto, Web and Mobile"><span class="rf-ic hl-ic" aria-hidden="true">🔁</span> Layout: <span class="hl-mode">Auto</span></button>
+      <button class="refresh-btn" id="welcome-refresh-btn" aria-label="Refresh the app"><span class="rf-ic" aria-hidden="true">⟳</span> Refresh</button>
+    </div>
     <div class="hero-logo"><img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="Research with Mufti Hassan logo"></div>
     <h1 class="hero-title">Research with Mufti Hassan</h1>
     <p class="hero-tag">Jobs, internships, scholarships, fully funded conferences — and research guidance for every university discipline.</p>
@@ -571,8 +574,8 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <div class="ttl"><div class="appname">Research with Mufti Hassan</div></div>
     <span class="bellwrap"><button class="iconbtn" id="home-bell" aria-label="Notifications">🔔</button><span class="nbadge" id="home-bell-badge" hidden>0</span></span>
     <span class="avatar-dot" id="home-avatar" title="My Profile">A</span>
-    <button class="refresh-btn" id="home-refresh-btn" aria-label="Refresh the app"><span class="rf-ic" aria-hidden="true">⟳</span> Refresh</button>
-    <button class="layout-btn" id="hdr-layout-btn" aria-label="Switch between Mobile and Web layout"><span class="ly-ic" aria-hidden="true">🖥️</span><span class="ly-tx">Auto</span></button>
+    <button class="refresh-btn hbtn" id="home-refresh-btn" aria-label="Refresh the app" title="Refresh"><span class="rf-ic" aria-hidden="true">⟳</span></button>
+    <button class="hbtn" id="hdr-layout-btn" aria-label="Layout: Auto — tap to switch layout" title="Layout: Auto"><span class="ly-ic" aria-hidden="true">🔁</span></button>
   </div>
   <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
 
@@ -2619,13 +2622,16 @@ function docxName(title){
 /* ================= Layout switch ================= */
 function layoutPref(){ try{ return localStorage.getItem(LAYOUT_KEY) || "auto"; }catch(e){ return "auto"; } }
 function layoutLabel(){ const p = layoutPref(); return p === "auto" ? "Auto" : (p === "web" ? "Web" : "Mobile"); }
+function layoutIcon(p){ return p === "mobile" ? "📱" : (p === "web" ? "🖥️" : "🔁"); }
 function applyLayout(){
   const p = layoutPref();
   document.documentElement.dataset.layout = p;
   const ab = document.getElementById("about-layout-btn"); if(ab) ab.textContent = "🖥️ Layout: " + layoutLabel();
   const tl = document.getElementById("tile-layout-sub"); if(tl) tl.textContent = layoutLabel();
   const hb = document.getElementById("hdr-layout-btn");
-  if(hb){ hb.querySelector(".ly-tx").textContent = layoutLabel(); hb.querySelector(".ly-ic").textContent = p === "mobile" ? "📱" : "🖥️"; }
+  if(hb){ hb.querySelector(".ly-ic").textContent = layoutIcon(p); hb.title = "Layout: " + layoutLabel(); hb.setAttribute("aria-label", "Layout: " + layoutLabel() + " — tap to switch layout"); }
+  const hl = document.getElementById("hero-layout");
+  if(hl){ hl.querySelector(".hl-mode").textContent = layoutLabel(); hl.querySelector(".hl-ic").textContent = layoutIcon(p); }
 }
 function cycleLayout(){
   const order = ["auto","web","mobile"], next = order[(order.indexOf(layoutPref()) + 1) % order.length];
@@ -2804,6 +2810,7 @@ function wire(){
   $("home-install-btn").addEventListener("click", tryInstall);
   $("home-layout-btn").addEventListener("click", cycleLayout);
   $("hdr-layout-btn").addEventListener("click", cycleLayout);
+  $("hero-layout").addEventListener("click", cycleLayout);
   $("home-about-btn").addEventListener("click", ()=> { NAV_BACK["view-about"] = "view-home"; showView("view-about"); });
   $("home-hub-btn").addEventListener("click", ()=> showView("view-hub"));
   // MAQAMAT contact points — single source: the CONFIG constants above.

@@ -429,10 +429,11 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   </div>
   <button class="btn ghost info-btn" id="btn-who" aria-expanded="false" aria-controls="who-panel"><span>🎓 Who is this app for?</span><span class="ht-chev" aria-hidden="true">▾</span></button>
   <div class="info-panel" id="who-panel" hidden>
-    <p style="margin:0 0 10px">University students of <b>all departments</b> — BS, MS, MPhil and PhD — anywhere in the world. Registration is free and open.</p>
-    <div class="ur" style="font-size:15.5px">یہ ایپ یونیورسٹی طلبہ کے لیے ہے۔ علماء و عالمات براہِ کرم «علمی مشغولیت» ایپ استعمال فرمائیں۔</div>
+    <p style="margin:0 0 10px">Non-Ulama university students of <b>all departments</b> — BS, MS, MPhil and PhD — anywhere in the world. Registration is free and open.</p>
+    <p style="margin:0 0 10px">Ulama university students — please log in with the <a id="who-ulama-link" href="#" target="_blank" rel="noopener">Ilmi Mashghuliyat app</a>.</p>
+    <div class="ur" style="font-size:15.5px">صرف غیر علماء یونیورسٹی طلبہ کے لیے۔ یونیورسٹی میں زیرِ تعلیم علماء و عالمات براہِ کرم «علمی مشغولیت» ایپ سے لاگ اِن کریں۔</div>
   </div>
-  <a class="btn ghost info-btn ulama-btn" id="welcome-ulama-btn" href="#" target="_blank" rel="noopener"><span>🕌 Ulama &amp; Alimat — Open the Ilmi Mashghuliyat App ↗</span></a>
+  <a class="btn ghost info-btn ulama-btn" id="welcome-ulama-btn" href="#" target="_blank" rel="noopener"><span>🕌 Ulama Students — Open the Ilmi Mashghuliyat App ↗</span></a>
   <p class="footer-note">By <b>Learn with Mufti Hassan</b> · <a id="welcome-site-link" href="#" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">learnwithmuftihassan.com</a></p>
   <p class="demo-note" id="demo-note-welcome" hidden>Preview build — live database connects at launch.</p>
 </section>
@@ -442,7 +443,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div class="topbar"><button class="tbtn" data-back="view-welcome">‹ Back</button><div class="ttl">Create Account</div><span style="width:44px"></span></div>
   <h2>Register — it takes a minute</h2>
   <p class="small">Fill in your details. After registering, we email you a verification link — tap it, then complete two quick steps (community + academic identity) and you are in.</p>
-  <div class="notice"><p style="margin:0"><b>University students only.</b> Ulama &amp; Alimat — please use the <a id="register-ulama-link" href="#" target="_blank" rel="noopener">Ilmi Mashghuliyat app</a> instead.</p></div>
+  <div class="notice"><p style="margin:0"><b>Just for non-Ulama university students.</b></p><p style="margin:6px 0 0">Ulama university students — please log in with the <a id="register-ulama-link" href="#" target="_blank" rel="noopener">Ilmi Mashghuliyat app</a>.</p></div>
   <form id="reg-form" novalidate>
     <label for="reg-name">Full name <span class="req">*</span></label>
     <input id="reg-name" type="text" autocomplete="name" placeholder="e.g. Ayesha Khan">
@@ -472,11 +473,15 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <div class="two-grid" style="gap:0 12px">
       <div>
         <label for="reg-country">Country <span class="req">*</span></label>
+        <div class="help" style="margin:2px 0 0">The country where you study now</div>
+        <div class="ur" style="font-size:13.5px;margin:0 0 6px">وہ ملک جہاں آپ اس وقت پڑھ رہے ہیں</div>
         <input id="reg-country" type="text" autocomplete="country-name" placeholder="e.g. Pakistan">
         <div class="field-err" id="err-reg-country">Please enter your country.</div>
       </div>
       <div>
         <label for="reg-city">City <span class="req">*</span></label>
+        <div class="help" style="margin:2px 0 0">The city where you study now</div>
+        <div class="ur" style="font-size:13.5px;margin:0 0 6px">وہ شہر جہاں آپ اس وقت پڑھ رہے ہیں</div>
         <input id="reg-city" type="text" autocomplete="address-level2" placeholder="e.g. Karachi">
         <div class="field-err" id="err-reg-city">Please enter your city.</div>
       </div>
@@ -543,28 +548,40 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div class="card accent">
     <p class="small" style="margin-bottom:6px">Both are required — the group is where students discuss, and the channel carries announcements.</p>
     <a class="btn" id="gate-group-btn" href="#" target="_blank" rel="noopener">Join the WhatsApp Group — “Research with Mufti Hassan”</a>
-    <label class="checkrow"><input type="checkbox" id="gate-group-check"><span>I have joined the WhatsApp group.</span></label>
+    <label class="checkrow"><input type="checkbox" id="gate-group-check" disabled><span>I have joined the WhatsApp group.</span></label>
+    <div id="gate-group-hint"><div class="help" style="margin-top:0">First tap the button above.</div><div class="ur" style="font-size:14px">پہلے اوپر والا بٹن دبائیں۔</div></div>
     <a class="btn goldb" id="gate-channel-btn" href="#" target="_blank" rel="noopener">Follow the WhatsApp Channel</a>
-    <label class="checkrow"><input type="checkbox" id="gate-channel-check"><span>I follow the WhatsApp channel.</span></label>
+    <label class="checkrow"><input type="checkbox" id="gate-channel-check" disabled><span>I follow the WhatsApp channel.</span></label>
+    <div id="gate-channel-hint"><div class="help" style="margin-top:0">First tap the button above.</div><div class="ur" style="font-size:14px">پہلے اوپر والا بٹن دبائیں۔</div></div>
   </div>
   <div class="gate-step" id="gateB-step"><div class="n">2</div><b>Your academic identity</b></div>
   <div class="card accent">
     <p class="small" style="margin-bottom:4px">All three are required — they let Mufti guide you properly and keep the community genuinely academic.</p>
+    <p class="small" style="margin-bottom:2px"><b>Mufti reviews these links — please add your real profiles.</b></p>
+    <div class="ur" style="font-size:14px;margin-bottom:6px">مفتی صاحب ان لنکس کو خود دیکھتے ہیں — براہ کرم اپنے اصل پروفائل ہی دیں۔</div>
     <label for="gate-cvlink">Your CV — upload a file, or paste a link</label>
     <div class="filebox">
-      <input type="file" id="gate-cv-file" accept=".pdf,image/*" style="border:none;padding:4px;min-height:44px">
+      <input type="file" id="gate-cv-file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" style="border:none;padding:4px;min-height:44px">
       <div class="small" id="gate-cv-status">No file chosen yet. PDF or photo of your CV, up to ~700 KB.</div>
     </div>
+    <div class="field-err" id="err-gate-cvtype">Please upload your CV as a PDF or a photo (JPG/PNG).</div>
+    <div class="field-err ur" id="err-gate-cvtype-ur" style="font-size:14.5px">براہ کرم CV صرف PDF یا تصویر کی صورت میں اپلوڈ کریں۔</div>
     <input id="gate-cvlink" type="url" placeholder="…or paste a CV link (Google Drive / Dropbox)" style="margin-top:8px">
     <div class="field-err" id="err-gate-cv">Please upload your CV or paste a CV link.</div>
+    <div class="field-err" id="err-gate-cvlink">Please paste the share link of your CV (Google Drive / Dropbox / OneDrive).</div>
+    <div class="field-err ur" id="err-gate-cvlink-ur" style="font-size:14.5px">براہ کرم اپنے CV کا شیئر لنک لگائیں (گوگل ڈرائیو / ڈراپ باکس / ون ڈرائیو)۔</div>
     <label for="gate-linkedin">LinkedIn profile URL</label>
     <input id="gate-linkedin" type="url" placeholder="https://www.linkedin.com/in/your-name">
     <div class="help">No LinkedIn yet? <a href="https://www.linkedin.com/help/linkedin/answer/a1337200" target="_blank" rel="noopener">How to create a LinkedIn profile</a> — it takes 10 minutes and employers check it first.</div>
-    <div class="field-err" id="err-gate-linkedin">Please enter a valid LinkedIn profile link (linkedin.com/…).</div>
+    <div class="field-err" id="err-gate-linkedin">Please paste your LinkedIn profile link — it looks like linkedin.com/in/your-name.</div>
+    <div class="field-err ur" id="err-gate-linkedin-ur" style="font-size:14.5px">براہ کرم اپنا LinkedIn پروفائل لنک لگائیں — اس کی شکل linkedin.com/in/your-name جیسی ہوتی ہے۔</div>
     <label for="gate-scholar">Google Scholar profile URL</label>
     <input id="gate-scholar" type="url" placeholder="https://scholar.google.com/citations?user=…">
     <div class="help">No Scholar profile yet? <a href="https://scholar.google.com/intl/en/scholar/citations.html" target="_blank" rel="noopener">How to create a Google Scholar profile</a> — sign in with your university email if you can.</div>
-    <div class="field-err" id="err-gate-scholar">Please enter a valid Google Scholar profile link (scholar.google…). </div>
+    <div class="field-err" id="err-gate-scholar">Please paste your Google Scholar profile link — open your profile and copy its link (it contains 'citations?user=…').</div>
+    <div class="field-err ur" id="err-gate-scholar-ur" style="font-size:14.5px">براہ کرم اپنا Google Scholar پروفائل لنک لگائیں — اپنا پروفائل کھول کر اس کا لنک کاپی کریں (اس میں citations?user=… ہوتا ہے)۔</div>
+    <div class="notice" id="gateb-demo-hint" hidden style="margin:10px 0"><b>Demo examples</b> — CV link: https://drive.google.com/file/d/… · LinkedIn: https://www.linkedin.com/in/your-name · Scholar: https://scholar.google.com/citations?user=XXXX</div>
+    <div class="msg ok" id="gate-verified-note" hidden>✓ Identity verified — Mufti has reviewed your CV and profile links.</div>
     <div class="msg" id="gates-msg"></div>
     <button class="btn" id="gates-save">Save &amp; enter the app</button>
   </div>
@@ -742,15 +759,22 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <div class="kv"><span>CV</span><b id="prof-cv">—</b></div>
     <div class="kv"><span>LinkedIn</span><b><a id="prof-linkedin" href="#" target="_blank" rel="noopener">—</a></b></div>
     <div class="kv"><span>Google Scholar</span><b><a id="prof-scholar" href="#" target="_blank" rel="noopener">—</a></b></div>
+    <div class="msg ok" id="prof-verified-note" hidden>✓ Identity verified — Mufti has reviewed your CV and profile links.</div>
     <label for="prof-linkedin-in">LinkedIn profile URL</label>
     <input id="prof-linkedin-in" type="url" placeholder="https://www.linkedin.com/in/your-name">
-    <div class="field-err" id="err-prof-linkedin">Please enter a valid LinkedIn link (linkedin.com/…).</div>
+    <div class="field-err" id="err-prof-linkedin">Please paste your LinkedIn profile link — it looks like linkedin.com/in/your-name.</div>
+    <div class="field-err ur" id="err-prof-linkedin-ur" style="font-size:14.5px">براہ کرم اپنا LinkedIn پروفائل لنک لگائیں — اس کی شکل linkedin.com/in/your-name جیسی ہوتی ہے۔</div>
     <label for="prof-scholar-in">Google Scholar profile URL</label>
     <input id="prof-scholar-in" type="url" placeholder="https://scholar.google.com/citations?user=…">
-    <div class="field-err" id="err-prof-scholar">Please enter a valid Google Scholar link (scholar.google…).</div>
+    <div class="field-err" id="err-prof-scholar">Please paste your Google Scholar profile link — open your profile and copy its link (it contains 'citations?user=…').</div>
+    <div class="field-err ur" id="err-prof-scholar-ur" style="font-size:14.5px">براہ کرم اپنا Google Scholar پروفائل لنک لگائیں — اپنا پروفائل کھول کر اس کا لنک کاپی کریں (اس میں citations?user=… ہوتا ہے)۔</div>
     <label for="prof-cvlink-in">CV link (or upload a new CV in the field below)</label>
     <input id="prof-cvlink-in" type="url" placeholder="https://drive.google.com/…">
-    <div class="filebox"><input type="file" id="prof-cv-file" accept=".pdf,image/*" style="border:none;padding:4px;min-height:44px"><div class="small" id="prof-cv-status"></div></div>
+    <div class="field-err" id="err-prof-cvlink">Please paste the share link of your CV (Google Drive / Dropbox / OneDrive).</div>
+    <div class="field-err ur" id="err-prof-cvlink-ur" style="font-size:14.5px">براہ کرم اپنے CV کا شیئر لنک لگائیں (گوگل ڈرائیو / ڈراپ باکس / ون ڈرائیو)۔</div>
+    <div class="filebox"><input type="file" id="prof-cv-file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" style="border:none;padding:4px;min-height:44px"><div class="small" id="prof-cv-status"></div></div>
+    <div class="field-err" id="err-prof-cvtype">Please upload your CV as a PDF or a photo (JPG/PNG).</div>
+    <div class="field-err ur" id="err-prof-cvtype-ur" style="font-size:14.5px">براہ کرم CV صرف PDF یا تصویر کی صورت میں اپلوڈ کریں۔</div>
     <div class="msg" id="prof-ok"></div>
     <button class="btn" id="prof-save">Save changes</button>
   </div>
@@ -771,7 +795,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div class="topbar"><button class="tbtn" data-back="view-home" id="about-back">‹ Back</button><div class="ttl">About</div><span style="width:44px"></span></div>
   <div class="center"><img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="Research with Mufti Hassan logo" style="width:84px;height:84px;border-radius:18px"></div>
   <h2 class="center" style="margin-top:8px">Research with Mufti Hassan</h2>
-  <p>A free platform by <b>Learn with Mufti Hassan</b> for university students of every department, worldwide: jobs &amp; internships, scholarships, fully funded conferences, and honest, discipline-wise research guidance — where to find data, which AI tools to use, and where to publish.</p>
+  <p>A free platform by <b>Learn with Mufti Hassan</b> for non-Ulama university students of every department, worldwide: jobs &amp; internships, scholarships, fully funded conferences, and honest, discipline-wise research guidance — where to find data, which AI tools to use, and where to publish.</p>
   <div class="card accent">
     <h3>🔗 Visit us</h3>
     <p style="margin:0 0 2px"><b>Our website — learnwithmuftihassan.com</b></p>
@@ -782,8 +806,8 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <a class="btn ghost" id="about-playlist-btn" href="#" target="_blank" rel="noopener">▶️ Open the playlist page ↗</a>
   </div>
   <div class="notice">
-    <p><b>This app is for university students.</b></p>
-    <p>Ulama &amp; Alimat (madrasa scholars) are served by the <b>Ilmi Mashghuliyat</b> app of Madrasa.pk:</p>
+    <p><b>Just for non-Ulama university students.</b></p>
+    <p>Ulama university students — please log in with the <b>Ilmi Mashghuliyat</b> app:</p>
     <a class="btn goldb" id="about-ulama-btn" href="#" target="_blank" rel="noopener">Open Ilmi Mashghuliyat</a>
   </div>
   <p class="small">Founder: Mufti Muhammad Hassan — researcher and teacher of AI &amp; research skills for scholars and students. Website: <a href="https://learnwithmuftihassan.com" target="_blank" rel="noopener">learnwithmuftihassan.com</a></p>
@@ -1939,8 +1963,37 @@ function renderVerify(){
 /* ================= Validation helpers ================= */
 function showErr(id, bad){ const e = document.getElementById(id); if(e) e.classList.toggle("show", !!bad); return !bad; }
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||"").trim()); }
-function validLinkedIn(v){ v = String(v||"").trim().toLowerCase(); return v.includes("linkedin.com/in/") || v.includes("linkedin.com/company/"); }
-function validScholar(v){ v = String(v||"").trim().toLowerCase(); return v.includes("scholar.google."); }
+/* Gate B identity validation (strict — this data powers later guidance).
+   LinkedIn: a PROFILE link only — https://<any-subdomain.>linkedin.com/in/<slug>.
+   Scholar: a PROFILE link only — https://scholar.google.<tld>/citations?user=…
+   CV link: valid https only; known file hosts and direct .pdf links pass
+   cleanly; any other https host passes but is flagged (cvLinkOther) so the
+   admin can give it a closer look. */
+function validLinkedIn(v){
+  return /^https:\/\/([a-z0-9-]+\.)*linkedin\.com\/in\/[^\s/?#]+\/?([?#]\S*)?$/i.test(String(v||"").trim());
+}
+function validScholar(v){
+  try{
+    const u = new URL(String(v||"").trim());
+    return u.protocol === "https:" && /^scholar\.google\.[a-z.]+$/i.test(u.hostname)
+      && u.pathname.replace(/\/+$/,"") === "/citations" && !!(u.searchParams.get("user") || "").trim();
+  }catch(e){ return false; }
+}
+function cvLinkInfo(v){
+  v = String(v||"").trim();
+  if(!v) return { ok:true, other:false };
+  let u; try{ u = new URL(v); }catch(e){ return { ok:false, other:false }; }
+  if(u.protocol !== "https:") return { ok:false, other:false };
+  const hosts = ["drive.google.com","docs.google.com","dropbox.com","www.dropbox.com","onedrive.live.com","1drv.ms","box.com","app.box.com"];
+  if(hosts.indexOf(u.hostname.toLowerCase()) >= 0) return { ok:true, other:false };
+  if(/\.pdf$/i.test(u.pathname)) return { ok:true, other:false };
+  return { ok:true, other:true };
+}
+function cvFileOk(f){
+  if(!f) return false;
+  const t = (f.type || "").toLowerCase();
+  return ["application/pdf","image/jpeg","image/png","image/webp"].indexOf(t) >= 0 || /\.(pdf|jpe?g|png|webp)$/i.test(f.name || "");
+}
 
 /* File → compressed base64 (mirrors the reference app: images via canvas, PDFs as-is with a size guard) */
 function fileToData(file, cb){
@@ -2190,10 +2243,23 @@ function renderProfile(){
   document.getElementById("prof-scholar-in").value = i.scholar || "";
   document.getElementById("prof-cvlink-in").value = i.cvLink || "";
   document.getElementById("prof-cv-status").textContent = i.cvName ? ("Current file: " + i.cvName) : "";
+  document.getElementById("prof-verified-note").hidden = !ME.identityVerified;
   const mine = DB.requests.filter(r => r.email === ME.email).sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
   document.getElementById("prof-requests").innerHTML = mine.length ? mine.map(r => requestHTML(r, false)).join("") : '<div class="empty">No requests yet — use Research &amp; Writing Help or Consultation.</div>';
   const ns = myNotifications().slice(0, 8);
   document.getElementById("prof-notifs").innerHTML = ns.length ? ns.map(notifHTML).join("") : '<div class="empty">No notifications yet.</div>';
+}
+function identityBlock(u){
+  if(u.role === "admin") return "";
+  const i = u.identity || {};
+  let h = '<div style="margin-top:8px;border-top:1px solid #e6e9e6;padding-top:8px"><div class="small"><b>Academic identity</b></div>';
+  if(i.cvData) h += '<div class="small">CV file: <a href="#" data-cvdl="' + esc(u.email) + '">⬇ Download ' + esc(i.cvName || "CV") + '</a></div>';
+  if(i.cvLink) h += '<div class="small">CV link: <a href="' + esc(i.cvLink) + '" target="_blank" rel="noopener">Open CV link ↗</a>' + (i.cvLinkOther ? ' <span style="color:#9a6a00"><b>⚠ other host — closer look</b></span>' : '') + '</div>';
+  if(!i.cvData && !i.cvLink) h += '<div class="small">CV: —</div>';
+  h += '<div class="small">LinkedIn: ' + (i.linkedin ? '<a href="' + esc(i.linkedin) + '" target="_blank" rel="noopener">View profile ↗</a>' : '—') + '</div>';
+  h += '<div class="small">Google Scholar: ' + (i.scholar ? '<a href="' + esc(i.scholar) + '" target="_blank" rel="noopener">View profile ↗</a>' : '—') + '</div>';
+  h += '<label class="checkrow" style="margin-top:6px"><input type="checkbox" data-idv="' + esc(u.email) + '"' + (u.identityVerified ? ' checked' : '') + '><span>Identity verified ✓</span></label>';
+  return h + '</div>';
 }
 function memberRow(u){
   const pills = '<span class="status-pill ' + esc(u.status) + '">' + esc(u.status) + '</span>';
@@ -2203,7 +2269,7 @@ function memberRow(u){
     + (u.memberId ? '<br>Member ID: <b>' + esc(u.memberId) + '</b>' : '')
     + '<br>Registered ' + fmtDate(u.createdAt)
     + (u.role !== "admin" ? ' · Gates: ' + (accessComplete(u) ? 'complete' : 'incomplete') : '')
-    + '</div></div>';
+    + '</div>' + identityBlock(u) + '</div>';
 }
 function renderAdmin(){
   if(!ME || ME.role !== "admin") return;
@@ -2242,11 +2308,40 @@ function adminRespond(id){
 }
 
 /* ================= Gates ================= */
+/* Gate A click-lock: a checkbox unlocks only after its button above was
+   actually tapped. The opened-state rides on ME.gates (groupOpened /
+   channelOpened) — the same record as the gate flags — so it persists
+   with the student's gate progress in demo and live mode alike. */
+function paintGateA(){
+  if(!ME) return;
+  const g = ME.gates || {};
+  const done = !!(g.group && g.channel);
+  [["gate-group-check","gate-group-hint","gate-group-btn", !!g.groupOpened],
+   ["gate-channel-check","gate-channel-hint","gate-channel-btn", !!g.channelOpened]].forEach(([cbId, hintId, btnId, opened])=>{
+    const cb = document.getElementById(cbId), hint = document.getElementById(hintId), btn = document.getElementById(btnId);
+    if(cb) cb.disabled = !(opened || done);
+    if(hint) hint.hidden = (opened || done);
+    if(btn){
+      if(!btn.dataset.baseLabel) btn.dataset.baseLabel = btn.textContent.replace(/ ✓ Opened$/, "");
+      btn.textContent = btn.dataset.baseLabel + ((opened || done) ? " ✓ Opened" : "");
+    }
+  });
+}
+function markGateOpened(which){
+  if(!ME) return;
+  if(!ME.gates || typeof ME.gates !== "object") ME.gates = {};
+  ME.gates[which] = true;
+  persist(); if(FB) FB.saveUser(ME);
+  paintGateA();
+}
 function renderGates(){
   if(!ME) return;
   const g = ME.gates || {}, i = ME.identity || {};
   document.getElementById("gate-group-check").checked = !!g.group;
   document.getElementById("gate-channel-check").checked = !!g.channel;
+  paintGateA();
+  const bh = document.getElementById("gateb-demo-hint"); if(bh) bh.hidden = !DEMO_MODE;
+  const vn = document.getElementById("gate-verified-note"); if(vn) vn.hidden = !ME.identityVerified;
   const gb = document.getElementById("gate-group-btn");
   if(WHATSAPP_GROUP_URL){ gb.href = WHATSAPP_GROUP_URL; }
   else{
@@ -2672,6 +2767,7 @@ function wire(){
   }));
   $("welcome-ulama-btn").href = ULAMA_APP_URL;
   $("register-ulama-link").href = ULAMA_APP_URL;
+  $("who-ulama-link").href = ULAMA_APP_URL;
   $("about-ulama-btn").href = ULAMA_APP_URL;
   $("welcome-site-link").href = WEBSITE_URL;
   $("about-website-btn").href = WEBSITE_URL;
@@ -2784,8 +2880,17 @@ function wire(){
   let gateCv = null;
   $("gate-cv-file").addEventListener("change", e => {
     const f = e.target.files[0]; if(!f) return;
+    if(!cvFileOk(f)){
+      gateCv = null; e.target.value = "";
+      showErr("err-gate-cvtype", true); showErr("err-gate-cvtype-ur", true);
+      $("gate-cv-status").textContent = "That file was rejected — please use a PDF or a photo (JPG/PNG/WebP).";
+      return;
+    }
+    showErr("err-gate-cvtype", false); showErr("err-gate-cvtype-ur", false);
     fileToData(f, res => { if(res){ gateCv = res; $("gate-cv-status").textContent = "Ready: " + res.name; } });
   });
+  $("gate-group-btn").addEventListener("click", ()=> markGateOpened("groupOpened"));
+  $("gate-channel-btn").addEventListener("click", ()=> markGateOpened("channelOpened"));
   $("gates-save").addEventListener("click", ()=>{
     if(!ME) return;
     const group = $("gate-group-check").checked, channel = $("gate-channel-check").checked;
@@ -2793,18 +2898,23 @@ function wire(){
     let ok = true;
     const hasCv = !!(gateCv || cvlink || (ME.identity && (ME.identity.cvData || ME.identity.cvLink)));
     ok = showErr("err-gate-cv", !hasCv) && ok;
-    ok = showErr("err-gate-linkedin", !validLinkedIn(linkedin)) && ok;
-    ok = showErr("err-gate-scholar", !validScholar(scholar)) && ok;
+    const cvInfo = cvLinkInfo(cvlink);
+    ok = showErr("err-gate-cvlink", !!cvlink && !cvInfo.ok) && ok; showErr("err-gate-cvlink-ur", !!cvlink && !cvInfo.ok);
+    ok = showErr("err-gate-linkedin", !validLinkedIn(linkedin)) && ok; showErr("err-gate-linkedin-ur", !validLinkedIn(linkedin));
+    ok = showErr("err-gate-scholar", !validScholar(scholar)) && ok; showErr("err-gate-scholar-ur", !validScholar(scholar));
     const msg = $("gates-msg"); msg.className = "msg"; msg.textContent = "";
     if(!group || !channel){ msg.className = "msg err"; msg.textContent = "Step 1 is incomplete: please join the WhatsApp group, follow the channel, and tick both boxes."; if(!ok) return; return; }
     if(!ok) return;
     ME.gates = { group:true, channel:true };
     ME.identity = { cvData: gateCv ? gateCv.data : (ME.identity.cvData || ""), cvName: gateCv ? gateCv.name : (ME.identity.cvName || ""),
-                    cvLink: cvlink, linkedin:linkedin, scholar:scholar };
+                    cvLink: cvlink, cvLinkOther: !!cvInfo.other, linkedin:linkedin, scholar:scholar };
     ensureMemberId(ME);
     persist(); if(FB) FB.saveUser(ME);
     toast("Welcome in, " + ME.name.split(" ")[0] + "!"); showView("view-home");
   });
+  $("gate-linkedin").addEventListener("blur", ()=>{ const bad = !validLinkedIn($("gate-linkedin").value.trim()); showErr("err-gate-linkedin", bad); showErr("err-gate-linkedin-ur", bad); });
+  $("gate-scholar").addEventListener("blur", ()=>{ const bad = !validScholar($("gate-scholar").value.trim()); showErr("err-gate-scholar", bad); showErr("err-gate-scholar-ur", bad); });
+  $("gate-cvlink").addEventListener("blur", ()=>{ const v = $("gate-cvlink").value.trim(); const bad = !!v && !cvLinkInfo(v).ok; showErr("err-gate-cvlink", bad); showErr("err-gate-cvlink-ur", bad); });
 
   /* ---- Home ---- */
   $("home-avatar").addEventListener("click", ()=> showView("view-profile"));
@@ -2928,24 +3038,50 @@ function wire(){
   let profCv = null;
   $("prof-cv-file").addEventListener("change", e => {
     const f = e.target.files[0]; if(!f) return;
+    if(!cvFileOk(f)){
+      profCv = null; e.target.value = "";
+      showErr("err-prof-cvtype", true); showErr("err-prof-cvtype-ur", true);
+      $("prof-cv-status").textContent = "That file was rejected — please use a PDF or a photo (JPG/PNG/WebP).";
+      return;
+    }
+    showErr("err-prof-cvtype", false); showErr("err-prof-cvtype-ur", false);
     fileToData(f, res => { if(res){ profCv = res; $("prof-cv-status").textContent = "Ready: " + res.name; } });
   });
   $("prof-save").addEventListener("click", ()=>{
     if(!ME) return;
     const linkedin = $("prof-linkedin-in").value.trim(), scholar = $("prof-scholar-in").value.trim(), cvlink = $("prof-cvlink-in").value.trim();
     let ok = true;
-    ok = showErr("err-prof-linkedin", !validLinkedIn(linkedin)) && ok;
-    ok = showErr("err-prof-scholar", !validScholar(scholar)) && ok;
+    ok = showErr("err-prof-linkedin", !validLinkedIn(linkedin)) && ok; showErr("err-prof-linkedin-ur", !validLinkedIn(linkedin));
+    ok = showErr("err-prof-scholar", !validScholar(scholar)) && ok; showErr("err-prof-scholar-ur", !validScholar(scholar));
+    const cvInfo = cvLinkInfo(cvlink);
+    ok = showErr("err-prof-cvlink", !!cvlink && !cvInfo.ok) && ok; showErr("err-prof-cvlink-ur", !!cvlink && !cvInfo.ok);
     if(!ok) return;
-    ME.identity.linkedin = linkedin; ME.identity.scholar = scholar; ME.identity.cvLink = cvlink;
+    ME.identity.linkedin = linkedin; ME.identity.scholar = scholar; ME.identity.cvLink = cvlink; ME.identity.cvLinkOther = !!cvInfo.other;
     if(profCv){ ME.identity.cvData = profCv.data; ME.identity.cvName = profCv.name; }
     persist(); if(FB) FB.saveUser(ME);
     const m = $("prof-ok"); m.className = "msg ok"; m.textContent = "Saved. Your academic identity is up to date.";
     renderProfile();
   });
+  $("prof-linkedin-in").addEventListener("blur", ()=>{ const bad = !validLinkedIn($("prof-linkedin-in").value.trim()); showErr("err-prof-linkedin", bad); showErr("err-prof-linkedin-ur", bad); });
+  $("prof-scholar-in").addEventListener("blur", ()=>{ const bad = !validScholar($("prof-scholar-in").value.trim()); showErr("err-prof-scholar", bad); showErr("err-prof-scholar-ur", bad); });
+  $("prof-cvlink-in").addEventListener("blur", ()=>{ const v = $("prof-cvlink-in").value.trim(); const bad = !!v && !cvLinkInfo(v).ok; showErr("err-prof-cvlink", bad); showErr("err-prof-cvlink-ur", bad); });
 
   /* ---- Admin ---- */
   $("adm-search").addEventListener("input", renderAdminMembers);
+  $("adm-members").addEventListener("change", e => {
+    const t = e.target; if(!t || !t.dataset || !t.dataset.idv) return;
+    const u = DB.users.find(x => x.email === t.dataset.idv); if(!u) return;
+    u.identityVerified = !!t.checked;
+    persist(); if(FB) FB.saveUser(u);
+    toast(t.checked ? ("Identity verified for " + u.name + ".") : ("Identity verification removed for " + u.name + "."));
+  });
+  $("adm-members").addEventListener("click", e => {
+    const t = e.target; if(!t || !t.dataset || !t.dataset.cvdl) return;
+    e.preventDefault();
+    const u = DB.users.find(x => x.email === t.dataset.cvdl); if(!u || !u.identity || !u.identity.cvData) return;
+    const a = document.createElement("a");
+    a.href = u.identity.cvData; a.download = u.identity.cvName || "CV"; a.click();
+  });
   $("adm-export").addEventListener("click", ()=>{
     const rows = [["Name","Email","University","Department","Degree","Country","City","WhatsApp","Status","Registered","Gates complete"].join(",")];
     DB.users.filter(u => u.role !== "admin").forEach(u => rows.push([u.name,u.email,u.university,u.dept,u.degree,u.country,u.city,u.whatsapp,u.status,fmtDate(u.createdAt),accessComplete(u)?"Yes":"No"].map(x => '"' + String(x||"").replace(/"/g,'""') + '"').join(",")));

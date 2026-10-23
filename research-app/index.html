@@ -213,7 +213,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .res-item .inf{flex:1;min-width:0}
 .res-item .nm{font-weight:700;color:var(--navy);font-size:16px}
 .res-item .ds{font-size:14px;color:var(--mut);line-height:1.55}
-.res-item a.open{
+.res-item .open{
   flex:0 0 auto;background:var(--navy);color:#fff;text-decoration:none;font-size:14px;font-weight:600;
   border-radius:9px;padding:9px 13px;min-height:44px;display:inline-flex;align-items:center;
 }
@@ -300,6 +300,14 @@ html[data-layout="web"] .tile-grid.cols3{grid-template-columns:repeat(3,1fr)}
 .tile .ic{font-size:26px;line-height:1.25}
 .tile b{font-size:14.5px;color:var(--navy);line-height:1.3}
 .tile .sub{font-size:11.5px;color:var(--mut);line-height:1.35}
+.disc-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+.disc-grid .tile{min-height:88px;padding:9px 5px 8px;border-top-width:2px}
+.disc-grid .tile .ic{font-size:22px}
+.disc-grid .tile b{font-size:12.75px;line-height:1.3}
+html[data-layout="web"] .disc-grid{grid-template-columns:repeat(4,1fr)}
+@media (min-width:1024px){ html[data-layout="auto"] .disc-grid{grid-template-columns:repeat(4,1fr)} }
+a.res-item{color:inherit;text-decoration:none;cursor:pointer}
+a.res-item:hover{background:#FBF8EC}
 .tile .cnt{position:absolute;top:6px;right:6px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;border-radius:10px;padding:1px 8px;line-height:1.6}
 .consult-bar{
   display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;color:#fff;
@@ -464,7 +472,8 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <input id="reg-uni" type="text" placeholder="e.g. University of Karachi">
     <div class="field-err" id="err-reg-uni">Please enter your university name.</div>
     <label for="reg-dept">Department / Faculty <span class="req">*</span></label>
-    <input id="reg-dept" type="text" placeholder="e.g. Computer Science">
+    <input id="reg-dept" type="text" list="dept-list" placeholder="e.g. Computer Science">
+    <datalist id="dept-list"><option value="Engineering"></option><option value="Medicine & Health Sciences"></option><option value="Computer Science & IT"></option><option value="Cybersecurity"></option><option value="Social Sciences"></option><option value="General Research Skills"></option><option value="Education"></option><option value="Psychology"></option><option value="Sciences"></option><option value="Law"></option><option value="Islamic Studies"></option><option value="Business & Management"></option><option value="Agriculture"></option><option value="Languages & Literature"></option><option value="Mathematics & Statistics"></option><option value="Media & Communication"></option></datalist>
     <div class="field-err" id="err-reg-dept">Please enter your department or faculty.</div>
     <label for="reg-degree">Degree level <span class="req">*</span></label>
     <select id="reg-degree">
@@ -681,7 +690,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <!-- ================= TOOLKIT ================= -->
 <section class="view" id="view-toolkit">
   <div class="topbar"><button class="tbtn" data-back="view-hub-research">‹ Back</button><div class="ttl">Research Toolkit</div><span style="width:44px"></span></div>
-  <p class="lead">Pick your discipline — where to find data, which AI tools &amp; software to use, and where to publish.</p>
+  <p class="lead">Pick your discipline. Every guide follows the same map — <b>Data · AI tools · journals</b>: where to find data, which AI tools &amp; software to use, and where to publish.</p>
   <div id="discipline-list"></div>
   <div class="group-label">Writing services</div>
   <div class="tile-grid">
@@ -1154,17 +1163,18 @@ const DISCIPLINES = [
     ["Google Scholar","Free and wide; use it to find citing papers and open-access copies.","https://scholar.google.com"]
   ],
   tools:[
-    ["MATLAB & Simulink","Industry standard for modelling, simulation and signal processing in most engineering departments."],
-    ["ANSYS","Finite-element simulation (structures, fluids, heat) — the reference tool for mechanical/civil research."],
-    ["Python (NumPy · Pandas · Matplotlib)","Free, and now expected in almost every engineering research group for data work."],
-    ["Zotero","Free reference manager — collect, cite and build your bibliography automatically."],
-    ["Elicit / SciSpace (AI)","AI assistants that search and summarise papers — always verify every claim against the original paper."]
+    ["MATLAB & Simulink","Industry standard for modelling, simulation and signal processing in most engineering departments.","https://www.mathworks.com"],
+    ["ANSYS","Finite-element simulation (structures, fluids, heat) — the reference tool for mechanical/civil research.","https://www.ansys.com"],
+    ["Python (NumPy · Pandas · Matplotlib)","Free, and now expected in almost every engineering research group for data work.","https://www.python.org"],
+    ["Zotero","Free reference manager — collect, cite and build your bibliography automatically.","https://www.zotero.org"],
+    ["Elicit (AI)","AI assistant that searches and summarises papers — always verify every claim against the original paper.","https://elicit.com"],
+    ["SciSpace (AI)","Chat with PDFs and get plain-language explanations of methods, tables and equations.","https://scispace.com"]
   ],
   publish:[
-    ["IEEE Transactions & IEEE conferences","The flagship route in most engineering sub-fields; check the Transactions title for your specialisation."],
-    ["ASME Journals","The standard home for mechanical engineering research."],
-    ["Elsevier / Springer field journals","Pick by Scopus ranking (CiteScore) inside your exact topic, not by name alone."],
-    ["Before submitting","Verify the journal is indexed in Scopus — use the Scopus Sources list, never an email invitation."]
+    ["IEEE Transactions & IEEE conferences","The flagship route in most engineering sub-fields; check the Transactions title for your specialisation.","https://www.ieee.org"],
+    ["ASME Journals","The standard home for mechanical engineering research.","https://asmedigitalcollection.asme.org"],
+    ["Elsevier / Springer field journals","Pick by Scopus ranking (CiteScore) inside your exact topic, not by name alone.","https://www.springer.com"],
+    ["Before submitting","Verify the journal is indexed in Scopus — use the Scopus Sources list, never an email invitation.","https://www.scopus.com/sources"]
   ]},
 { id:"medicine", icon:"🩺", name:"Medicine & Health Sciences",
   data:[
@@ -1174,17 +1184,22 @@ const DISCIPLINES = [
     ["Embase (via library)","Stronger than PubMed for pharmacology and European journals; usually through your university library.","https://www.embase.com"]
   ],
   tools:[
-    ["SPSS / R","SPSS is the department workhorse; R is free and stronger for advanced statistics — learn one deeply."],
-    ["Covidence / Rayyan","Screening tools for systematic reviews — Rayyan has a free tier and speeds up title/abstract screening."],
-    ["NVivo / ATLAS.ti","For qualitative health research — interviews, focus groups, thematic analysis."],
-    ["Zotero / EndNote","Reference managers; EndNote is common in medical schools, Zotero is free."],
+    ["SPSS","The department workhorse for clinical and survey statistics.","https://www.ibm.com/products/spss-statistics"],
+    ["R","Free and stronger for advanced statistics — learn one of the two deeply.","https://www.r-project.org"],
+    ["Covidence","The standard screening tool for systematic reviews, from title/abstract to full text.","https://www.covidence.org"],
+    ["Rayyan","AI-assisted review screening with a free tier — speeds up title/abstract decisions.","https://www.rayyan.ai"],
+    ["NVivo","For qualitative health research — interviews, focus groups, thematic analysis.","https://lumivero.com"],
+    ["ATLAS.ti","The other major qualitative suite — equally at home with health interviews and documents.","https://atlasti.com"],
+    ["Zotero","Free reference manager; EndNote is common in medical schools, Zotero is free and open.","https://www.zotero.org"],
+    ["EndNote","The reference manager many medical schools standardise on.","https://endnote.com"],
     ["PRISMA & CONSORT checklists","Reporting guidelines — reviewers expect them; use the right one for your study design.","https://www.equator-network.org"]
   ],
   publish:[
-    ["The Lancet · BMJ · JAMA · NEJM","The top general medical journals — highly competitive; aim here only with strong, novel results."],
-    ["PLOS Medicine / BMC journals","Respected open-access routes with rigorous peer review."],
+    ["The Lancet · BMJ · JAMA · NEJM","The top general medical journals — highly competitive; aim here only with strong, novel results.","https://www.thelancet.com"],
+    ["PLOS Medicine","Respected open-access route with rigorous peer review.","https://plos.org"],
+    ["BMC journals","A large family of open-access journals across medicine and biology.","https://www.biomedcentral.com"],
     ["Your specialty's society journal","Often the most realistic high-quality target — find it via Scopus ranking in your specialty."],
-    ["Before submitting","Confirm indexing in PubMed/Scopus and beware predatory look-alike journals (Think. Check. Submit.)."]
+    ["Before submitting","Confirm indexing in PubMed/Scopus and beware predatory look-alike journals (Think. Check. Submit.).","https://thinkchecksubmit.org"]
   ]},
 { id:"cs", icon:"💻", name:"Computer Science & IT",
   data:[
@@ -1195,16 +1210,16 @@ const DISCIPLINES = [
     ["Semantic Scholar","Free AI-assisted search with citation graphs and paper summaries.","https://www.semanticscholar.org"]
   ],
   tools:[
-    ["Python + Jupyter / Google Colab","The default research stack for data and ML experiments; Colab gives free GPUs."],
-    ["GitHub","Version control and public code — reviewers increasingly expect a code link with your paper."],
-    ["Overleaf (LaTeX)","How CS papers are written — most venues provide LaTeX templates; Overleaf makes it painless."],
-    ["AI coding assistants (Claude / ChatGPT / Copilot)","Useful for boilerplate and debugging — you must understand and test every line you submit."]
+    ["Python + Jupyter / Google Colab","The default research stack for data and ML experiments; Colab gives free GPUs.","https://jupyter.org"],
+    ["GitHub","Version control and public code — reviewers increasingly expect a code link with your paper.","https://github.com"],
+    ["Overleaf (LaTeX)","How CS papers are written — most venues provide LaTeX templates; Overleaf makes it painless.","https://www.overleaf.com"],
+    ["AI coding assistants (Claude / ChatGPT / Copilot)","Useful for boilerplate and debugging — you must understand and test every line you submit.","https://github.com/features/copilot"]
   ],
   publish:[
-    ["Top conferences are the prize","In CS, leading conferences (e.g. NeurIPS, ICML, ACL, CVPR, and the ACM/IEEE venues of your sub-field) outrank most journals."],
-    ["ACM / IEEE Transactions","For extended journal versions of strong conference work."],
-    ["ACM Computing Surveys","High-impact survey journal — for comprehensive literature reviews."],
-    ["Before submitting","Check the venue's ranking (CORE for conferences) and its official site — fake 'IEEE conferences' exist."]
+    ["Top conferences are the prize","In CS, leading conferences (e.g. NeurIPS, ICML, ACL, CVPR, and the ACM/IEEE venues of your sub-field) outrank most journals.","https://portal.core.edu.au/conf-ranks/"],
+    ["ACM / IEEE Transactions","For extended journal versions of strong conference work.","https://dl.acm.org"],
+    ["ACM Computing Surveys","High-impact survey journal — for comprehensive literature reviews.","https://dl.acm.org"],
+    ["Before submitting","Check the venue's ranking (CORE for conferences) and its official site — fake 'IEEE conferences' exist.","https://portal.core.edu.au/conf-ranks/"]
   ]},
 { id:"cyber", icon:"🛡️", name:"Cybersecurity",
   data:[
@@ -1214,16 +1229,16 @@ const DISCIPLINES = [
     ["NIST Publications & NVD","Official standards, guidelines and the National Vulnerability Database — primary sources, not blogs.","https://www.nist.gov"]
   ],
   tools:[
-    ["Wireshark & tcpdump","Packet analysis fundamentals — expected in any network-security study."],
-    ["Kali Linux toolset","The standard lab environment for penetration-testing research; use only in your own lab."],
-    ["Ghidra","NSA's free reverse-engineering framework for malware and binary analysis."],
-    ["Python (Scapy, PyShark)","For custom experiments, fuzzing and traffic analysis."],
+    ["Wireshark & tcpdump","Packet analysis fundamentals — expected in any network-security study.","https://www.wireshark.org"],
+    ["Kali Linux toolset","The standard lab environment for penetration-testing research; use only in your own lab.","https://www.kali.org"],
+    ["Ghidra","NSA's free reverse-engineering framework for malware and binary analysis.","https://ghidra-sre.org"],
+    ["Python (Scapy, PyShark)","For custom experiments, fuzzing and traffic analysis.","https://scapy.net"],
     ["Ethics first","Test only systems you own or have written permission for — this is both law and research ethics."]
   ],
   publish:[
-    ["IEEE Symposium on Security & Privacy · USENIX Security · ACM CCS · NDSS","The 'big four' security conferences — the field's highest prestige."],
-    ["IEEE Transactions on Information Forensics & Security","The leading journal route for security research."],
-    ["Computers & Security (Elsevier)","A well-established journal welcoming applied and socio-technical security work."],
+    ["IEEE Symposium on Security & Privacy · USENIX Security · ACM CCS · NDSS","The 'big four' security conferences — the field's highest prestige.","https://www.ieee-security.org"],
+    ["IEEE Transactions on Information Forensics & Security","The leading journal route for security research.","https://signalprocessingsociety.org"],
+    ["Computers & Security (Elsevier)","A well-established journal welcoming applied and socio-technical security work.","https://www.sciencedirect.com/journal/computers-and-security"],
     ["Before submitting","Venues in this field are heavily impersonated — submit only via the official conference site."]
   ]},
 { id:"social", icon:"🌍", name:"Social Sciences",
@@ -1234,16 +1249,21 @@ const DISCIPLINES = [
     ["Scopus / Web of Science","For mapping a field, citation tracking and choosing target journals.","https://www.scopus.com"]
   ],
   tools:[
-    ["SPSS / Stata / R","Quantitative workhorses — Stata dominates economics & policy, SPSS education & psychology, R is free."],
-    ["NVivo / ATLAS.ti / MAXQDA","Qualitative analysis — code interviews and documents systematically instead of by hand."],
-    ["Zotero","Free referencing with excellent browser capture for articles, reports and web sources."],
-    ["Elicit / Consensus (AI)","AI literature-search assistants — good for scoping; verify every source yourself."]
+    ["Stata","The quantitative workhorse of economics and policy research.","https://www.stata.com"],
+    ["SPSS","The standard in education and psychology departments for survey data.","https://www.ibm.com/products/spss-statistics"],
+    ["R","Free, and the most reproducible route for quantitative work.","https://www.r-project.org"],
+    ["NVivo","Qualitative analysis — code interviews and documents systematically instead of by hand.","https://lumivero.com"],
+    ["ATLAS.ti","The other major qualitative suite — strong on multilingual and team projects.","https://atlasti.com"],
+    ["MAXQDA","Qualitative and mixed-methods analysis with built-in statistics.","https://www.maxqda.com"],
+    ["Zotero","Free referencing with excellent browser capture for articles, reports and web sources.","https://www.zotero.org"],
+    ["Elicit (AI)","AI literature-search assistant — good for scoping; verify every source yourself.","https://elicit.com"],
+    ["Consensus (AI)","Ask a question and get answers drawn from real papers — a starting point, never the final word.","https://consensus.app"]
   ],
   publish:[
     ["Your field's flagship journals","Find them by Scopus/SJR ranking within your exact subject — prestige is field-specific in social sciences."],
-    ["Nature Human Behaviour","Top interdisciplinary venue for behavioural and social research."],
-    ["PLOS ONE","Rigorous, broad-scope open-access journal — a solid first target for sound empirical work."],
-    ["Before submitting","Check DOAJ for open-access legitimacy and Think. Check. Submit. before paying any fee."]
+    ["Nature Human Behaviour","Top interdisciplinary venue for behavioural and social research.","https://www.nature.com/nathumbehav"],
+    ["PLOS ONE","Rigorous, broad-scope open-access journal — a solid first target for sound empirical work.","https://plos.org"],
+    ["Before submitting","Check DOAJ for open-access legitimacy and Think. Check. Submit. before paying any fee.","https://doaj.org"]
   ]},
 { id:"general", icon:"🔬", name:"General Research Skills",
   data:[
@@ -1253,16 +1273,223 @@ const DISCIPLINES = [
     ["Your university library","The most under-used resource: librarians will get you paywalled papers for free — ask them."]
   ],
   tools:[
-    ["Zotero","The reference manager to learn first — free, and it builds your bibliography in Word automatically."],
+    ["Zotero","The reference manager to learn first — free, and it builds your bibliography in Word automatically.","https://www.zotero.org"],
     ["NotebookLM (Gemini Notebook)","Upload your own sources and question them — excellent for close reading; answers stay tied to your documents.","https://notebooklm.google.com"],
-    ["Elicit · Consensus · Research Rabbit","AI tools for finding and mapping papers — a starting point, never the final word."],
-    ["ChatGPT / Claude","Brainstorming, outlining, language polishing — never for inventing data or references; disclose use where your university requires it."]
+    ["Elicit","AI search that extracts findings from papers into tables — a starting point, never the final word.","https://elicit.com"],
+    ["Consensus","Ask a research question; answers are drawn from real papers.","https://consensus.app"],
+    ["Research Rabbit","Feed it one paper and it maps the collection around it — excellent for literature reviews.","https://www.researchrabbit.ai"],
+    ["ChatGPT","Brainstorming, outlining, language polishing — never for inventing data or references.","https://chatgpt.com"],
+    ["Claude","Long documents, careful reasoning and drafting help — disclose use where your university requires it.","https://claude.ai"]
   ],
   publish:[
     ["Manual first, tools second","Learn to search, read and cite by hand first — AI on top of skill multiplies you; AI instead of skill exposes you."],
     ["Similarity & AI indexes","Universities check both. Write in your own words, cite honestly, and keep drafts — they are your proof of authorship."],
-    ["Choose journals by index, not inbox","If a 'journal' emailed you an invitation with a fee, verify it in Scopus/DOAJ before anything else."],
+    ["Choose journals by index, not inbox","If a 'journal' emailed you an invitation with a fee, verify it in Scopus/DOAJ before anything else.","https://doaj.org"],
     ["Ask here","Use Research & Writing Help in this app — proposal, thesis, article or CV, in English or اردو."]
+  ]},
+{ id:"education", icon:"🎓", name:"Education",
+  data:[
+    ["ERIC","The US education-research index — the first stop for education literature; a large share is free full text.","https://eric.ed.gov"],
+    ["JSTOR","Deep journal archive for education history, theory and policy.","https://www.jstor.org"],
+    ["Scopus","Citation tracking and journal-quality signals for education research.","https://www.scopus.com"],
+    ["APA PsycINFO","Psychology of learning, assessment and development — via APA, usually through your library.","https://www.apa.org/pubs/databases/psycinfo"],
+    ["World Bank — Education data","Enrolment, literacy and spending statistics for almost every country — free.","https://data.worldbank.org"]
+  ],
+  tools:[
+    ["SPSS","The standard statistics package in education faculties — surveys, assessment and classroom data.","https://www.ibm.com/products/spss-statistics"],
+    ["NVivo","Code interviews, focus groups and observation notes systematically.","https://lumivero.com"],
+    ["ATLAS.ti","The other major qualitative suite — strong for classroom and curriculum studies.","https://atlasti.com"],
+    ["Qualtrics","The survey platform most education faculties use for questionnaires and experiments.","https://www.qualtrics.com"],
+    ["Zotero","Free reference manager — builds your bibliography in Word as you write.","https://www.zotero.org"]
+  ],
+  publish:[
+    ["Review of Educational Research (AERA)","The field's top review journal — read it to learn what a mature literature review looks like.","https://journals.sagepub.com/home/rer"],
+    ["British Educational Research Journal (BERA)","A leading general education journal — a realistic quality target for strong empirical work.","https://bera-journals.onlinelibrary.wiley.com/journal/14693518"],
+    ["AERA journals","The American Educational Research Association's journal family — the centre of the field.","https://www.aera.net"],
+    ["Before submitting","Check the journal in Scopus and on Think. Check. Submit. before paying any fee.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"psychology", icon:"🧠", name:"Psychology",
+  data:[
+    ["APA PsycINFO","The discipline's own index — journal articles, books and dissertations in psychology.","https://www.apa.org/pubs/databases/psycinfo"],
+    ["PubMed","Essential for clinical, health and neuroscience-leaning topics.","https://pubmed.ncbi.nlm.nih.gov"],
+    ["APA PsycNet","APA's own platform — PsycINFO, PsycArticles and APA books in one search.","https://psycnet.apa.org"],
+    ["Scopus","For citation tracking and choosing target journals.","https://www.scopus.com"]
+  ],
+  tools:[
+    ["SPSS","Still the department workhorse for experimental and survey data.","https://www.ibm.com/products/spss-statistics"],
+    ["JASP","Free, open-source statistics built for psychology — point-and-click, with Bayesian methods included.","https://jasp-stats.org"],
+    ["R","Free and stronger for advanced work — psychometrics, modelling and reproducible analysis.","https://www.r-project.org"],
+    ["PsyToolkit","Free online experiments and surveys designed for psychology research and teaching.","https://www.psytoolkit.org"],
+    ["NVivo","For qualitative work — interviews, therapy transcripts, thematic analysis.","https://lumivero.com"]
+  ],
+  publish:[
+    ["American Psychologist (APA)","APA's flagship — broad, high-standard articles on the science and practice of psychology.","https://www.apa.org/pubs/journals/amp"],
+    ["Psychological Science (APS)","The flagship empirical journal of the Association for Psychological Science.","https://journals.sagepub.com/home/pss"],
+    ["Annual Review of Psychology","The review volume senior scholars write — the best map of any sub-field.","https://www.annualreviews.org/journal/psych"],
+    ["Before submitting","Verify indexing in Scopus/PsycINFO and beware look-alike 'psychology' journals that spam invitations.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"sciences", icon:"🔭", name:"Sciences",
+  data:[
+    ["Web of Science","The curated citation index for the natural sciences — quality signals universities trust.","https://www.webofscience.com"],
+    ["Scopus","Broad coverage across physics, chemistry, biology and earth sciences.","https://www.scopus.com"],
+    ["arXiv","Free preprints in physics, mathematics and related sciences — read new work months early.","https://arxiv.org"],
+    ["PubChem","The open chemistry database — compounds, properties and bioactivity data from NIH.","https://pubchem.ncbi.nlm.nih.gov"],
+    ["NASA ADS","The Astrophysics Data System — astronomy and physics literature, free to search.","https://ui.adsabs.harvard.edu"]
+  ],
+  tools:[
+    ["Python (SciPy · pandas)","The working language of data-heavy science — free, and expected in most labs.","https://www.python.org"],
+    ["R","Statistics and publication-quality figures for experimental data.","https://www.r-project.org"],
+    ["Wolfram Mathematica","Symbolic computation and modelling — strong for physics and applied mathematics.","https://www.wolfram.com/mathematica"],
+    ["OriginLab","Graphing and analysis software common in physics and chemistry labs.","https://www.originlab.com"],
+    ["Overleaf (LaTeX)","How science papers are written — journals and conferences provide the templates.","https://www.overleaf.com"]
+  ],
+  publish:[
+    ["Nature · Science","The two general-science flagships — aim here only with results of broad significance.","https://www.nature.com"],
+    ["PLOS ONE","Rigorous broad-scope open-access journal — a solid target for sound experimental work.","https://plos.org"],
+    ["Royal Society journals","The UK national academy's journals — respected homes for physics, biology and interdisciplinary work.","https://royalsocietypublishing.org"],
+    ["Before submitting","Confirm Scopus/Web of Science indexing on the journal's own site — never from an emailed invitation.","https://www.scopus.com/sources"]
+  ]},
+{ id:"law", icon:"⚖️", name:"Law",
+  data:[
+    ["HeinOnline","The great law-review archive — centuries of journals, and the standard for legal history.","https://heinonline.org"],
+    ["Westlaw (Thomson Reuters)","Cases, statutes and commentary with KeyCite citator checks — usually via your law library.","https://legal.thomsonreuters.com/en/products/westlaw"],
+    ["Lexis+ (LexisNexis)","The other major legal database — cases, legislation and commentary.","https://www.lexisnexis.com"],
+    ["Pakistan Law Site","The digital home of PLD — Pakistani case law, statutes and journals in one searchable library.","https://www.pakistanlawsite.com"],
+    ["SSRN","Working papers in law — read scholarship months before it reaches a journal.","https://www.ssrn.com"]
+  ],
+  tools:[
+    ["Zotero","Reference manager with legal citation styles (OSCOLA, Bluebook) — essential for footnoted writing.","https://www.zotero.org"],
+    ["KeyCite & Shepard's citators","Check a case is still good law before you cite it — inside Westlaw and Lexis respectively.","https://legal.thomsonreuters.com/en/products/westlaw"],
+    ["CourtListener (Free Law Project)","Free US case law and court records — useful for comparative-law work.","https://www.courtlistener.com"],
+    ["Grammarly","Language polishing — law is a writing profession, and precision is the craft.","https://www.grammarly.com"]
+  ],
+  publish:[
+    ["HEC-recognised Pakistani law journals","Find them on the HEC HJRS list — the category counts for academic jobs and promotion in Pakistan.","https://hjrs.hec.gov.pk"],
+    ["HeinOnline law reviews","University law reviews are the classic first publication for law students — browse them here.","https://heinonline.org"],
+    ["Harvard Law Review","The most cited student-edited review — read it to learn the genre's standard.","https://harvardlawreview.org"],
+    ["Before submitting","Law journals are heavily impersonated — verify on HJRS/Scopus and never pay an unknown 'journal' by personal transfer.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"islamic", icon:"🕌", name:"Islamic Studies",
+  data:[
+    ["Al-Turath Notebook — Library Hub","Mufti's linked library hub — NotebookLM collections over the classical turath: Qur'an, hadith, fiqh, seerah and more.","https://sajidzbi.github.io/Al-Turath-Notebook-LMs-Hub/index.html"],
+    ["Maktaba Shamila","The great free Arabic library — thousands of classical and modern works, fully searchable.","https://shamela.ws"],
+    ["Sunnah.com","Hadith collections in Arabic with English translation — searchable by book, number and narrator.","https://sunnah.com"],
+    ["Quranic Arabic Corpus","The Qur'an word by word — morphology, syntax and the classical grammar tradition, made searchable.","https://corpus.quran.com"],
+    ["Brill — Index Islamicus","The discipline's bibliography of record for Islamic studies worldwide — via Brill or your library.","https://brill.com"]
+  ],
+  tools:[
+    ["Maktaba Shamila (desktop & app)","Download the library and search offline — roots, phrases and cross-references across the turath.","https://shamela.ws"],
+    ["Zotero","Keep Arabic and English sources in one library; it builds your bibliography in either script.","https://www.zotero.org"],
+    ["Elicit","AI search over English-language Islamic-studies literature — verify every claim against the paper.","https://elicit.com"],
+    ["ABBYY FineReader","OCR that handles Arabic print well — turns scanned books into searchable text; proofread against the page.","https://www.abbyy.com"]
+  ],
+  publish:[
+    ["Journal of Islamic Studies (Oxford)","A leading peer-reviewed journal of the field — Islamic history, law, thought and society.","https://academic.oup.com/jis"],
+    ["Brill journals — Die Welt des Islams · Islamic Law and Society","The major European venues for Islamic studies.","https://brill.com"],
+    ["Pakistani Islamic-studies journals (HEC HJRS)","Al-Idah, Fikr-o-Nazar and their peers — check the current HJRS category before you submit.","https://hjrs.hec.gov.pk"],
+    ["Before submitting","A journal that promises publication in days for a fee is not peer review — verify first.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"business", icon:"💼", name:"Business & Management",
+  data:[
+    ["Emerald Insight","Management, marketing and business journals — a core library for business schools.","https://www.emerald.com/insight"],
+    ["EBSCO — Business Source","Business journals, company profiles and market reports in one database.","https://www.ebsco.com"],
+    ["SSRN","Working papers in management, finance and economics — see ideas before they are published.","https://www.ssrn.com"],
+    ["Statista","Market and consumer statistics for case studies and industry chapters.","https://www.statista.com"],
+    ["Scopus","Citation tracking and journal-quality signals for choosing where to publish.","https://www.scopus.com"]
+  ],
+  tools:[
+    ["SmartPLS","The standard tool for PLS-SEM — the method behind a large share of management theses.","https://www.smartpls.com"],
+    ["SPSS","Survey data workhorse in business schools — pair it with Stata for econometrics.","https://www.ibm.com/products/spss-statistics"],
+    ["NVivo","For case-study and interview-based management research.","https://lumivero.com"],
+    ["Tableau","Turn business data into the dashboards and figures examiners love.","https://www.tableau.com"],
+    ["Zotero","Free reference manager for your articles, reports and cases.","https://www.zotero.org"]
+  ],
+  publish:[
+    ["Academy of Management journals","AMJ, AMR and the Annals — the field's flagship family.","https://aom.org"],
+    ["Harvard Business Review","The practitioner flagship — read it for the questions managers actually ask.","https://hbr.org"],
+    ["ABDC Journal Quality List","The business schools' own ranking of journals — check your target's grade before submitting.","https://abdc.edu.au"],
+    ["Before submitting","Business has many pay-to-publish look-alikes — cross-check ABDC/Scopus first.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"agriculture", icon:"🌾", name:"Agriculture",
+  data:[
+    ["AGRIS (FAO)","The international index of agricultural literature — strong for developing-country research.","https://agris.fao.org"],
+    ["CAB Abstracts (CABI)","The agriculture and veterinary database of record — usually through your university library.","https://www.cabi.org"],
+    ["FAOSTAT","FAO's free statistics — crops, livestock, land and food balances for every country.","https://www.fao.org/faostat"],
+    ["Scopus","Citation tracking and a map of your topic's active research groups.","https://www.scopus.com"]
+  ],
+  tools:[
+    ["R","Field-trial design and analysis (ANOVA, mixed models) — free and fully reproducible.","https://www.r-project.org"],
+    ["SAS","The long-standing standard in agricultural statistics departments.","https://www.sas.com"],
+    ["QGIS","Free GIS — map farms, trial sites, soils and irrigation from satellite and survey data.","https://qgis.org"],
+    ["DSSAT","Crop simulation modelling — test seasons and varieties in software before the field.","https://dssat.net"],
+    ["Zotero","Reference manager for papers, FAO reports and conference proceedings.","https://www.zotero.org"]
+  ],
+  publish:[
+    ["Pakistan Journal of Agricultural Sciences (UAF)","Pakistan's flagship agriculture journal, from the University of Agriculture Faisalabad.","https://pakjas.com.pk"],
+    ["Agricultural Systems (Elsevier)","A leading international venue for farming-systems and agricultural research.","https://www.sciencedirect.com/journal/agricultural-systems"],
+    ["Pakistani agriculture journals (HEC HJRS)","Sarhad Journal of Agriculture and its peers — check the current HJRS category first.","https://hjrs.hec.gov.pk"],
+    ["Before submitting","Verify indexing in Scopus/HJRS on the journal's own site — agricultural titles are often cloned.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"languages", icon:"📖", name:"Languages & Literature",
+  data:[
+    ["JSTOR","The deep archive for literary studies — texts, criticism and language journals.","https://www.jstor.org"],
+    ["Project MUSE","Humanities journals and university-press books — strong in literature and cultural studies.","https://muse.jhu.edu"],
+    ["ProQuest — LLBA","Linguistics and Language Behavior Abstracts — the linguistics index, via your library.","https://www.proquest.com"],
+    ["Google Books","Search inside millions of books — editions, quotations and reception history.","https://books.google.com"]
+  ],
+  tools:[
+    ["Voyant Tools","Free web-based text analysis — word frequencies, trends and patterns across a corpus.","https://voyant.org"],
+    ["AntConc","Free corpus-analysis toolkit — concordances and collocations for language research.","https://www.laurenceanthony.net/software/antconc/"],
+    ["Sketch Engine","The professional corpus platform — word sketches and billion-word corpora in many languages.","https://www.sketchengine.eu"],
+    ["DeepL","The most accurate machine translator for academic prose — a drafting aid, never a ghost-writer.","https://www.deepl.com"],
+    ["Zotero","Handles MLA, Chicago and APA styles — the footnote-heavy styles of the humanities.","https://www.zotero.org"]
+  ],
+  publish:[
+    ["PMLA (MLA)","The flagship journal of literary studies, from the Modern Language Association.","https://www.cambridge.org/core/journals/pmla"],
+    ["ELT Journal (Oxford)","The leading journal for English-language teaching research and practice.","https://academic.oup.com/eltj"],
+    ["Pakistani language & literature journals (HEC HJRS)","University journals in English, Urdu and regional languages — check the HJRS category.","https://hjrs.hec.gov.pk"],
+    ["Before submitting","Literature has its own look-alike journals — verify in Scopus/MLA listings before paying anything.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"maths", icon:"➗", name:"Mathematics & Statistics",
+  data:[
+    ["MathSciNet (AMS)","Reviews and index of mathematical literature — the discipline's own database.","https://mathscinet.ams.org"],
+    ["zbMATH","The open mathematics abstracting service — free to search, strong on European literature.","https://zbmath.org"],
+    ["arXiv (math · stat)","Preprints — mathematics moves here first.","https://arxiv.org"],
+    ["Scopus","Citation tracking across mathematics, statistics and their applications.","https://www.scopus.com"]
+  ],
+  tools:[
+    ["Overleaf (LaTeX)","Mathematics is written in LaTeX — Overleaf is the painless way to learn and collaborate.","https://www.overleaf.com"],
+    ["MATLAB","Numerical computing for applied mathematics and statistics.","https://www.mathworks.com"],
+    ["R","The statistics language — free, and the medium of modern statistical research.","https://www.r-project.org"],
+    ["GeoGebra","Free interactive geometry and algebra — excellent for teaching-linked research.","https://www.geogebra.org"],
+    ["Wolfram Mathematica","Symbolic computation — manipulate the formulas themselves, not just numbers.","https://www.wolfram.com/mathematica"]
+  ],
+  publish:[
+    ["SIAM journals","The Society for Industrial and Applied Mathematics — applied mathematics and computation.","https://www.siam.org"],
+    ["AMS journals","The American Mathematical Society's journal family — pure and applied.","https://www.ams.org"],
+    ["Institute of Mathematical Statistics journals","Annals of Statistics and Annals of Probability — the statistics flagships.","https://imstat.org"],
+    ["Before submitting","Mathematics has few predatory titles but many clones — submit only from the society's own site.","https://thinkchecksubmit.org"]
+  ]},
+{ id:"media", icon:"🎙️", name:"Media & Communication",
+  data:[
+    ["EBSCO — Communication & Mass Media Complete","The media-studies index — journals in communication, journalism and film.","https://www.ebsco.com"],
+    ["JSTOR","Film, media history and cultural-studies archives.","https://www.jstor.org"],
+    ["Reuters Institute","Oxford's research centre for journalism — its Digital News Report is the industry's reference data.","https://reutersinstitute.politics.ox.ac.uk"],
+    ["Scopus","For mapping the field and choosing target journals.","https://www.scopus.com"]
+  ],
+  tools:[
+    ["NVivo","Code interviews, focus groups and media texts — the qualitative standard in media research.","https://lumivero.com"],
+    ["ATLAS.ti","Qualitative analysis with strong multimedia support — video, audio and social posts.","https://atlasti.com"],
+    ["MAXQDA","Mixed-methods analysis — combines text coding with statistics in one workspace.","https://www.maxqda.com"],
+    ["SPSS","Audience surveys and content-analysis counts — the department standard.","https://www.ibm.com/products/spss-statistics"],
+    ["Audacity","Free audio editing — for podcast, radio and oral-history research outputs.","https://www.audacityteam.org"],
+    ["Zotero","Captures articles, reports and web sources with one click — vital in a fast-moving field.","https://www.zotero.org"]
+  ],
+  publish:[
+    ["Journal of Communication (ICA)","The flagship of the International Communication Association.","https://academic.oup.com/joc"],
+    ["Media, Culture & Society (Sage)","A leading critical media-studies journal.","https://journals.sagepub.com/home/mcs"],
+    ["Pakistani media & communication journals (HEC HJRS)","University journals in mass communication — check the current HJRS category.","https://hjrs.hec.gov.pk"],
+    ["Before submitting","Verify in Scopus/DOAJ — media titles are frequent targets for clone journals.","https://thinkchecksubmit.org"]
   ]}
 ];
 
@@ -1814,7 +2041,17 @@ function disciplineOf(u){
   if(/comput|software|information technology|\bit\b|data science|artificial intelligence/.test(t)) return "cs";
   if(/medic|health|nurs|pharm|dental|clinic|biochem|biotech|physiother/.test(t)) return "medicine";
   if(/engineer|mechanical|electrical|civil|mechatron/.test(t)) return "engineering";
-  if(/social|psycholog|sociolog|education|economics|business|management|commerce|law|media|communication|islamic|arabic|history|political|finance|account/.test(t)) return "social";
+  if(/psycholog/.test(t)) return "psychology";
+  if(/\blaw\b|legal studies|ll\.?b/.test(t)) return "law";
+  if(/islamic|shariah|sharia|quran|hadith|islamiyat/.test(t)) return "islamic";
+  if(/education|pedagog|curriculum/.test(t)) return "education";
+  if(/agricultur|agronom|horticultur|veterinary|animal science|livestock|crop/.test(t)) return "agriculture";
+  if(/business|management|commerce|finance|account|marketing|entrepreneur/.test(t)) return "business";
+  if(/mathemat|statistic/.test(t)) return "maths";
+  if(/media|communication|journalis/.test(t)) return "media";
+  if(/language|literature|linguist|\barabic\b|\benglish\b|\burdu\b/.test(t)) return "languages";
+  if(/social|sociolog|history|political|economics|anthropolog|international relations/.test(t)) return "social";
+  if(/biolog|chemistry|physics|environment|geolog|botany|zoolog|science/.test(t)) return "sciences";
   return "general";
 }
 function renderWork(){
@@ -2125,10 +2362,9 @@ function renderHome(){
   renderTopStrip();
 }
 function renderDisciplines(){
-  document.getElementById("discipline-list").innerHTML = '<div class="tile-grid cols3">' + DISCIPLINES.map(d =>
+  document.getElementById("discipline-list").innerHTML = '<div class="tile-grid disc-grid">' + DISCIPLINES.map(d =>
     '<button class="tile" data-disc="' + d.id + '">'
-    + '<span class="ic">' + d.icon + '</span><b>' + esc(d.name) + '</b>'
-    + '<span class="sub">Data · AI tools · journals</span></button>'
+    + '<span class="ic">' + d.icon + '</span><b>' + esc(d.name) + '</b></button>'
   ).join("") + '</div>';
   document.querySelectorAll("[data-disc]").forEach(b => b.addEventListener("click", ()=>{
     const id = b.dataset.disc;
@@ -2137,10 +2373,13 @@ function renderDisciplines(){
   }));
 }
 function resBlock(title, items){
-  return '<div class="card accent"><h3>' + title + '</h3>' + items.map(it =>
-    '<div class="res-item"><div class="inf"><div class="nm">' + esc(it[0]) + '</div><div class="ds">' + esc(it[1]) + '</div></div>'
-    + (it[2] ? '<a class="open" href="' + esc(it[2]) + '" target="_blank" rel="noopener">Open ↗</a>' : '')
-    + '</div>').join("") + '</div>';
+  return '<div class="card accent"><h3>' + title + '</h3>' + items.map(it => {
+    const inner = '<div class="inf"><div class="nm">' + esc(it[0]) + '</div><div class="ds">' + esc(it[1]) + '</div></div>'
+      + (it[2] ? '<span class="open">Open ↗</span>' : '');
+    return it[2]
+      ? '<a class="res-item" href="' + esc(it[2]) + '" target="_blank" rel="noopener">' + inner + '</a>'
+      : '<div class="res-item">' + inner + '</div>';
+  }).join("") + '</div>';
 }
 function renderDiscipline(id){
   const d = DISCIPLINES.find(x => x.id === id) || DISCIPLINES[0];

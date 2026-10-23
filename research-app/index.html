@@ -3369,6 +3369,15 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       await setDoc(doc(db, "users", u.id), clean({ certificates: u.certificates }), { merge:true });
     }
     async function startFor(user){
+      /* Always re-read the account and force a fresh ID token BEFORE any
+         routing or promotion decision. The persisted session's token is
+         minted at sign-in: a member who clicks the verification link in a
+         mail app (a different context) stays "unverified" as far as this
+         client and the Firestore rules (which read the token claim) are
+         concerned — the promotion write was denied and the member looped
+         on the verify screen forever. Reload + getIdToken(true) fixes the
+         claim everywhere this flow runs (startup, sign-in, Continue). */
+      try{ await user.reload(); await user.getIdToken(true); }catch(e){}
       const isAdmin = await fetchIsAdmin(user.email);
       let doc = await fetchUser(user.uid);
       if(isAdmin){ if(doc){ doc.role = "admin"; } else { doc = { id:user.uid, role:"admin", status:"approved", name:"Admin", email:user.email, gates:{group:true,channel:true}, identity:{}, createdAt:new Date().toISOString() }; } }
@@ -3425,7 +3434,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       async signOut(){ stopSubs(); try{ await authMod.signOut(auth); }catch(e){} },
       async refreshMe(){ const u = auth.currentUser; return u ? startFor(u) : null; },
       async resendVerification(){ const u = auth.currentUser; if(!u) throw new Error("Not signed in."); await authMod.sendEmailVerification(u); },
-      async checkVerified(){ const u = auth.currentUser; if(!u) return null; try{ await u.reload(); }catch(e){} return startFor(u); },
+      async checkVerified(){ const u = auth.currentUser; if(!u) return null; try{ await u.reload(); await u.getIdToken(true); }catch(e){} return startFor(u); },
       async claimMemberId(u){ await claimMemberId(u); },
       async claimCertId(u, cert){ await claimCertId(u, cert); },
       _performers: null,

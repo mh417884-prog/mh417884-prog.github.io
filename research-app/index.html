@@ -641,6 +641,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <button class="tile" data-opp="scholarship"><span class="cnt" id="cnt-scholarships">0</span><span class="ic">🎓</span><b>Scholarships</b><span class="sub">Fully funded, worldwide</span></button>
     <button class="tile" data-opp="conference"><span class="cnt" id="cnt-conferences">0</span><span class="ic">🎤</span><b>Conferences</b><span class="sub">Incl. fully funded</span></button>
     <button class="tile" data-opp="news"><span class="cnt" id="cnt-news">0</span><span class="ic">📰</span><b>News</b><span class="sub">Announcements</span></button>
+    <button class="tile" data-opp="saved"><span class="cnt" id="cnt-saved">0</span><span class="ic">★</span><b>Saved</b><span class="sub">Your shortlist</span></button>
   </div>
 </section>
 <!-- ================= HUB: RESEARCH ================= -->
@@ -668,14 +669,6 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <!-- ================= OPPORTUNITIES ================= -->
 <section class="view" id="view-opps">
   <div class="topbar"><button class="tbtn" data-back="view-hub-opps">‹ Back</button><div class="ttl" id="opps-title">Opportunities</div><span style="width:44px"></span></div>
-  <div class="tabs" id="opps-tabs">
-    <button class="tab" data-tab="job">💼 Jobs &amp; Internships</button>
-    <button class="tab" data-tab="scholarship">🎓 Scholarships</button>
-    <button class="tab" data-tab="conference">🎤 Conferences</button>
-    <button class="tab" data-tab="news">📰 News</button>
-    <button class="tab" data-tab="saved">★ Saved</button>
-    <button class="tab" data-tab="all">All</button>
-  </div>
   <p class="small" id="opps-intro"></p>
   <div id="opps-list"></div>
   <div class="card" id="opps-schol-help" hidden>
@@ -1305,12 +1298,11 @@ function withSources(docs){
   return docs.concat(sourceDocs().filter(sc => !ids[sc.id]));
 }
 const CAT_INTRO = {
- job:"Real postings appear here as Mufti verifies them. Meanwhile, search these trusted boards — they are where genuine openings live:",
+ job:"Verified postings from Mufti, plus the trusted boards where genuine openings live — check both:",
  scholarship:"Announcements appear here as they open. These official portals are the sources to trust — never pay an 'agent' for a scholarship form:",
- conference:"Fully funded and academic conferences are posted here as announced. Until then:",
+ conference:"Fully funded and academic conferences, plus the portals worth watching:",
  news:"Announcements from Mufti and the Learn with Mufti Hassan team.",
- saved:"Your personal shortlist — everything you marked with ☆ Save. Saved posts also raise your My Progress score.",
- all:"Everything — jobs, scholarships, conferences and news, newest first."
+ saved:"Your personal shortlist — everything you marked with ☆ Save. Saved posts also raise your My Progress score."
 };
 
 /* =====================================================================
@@ -1860,7 +1852,7 @@ function workTargets(w, disc){
     write:{ key:"write", icon:"📝", title:"Write it up properly — Write & Export", body:"Draft the next piece in structured sections and download a formatted Word file.", btn:"Open Write & Export", act:"write" },
     learn:{ key:"learn", icon:"🎓", title:"Keep levelling up — free learning", body:"The Global Student Hub lists trusted free courses and channels for your field.", btn:"Open Global Student Hub", act:"hub" },
     disc:{ key:"disc", icon:"🧭", title:"Go deeper — your discipline guide", body:"Data sources, AI tools and journals for " + dn + ", all in one page.", btn:"Open my discipline guide", act:"disc" },
-    all:{ key:"all", icon:"🧭", title:"Browse everything — Opportunities", body:"Jobs, scholarships, conferences and news in one feed.", btn:"Open Opportunities", act:"opps:all" }
+    all:{ key:"all", icon:"🧭", title:"Explore Opportunities", body:"Jobs, scholarships, conferences and news — each in its own box.", btn:"Open Opportunities", act:"oppshub" }
   };
   let keys;
   if(ty === "Research paper" || ty === "Article") keys = ["publish", "conf", "help"];
@@ -1900,7 +1892,8 @@ function recGo(act){
     if(ME.role === "student" && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
     renderDiscipline(id); showView("view-discipline"); return;
   }
-  if(act.indexOf("opps:") === 0){ renderOpps(act.slice(5)); showView("view-opps"); return; }
+  if(act.indexOf("opps:") === 0){ const c = act.slice(5); if(CAT_LABEL[c]){ renderOpps(c); showView("view-opps"); } else { showView("view-hub-opps"); } return; }
+  if(act === "oppshub"){ showView("view-hub-opps"); return; }
   if(act === "help"){ btnHelp("view-work"); return; }
   if(act === "write"){ WRITE_BACK = "view-work"; showView("view-write"); return; }
   if(act === "hub"){ showView("view-hub"); return; }
@@ -2084,9 +2077,9 @@ function attachOppListeners(){
   document.querySelectorAll("#opps-list [data-view]").forEach(b => b.addEventListener("click", ()=> trackOppView(b.dataset.view)));
 }
 function renderOpps(cat){
+  if(!CAT_LABEL[cat]) cat = "news";   /* no mixed "All" view — each category screen shows its own type only */
   OPP_CAT = cat;
-  document.querySelectorAll("#opps-tabs .tab").forEach(t => t.classList.toggle("on", t.dataset.tab === cat));
-  document.getElementById("opps-title").textContent = cat === "all" ? "All Opportunities" : CAT_LABEL[cat];
+  document.getElementById("opps-title").textContent = CAT_LABEL[cat];
   document.getElementById("opps-intro").textContent = CAT_INTRO[cat] || "";
   document.getElementById("opps-schol-help").hidden = (cat !== "scholarship");
   let items = DB.news.slice().sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -2098,7 +2091,7 @@ function renderOpps(cat){
     attachOppListeners();
     return;
   }
-  if(cat !== "all") items = items.filter(n => catOf(n) === cat);
+  items = items.filter(n => catOf(n) === cat);
   const posts = items.filter(n => n.kind !== "source"), srcs = items.filter(n => n.kind === "source");
   document.getElementById("opps-list").innerHTML =
     (posts.map(oppCard).join("") || "")
@@ -2116,6 +2109,7 @@ function renderHome(){
   document.getElementById("cnt-scholarships").textContent = c("scholarship");
   document.getElementById("cnt-conferences").textContent = c("conference");
   document.getElementById("cnt-news").textContent = c("news");
+  document.getElementById("cnt-saved").textContent = ((ME.activity && ME.activity.oppsSaved) || []).length;
   const un = unreadCount(), b = document.getElementById("home-bell-badge");
   b.hidden = un === 0; b.textContent = un > 9 ? "9+" : un;
   const tn = document.getElementById("tile-notif-cnt");
@@ -2999,9 +2993,6 @@ function wire(){
   $("about-layout-btn").addEventListener("click", cycleLayout);
   $("about-back").addEventListener("click", ()=> showView(NAV_BACK["view-about"] || "view-hub-more"));
   $("notif-back").addEventListener("click", ()=> showView(NAV_BACK["view-notifications"] || "view-hub-space"));
-
-  /* ---- Opportunities tabs ---- */
-  document.querySelectorAll("#opps-tabs .tab").forEach(t => t.addEventListener("click", ()=> renderOpps(t.dataset.tab)));
 
   /* ---- Toolkit / help ---- */
   $("toolkit-help-btn").addEventListener("click", ()=> btnHelp("view-toolkit"));

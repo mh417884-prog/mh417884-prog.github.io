@@ -698,11 +698,15 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <button class="tile" id="toolkit-write-btn"><span class="ic">📝</span><b>Write &amp; Export</b><span class="sub">Article / synopsis → Word file</span></button>
   </div>
   <h3>📚 Islamic &amp; Heritage Sources</h3>
-  <div class="card">
-    <p class="small">For Islamic-studies topics and classical sources, these two libraries remain invaluable:</p>
-    <a class="btn ghost" id="toolkit-alturath" href="#" target="_blank" rel="noopener">Al-Turath Notebook — Library Hub</a>
-    <a class="btn ghost" href="https://shamela.ws" target="_blank" rel="noopener">Maktaba Shamila — shamela.ws</a>
-  </div>
+  <button class="tile" id="toolkit-islamic-btn" style="width:100%"><span class="ic">📚</span><b>Islamic Sources</b><span class="sub">Al-Turath · Shamila · Sunnah · Qur'an</span></button>
+</section>
+
+<!-- ================= ISLAMIC SOURCES ================= -->
+<section class="view" id="view-islamic">
+  <div class="topbar"><button class="tbtn" id="islamic-back">‹ Back</button><div class="ttl">Islamic Sources</div><span style="width:44px"></span></div>
+  <p class="lead">The classical libraries for Islamic-studies research — each one opens directly. No lists inside lists.</p>
+  <div id="islamic-body"></div>
+  <button class="btn ghost" id="islamic-disc-btn" style="width:100%">More databases &amp; journals for Islamic Studies →</button>
 </section>
 
 <!-- ================= DISCIPLINE ================= -->
@@ -2754,6 +2758,21 @@ async function downloadIdCardPNG(){
   toast("ID card downloaded.");
 }
 
+/* ================= Islamic Sources — dedicated screen (single-open) ================= */
+const ISLAMIC_SOURCES = [
+  ["Al-Turath NotebookLM Hub","Mufti's linked library hub — NotebookLM collections over the classical turath: Qur'an, hadith, fiqh, seerah and more.", ALTURATH_HUB_URL],
+  ["Maktaba Shamila","The great free Arabic library — thousands of classical and modern works, fully searchable.","https://shamela.ws"],
+  ["Sunnah.com","Hadith collections in Arabic with English translation — searchable by book, number and narrator.","https://sunnah.com"],
+  ["Quranic Arabic Corpus","The Qur'an word by word — morphology, syntax and the classical grammar tradition, made searchable.","https://corpus.quran.com"],
+  ["Brill — Index Islamicus","The discipline's bibliography of record for Islamic studies worldwide — via Brill or your library.","https://brill.com"]
+];
+let ISLAMIC_BACK = "view-hub-research";
+function openIslamic(from){ ISLAMIC_BACK = from || "view-hub-research"; renderIslamic(); showView("view-islamic"); }
+function renderIslamic(){
+  const el = $("islamic-body"); if(!el) return;
+  el.innerHTML = resBlock("📚 Islamic & Heritage Sources", ISLAMIC_SOURCES);
+}
+
 /* ================= WRITING HELP — SELF-HELP (playlist · tools · guide) ================= */
 const HELP_TOOLS = [
   ["NotebookLM","Read and question your own PDFs — every answer stays tied to your sources.","https://notebooklm.google.com"],
@@ -3083,7 +3102,6 @@ function wire(){
   $("about-website-btn").href = WEBSITE_URL;
   $("about-playlist-btn").href = YT_PLAYLIST_URL;
   $("adm-drive-link").href = DRIVE_FOLDER_URL;
-  $("toolkit-alturath").href = ALTURATH_HUB_URL;
   $("welcome-register-btn").addEventListener("click", ()=> showView("view-register"));
   $("welcome-login-btn").addEventListener("click", ()=> showView("view-login"));
   const toggleInfoPanel = (btnId, panelId)=>{
@@ -3236,7 +3254,13 @@ function wire(){
   $("hub-more-btn").addEventListener("click", ()=> showView("view-hub-more"));
   document.querySelectorAll("[data-opp]").forEach(b => b.addEventListener("click", ()=>{ renderOpps(b.dataset.opp); showView("view-opps"); }));
   $("home-toolkit-btn").addEventListener("click", ()=> showView("view-toolkit"));
-  $("home-heritage-btn").addEventListener("click", ()=> showView("view-toolkit"));
+  $("home-heritage-btn").addEventListener("click", ()=> openIslamic("view-hub-research"));
+  $("toolkit-islamic-btn").addEventListener("click", ()=> openIslamic("view-toolkit"));
+  $("islamic-back").addEventListener("click", ()=> showView(ISLAMIC_BACK));
+  $("islamic-disc-btn").addEventListener("click", ()=>{
+    if(ME && ME.role === "student" && !ME.activity.guidesOpened.includes("islamic")){ ME.activity.guidesOpened.push("islamic"); touch(); }
+    renderDiscipline("islamic"); showView("view-discipline");
+  });
   $("home-help-btn").addEventListener("click", ()=> btnHelp("view-hub-research"));
   $("home-write-btn").addEventListener("click", ()=> { WRITE_BACK = "view-hub-research"; showView("view-write"); });
   $("home-profile-btn").addEventListener("click", ()=> showView("view-profile"));

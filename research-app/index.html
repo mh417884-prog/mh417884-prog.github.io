@@ -1551,6 +1551,27 @@ const CAT_KEYS = ["job", "scholarship", "conference", "news"];
 /* The stored `cat` field is the ONE authoritative category of an item.
    Anything missing or unknown is treated as News (never dropped). */
 function catOf(n){ return CAT_KEYS.indexOf(n && n.cat) >= 0 ? n.cat : "news"; }
+/* Expiry (added 2026-10-24, Mufti's instruction — same rule as the Ilmi app):
+   an opportunity whose deadline has passed disappears from every student
+   list on its own; the nightly automation also purges it from the database.
+   expiresAt (ISO date) is the automation's authoritative field; for posts
+   without it, the displayed deadline text ("28 October 2026") is parsed.
+   An item stays visible ON its deadline day and goes the day after.
+   No parseable date = evergreen (stays). Source cards never expire. */
+function expiryEndOf(n){
+  if(!n || n.kind === "source") return null;
+  if(n.expiresAt){
+    const t = Date.parse(String(n.expiresAt).slice(0,10) + "T23:59:59");
+    if(!isNaN(t)) return t;
+  }
+  const dl = String(n.deadline || "").trim();
+  if(!dl) return null;
+  const t = Date.parse(dl);
+  if(isNaN(t)) return null;
+  return t + 86399999; /* end of the deadline day */
+}
+function notExpired(n){ const e = expiryEndOf(n); return e === null || Date.now() <= e; }
+function visibleNews(){ return DB.news.filter(notExpired); }
 /* The trusted-source cards are app content, not postings: they are merged
    into the feed in LIVE mode too (the demo seed already contains them),
    so every category screen shows its own sources on the live app as well. */
@@ -2358,7 +2379,7 @@ function renderOpps(cat){
   document.getElementById("opps-title").textContent = CAT_LABEL[cat];
   document.getElementById("opps-intro").textContent = CAT_INTRO[cat] || "";
   document.getElementById("opps-schol-help").hidden = (cat !== "scholarship");
-  let items = DB.news.slice().sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
+  let items = visibleNews().sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
   if(cat === "saved"){
     const savedIds = (ME && ME.activity && ME.activity.oppsSaved) || [];
     items = items.filter(n => savedIds.includes(n.id));
@@ -2380,7 +2401,7 @@ function renderHome(){
   maybeIssueCertificates();
   document.getElementById("home-hello").textContent = ME.name.split(" ")[0];
   document.getElementById("home-avatar").textContent = (ME.name || "S").trim().charAt(0).toUpperCase();
-  const c = cat => DB.news.filter(n => catOf(n) === cat).length;
+  const c = cat => visibleNews().filter(n => catOf(n) === cat).length;
   document.getElementById("cnt-jobs").textContent = c("job");
   document.getElementById("cnt-scholarships").textContent = c("scholarship");
   document.getElementById("cnt-conferences").textContent = c("conference");
@@ -2548,7 +2569,7 @@ function renderHubAccounts(){
 }
 function renderHubReminders(){
   const box = document.getElementById("hub-reminders"); if(!box || !ME) return;
-  const saved = DB.news.filter(n => ((ME.activity && ME.activity.oppsSaved) || []).includes(n.id) && n.deadline);
+  const saved = visibleNews().filter(n => ((ME.activity && ME.activity.oppsSaved) || []).includes(n.id) && n.deadline);
   box.innerHTML = saved.length
     ? saved.map(n => '<div class="notif-item"><div class="nt">⏰ ' + esc(n.title) + '</div><div>Deadline: <b>' + esc(n.deadline) + '</b></div><div class="nd">Saved by you — its reminder is in your notifications</div></div>').join("")
     : '<div class="empty">Nothing saved with a deadline yet — tap ☆ Save on an opportunity and its reminder will appear here and in your notifications.</div>';

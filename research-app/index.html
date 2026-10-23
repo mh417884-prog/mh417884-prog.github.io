@@ -120,6 +120,15 @@ p{margin-bottom:10px}
 .brk-dots{display:flex;gap:5px;align-items:center}
 .brk-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
 .brk-dot.on{background:var(--gold)}
+/* News special boxes + Malaysia/IIUM screens */
+.spec-box{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 10px;cursor:pointer}
+.spec-box .ic{font-size:26px;flex:0 0 auto}
+.spec-box b{display:block;font-size:16.5px;color:var(--navy)}
+.spec-box .sub{display:block;font-size:13.5px;color:#5B6B7E;margin-top:2px}
+.spec-box .chev{margin-left:auto;color:#9AA8B8;font-size:22px;flex:0 0 auto}
+.mysec-h{font-size:17px;color:var(--navy);margin:18px 0 8px}
+.steps-list{margin:6px 0 0;padding-left:20px}
+.steps-list li{margin-bottom:7px}
 
 /* ---------- Cards (14px radius, thin gold accent bar on section cards) ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
@@ -734,12 +743,54 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <section class="view" id="view-opps">
   <div class="topbar"><button class="tbtn" data-back="view-hub-opps">‹ Back</button><div class="ttl" id="opps-title">Opportunities</div><span style="width:44px"></span></div>
   <p class="small" id="opps-intro"></p>
+  <div id="opps-special" hidden>
+    <button class="spec-box" id="news-box-malaysia"><span class="ic">🇲🇾</span><span><b>Malaysian Universities News</b><span class="sub">Jobs, scholarships, conferences &amp; admissions in Malaysia</span></span><span class="chev">›</span></button>
+    <button class="spec-box" id="news-box-iium"><span class="ic">🎓</span><span><b>IIUM — Special</b><span class="sub">News, scholarships, conferences &amp; jobs from the International Islamic University Malaysia</span></span><span class="chev">›</span></button>
+  </div>
   <div id="opps-list"></div>
   <div class="card" id="opps-schol-help" hidden>
     <p style="margin:0 0 4px"><b>Need help applying for scholarships?</b> MAQAMAT scholarship desk — WhatsApp <b id="opps-schol-ph">+92 371 5205319</b></p>
     <a class="btn sm" id="opps-schol-wa" href="#" target="_blank" rel="noopener" style="margin-bottom:0">💬 Chat on WhatsApp</a>
     <a class="btn sm ghost" id="opps-schol-web" href="#" target="_blank" rel="noopener" style="margin-bottom:0">🌐 MAQAMAT website</a>
   </div>
+</section>
+
+<!-- ================= MALAYSIA ================= -->
+<section class="view" id="view-malaysia">
+  <div class="topbar"><button class="tbtn" data-back="view-opps">‹ News</button><div class="ttl">🇲🇾 Malaysian Universities</div><span style="width:44px"></span></div>
+  <p class="lead">Jobs, scholarships, conferences and admissions from universities across Malaysia — collected from official pages.</p>
+  <h3 class="mysec-h">💼 Jobs</h3>
+  <div id="my-list-job"></div>
+  <h3 class="mysec-h">🎓 Scholarships</h3>
+  <div id="my-list-scholarship"></div>
+  <h3 class="mysec-h">🎤 Conferences</h3>
+  <div id="my-list-conference"></div>
+  <h3 class="mysec-h">🗓️ Admissions</h3>
+  <div id="my-list-admissions"></div>
+  <div class="card">
+    <h3 style="margin-top:0">How to apply to a Malaysian university</h3>
+    <ol class="steps-list" id="my-apply-steps"></ol>
+  </div>
+  <div class="card">
+    <p style="margin:0 0 4px"><b>Need personal help with Malaysia admissions?</b> MAQAMAT — admissions WhatsApp <b id="my-adm-ph">+92 302 2150103</b> · scholarships WhatsApp <b id="my-sch-ph">+92 371 5205319</b></p>
+    <a class="btn sm" id="my-adm-wa" href="#" target="_blank" rel="noopener" style="margin-bottom:0">💬 Admissions chat</a>
+    <a class="btn sm" id="my-sch-wa" href="#" target="_blank" rel="noopener" style="margin-bottom:0">💬 Scholarships chat</a>
+    <a class="btn sm ghost" id="my-web" href="#" target="_blank" rel="noopener" style="margin-bottom:0">🌐 MAQAMAT website</a>
+  </div>
+</section>
+
+<!-- ================= IIUM SPECIAL ================= -->
+<section class="view" id="view-iium">
+  <div class="topbar"><button class="tbtn" data-back="view-opps">‹ News</button><div class="ttl">🎓 IIUM — Special</div><span style="width:44px"></span></div>
+  <p class="lead">Everything from the International Islamic University Malaysia (IIUM) — Mufti's own university — gathered in one place.</p>
+  <h3 class="mysec-h">📰 IIUM News &amp; Announcements</h3>
+  <div id="iium-list-news"></div>
+  <h3 class="mysec-h">🎓 IIUM Scholarships</h3>
+  <div id="iium-list-scholarship"></div>
+  <h3 class="mysec-h">🎤 IIUM Conferences</h3>
+  <div id="iium-list-conference"></div>
+  <h3 class="mysec-h">💼 IIUM Jobs</h3>
+  <div id="iium-list-job"></div>
 </section>
 
 <!-- ================= TOOLKIT ================= -->
@@ -1777,7 +1828,11 @@ function seedDB(){
       { id:"post-demo-2", kind:"post", cat:"job", title:"Research Assistant \u2014 AI in Education Lab", org:"University of Karachi", country:"Pakistan", deadline:"", link:"", details:"Part-time research assistant for an HEC-funded project on AI tools in university teaching. MS/MPhil students preferred.", createdAt:new Date(t-86400000*2).toISOString() },
       { id:"post-demo-3", kind:"post", cat:"conference", title:"International Conference on Islamic Finance 2027 \u2014 call for papers", org:"International Islamic University Malaysia (IIUM)", country:"Malaysia", deadline:"15 January 2027", link:"", details:"Abstracts are invited on Islamic finance, fintech and sustainable development. Best-paper award for doctoral researchers.", createdAt:new Date(t-86400000*3).toISOString() },
       { id:"post-demo-4", kind:"post", cat:"job", title:"Junior Lecturer \u2014 Computer Science", org:"COMSATS University Islamabad", country:"Pakistan", deadline:"30 November 2026", link:"", details:"Visiting faculty position for the spring semester. MS in Computer Science or a related field required.", createdAt:new Date(t-86400000*5).toISOString() },
-      { id:"post-demo-5", kind:"post", cat:"news", title:"Admissions notice \u2014 spring intake at partner universities", org:"Research with Mufti Hassan", country:"Worldwide", deadline:"", link:"", details:"General announcement \u2014 news-category items never appear in the breaking band.", createdAt:new Date(t-3600000).toISOString() }
+      { id:"post-demo-5", kind:"post", cat:"news", title:"Admissions notice \u2014 spring intake at partner universities", org:"Research with Mufti Hassan", country:"Worldwide", deadline:"", link:"", details:"General announcement \u2014 news-category items never appear in the breaking band.", createdAt:new Date(t-3600000).toISOString() },
+      { id:"post-demo-6", kind:"post", cat:"job", title:"Lecturer in Islamic Studies (demo)", org:"Universiti Malaya (UM)", country:"Malaysia", deadline:"", link:"", details:"Demo posting \u2014 a Malaysia job for the Malaysia screen.", createdAt:new Date(t-86400000*4).toISOString() },
+      { id:"post-demo-7", kind:"post", cat:"scholarship", title:"Malaysia International Scholarship (MIS) (demo)", org:"Ministry of Higher Education Malaysia", country:"Malaysia", deadline:"31 March 2027", link:"", details:"Demo posting \u2014 a Malaysia scholarship for the Malaysia screen.", createdAt:new Date(t-86400000*4.5).toISOString() },
+      { id:"post-demo-8", kind:"post", cat:"news", title:"IIUM admissions \u2014 apply any time via the E-Admission Portal (demo)", org:"International Islamic University Malaysia (IIUM)", country:"Malaysia", deadline:"", link:"", details:"Demo posting \u2014 IIUM admissions item for the Malaysia Admissions section and the IIUM screen.", createdAt:new Date(t-86400000*5).toISOString() },
+      { id:"post-demo-9", kind:"post", cat:"news", title:"IIUM holds International Research Week (demo)", org:"International Islamic University Malaysia (IIUM)", country:"Malaysia", deadline:"", link:"", details:"Demo posting \u2014 an IIUM news item for the IIUM screen.", createdAt:new Date(t-86400000*5.5).toISOString() }
     ]),
     requests:[
       { id:"rq-seed-1", email:"student@demo.local", name:"Ayesha Khan (demo student)", topic:"Choosing a thesis topic in NLP for Urdu", type:"Thesis / dissertation", lang:"English",
@@ -2338,6 +2393,8 @@ function showView(id){
   if(id === "view-certificates") renderCertificates();
   if(id === "view-certificate") renderCertificateDetail();
   if(id === "view-work") renderWork();
+  if(id === "view-malaysia") renderMalaysia();
+  if(id === "view-iium") renderIIUM();
 }
 function toast(text, ms){
   const t = document.getElementById("toast"); t.textContent = text; t.style.display = "block";
@@ -2554,9 +2611,11 @@ function oppCard(n){
     + '</div></div>';
 }
 let OPP_CAT = "job";
-function attachOppListeners(){
-  document.querySelectorAll("#opps-list [data-save]").forEach(b => b.addEventListener("click", ()=>{ toggleSave(b.dataset.save); renderOpps(OPP_CAT); }));
-  document.querySelectorAll("#opps-list [data-view]").forEach(b => b.addEventListener("click", ()=> trackOppView(b.dataset.view)));
+function attachOppListeners(rootSel, rerender){
+  const root = rootSel || "#opps-list";
+  const again = rerender || (()=> renderOpps(OPP_CAT));
+  document.querySelectorAll(root + " [data-save]").forEach(b => b.addEventListener("click", ()=>{ toggleSave(b.dataset.save); again(); }));
+  document.querySelectorAll(root + " [data-view]").forEach(b => b.addEventListener("click", ()=> trackOppView(b.dataset.view)));
 }
 function renderOpps(cat){
   if(!CAT_LABEL[cat]) cat = "news";   /* no mixed "All" view — each category screen shows its own type only */
@@ -2564,6 +2623,7 @@ function renderOpps(cat){
   document.getElementById("opps-title").textContent = CAT_LABEL[cat];
   document.getElementById("opps-intro").textContent = CAT_INTRO[cat] || "";
   document.getElementById("opps-schol-help").hidden = (cat !== "scholarship");
+  document.getElementById("opps-special").hidden = (cat !== "news");
   let items = visibleNews().sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
   if(cat === "saved"){
     const savedIds = (ME && ME.activity && ME.activity.oppsSaved) || [];
@@ -2581,6 +2641,36 @@ function renderOpps(cat){
     + (items.length ? "" : '<div class="empty">Nothing here yet — new posts appear as soon as they are published.</div>');
   attachOppListeners();
 }
+/* ---------- Malaysia & IIUM screens (feed-driven) ---------- */
+const APPLY_STEPS_MY = ["Apply to a Malaysian university through its official admissions portal and accept the offer letter.", "Your Student Pass application is submitted online via EMGS (website or EMGS HUB app), or by the institution through STARS.", "EMGS screens the application and verifies your documents (passport, offer letter, health declaration, academic certificates).", "Receive the electronic Visa Approval Letter (eVAL), valid for 6 months — you may enter Malaysia only after it is issued.", "If your country requires one, obtain a Single-Entry Visa through Malaysia's eVISA system before travelling.", "On arrival, complete the post-arrival medical screening, then have your passport endorsed with the Student Pass (usually 1 year)."];
+function isMalaysia(n){ return /malaysia/i.test((n && n.country) || ""); }
+function isIIUM(n){ return /IIUM|International Islamic University Malaysia/i.test(((n && n.org) || "") + " " + ((n && n.title) || "")); }
+function isAdmissionItem(n){ return /admission|intake|nomination/i.test((n && n.title) || ""); }
+function feedInto(elId, items){
+  const el = document.getElementById(elId); if(!el) return;
+  el.innerHTML = items.length ? items.map(oppCard).join("")
+    : '<div class="empty">No current items here — check back soon. <span class="urn">فی الحال کوئی آئٹم نہیں — جلد دوبارہ دیکھیں۔</span></div>';
+}
+function renderMalaysia(){
+  const items = visibleNews().filter(isMalaysia).sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
+  const by = c => items.filter(n => catOf(n) === c);
+  feedInto("my-list-job", by("job"));
+  feedInto("my-list-scholarship", by("scholarship"));
+  feedInto("my-list-conference", by("conference"));
+  feedInto("my-list-admissions", items.filter(n => catOf(n) === "news" && isAdmissionItem(n)));
+  document.getElementById("my-apply-steps").innerHTML = APPLY_STEPS_MY.map(st => "<li>" + esc(st) + "</li>").join("");
+  attachOppListeners("#view-malaysia", renderMalaysia);
+}
+function renderIIUM(){
+  const items = visibleNews().filter(isIIUM).sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
+  const by = c => items.filter(n => catOf(n) === c);
+  feedInto("iium-list-news", by("news"));
+  feedInto("iium-list-scholarship", by("scholarship"));
+  feedInto("iium-list-conference", by("conference"));
+  feedInto("iium-list-job", by("job"));
+  attachOppListeners("#view-iium", renderIIUM);
+}
+
 /* ---------- Breaking-news band (home + admin share one renderer) ---------- */
 const BRK = { home:{ i:0, items:[] }, adm:{ i:0, items:[] } };
 function breakingItems(){
@@ -3707,6 +3797,13 @@ function wire(){
   $("maq-web").href = MAQAMAT_WEBSITE;
   $("hub-sa-web").href = MAQAMAT_WEBSITE;
   $("opps-schol-web").href = MAQAMAT_WEBSITE;
+  $("my-adm-ph").textContent = MAQAMAT_ADMISSIONS_PHONE;
+  $("my-adm-wa").href = MAQAMAT_ADMISSIONS_WA;
+  $("my-sch-ph").textContent = MAQAMAT_SCHOLARSHIPS_PHONE;
+  $("my-sch-wa").href = MAQAMAT_SCHOLARSHIPS_WA;
+  $("my-web").href = MAQAMAT_WEBSITE;
+  $("news-box-malaysia").addEventListener("click", ()=> showView("view-malaysia"));
+  $("news-box-iium").addEventListener("click", ()=> showView("view-iium"));
   $("home-top-head").addEventListener("click", ()=> showView("view-leaderboard"));
   $("home-work-btn").addEventListener("click", ()=> showView("view-work"));
   $("home-certs-btn").addEventListener("click", ()=> showView("view-certificates"));

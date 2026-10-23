@@ -1,7 +1,7 @@
 /* Research with Mufti Hassan — app-shell service worker (offline shell + install).
    Data always comes from the network/Firestore when available; this caches only
    the static shell so the app opens on weak connections. */
-const CACHE = "rwmh-shell-v25";
+const CACHE = "rwmh-shell-v26";
 const SHELL = [
   "./",
   "./index.html",

@@ -457,20 +457,20 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 .adm-work-row .nm{font-weight:700;color:var(--navy)}
 @media (max-width:380px){ h1{font-size:24px} }
 
-/* ---------- Responsive type scale (v33, Mufti: "still the same —
-   make them BIGGER") ----------
-   v32's steps were too subtle (body +1.5px read as unchanged), so the
-   whole audited map is lifted to a plainly BIG scale. Below 1024px, in
-   Auto + Mobile layouts only: <=430px a modest lift (body 18px),
-   431-599px a clear step (body 19px), 600-1023px the BIG step (body
-   20px, .small 17px, hub titles 21px, buttons 20px, h1 33px). Web
-   layout and >=1024px are pixel-unchanged (scoped to the auto/mobile
-   layout attribute). ID-card internals are CAPPED at the v32 sizes —
-   the card is max-460px wide and bigger internals would overflow it.
-   Every line-height is a unitless multiplier, so Urdu Nastaleeq
-   (line-height 2.0) grows its line box with the glyphs and cannot
-   clip. Form fields are >=16px at every phone width. */
-@media (max-width:430.98px){
+/* ---------- Uniform proportional scaling (v34, Mufti: "on the
+   phone it must look the SAME as the laptop Mobile view") ----------
+   Below 1024px, in Auto + Mobile layouts only, the app carries ONE
+   internal type scale (the <=430px values v33 approved — the reference
+   look) and #app is zoomed by a factor tracking viewportWidth/430
+   (1.05 @431-451 ... 1.6 @667-709 ... capped 1.9 @796-1023), so type,
+   icons, cards and spacing all scale together and the phone renders
+   the 430px interface itself, larger. <=430px is factor 1.0: exactly
+   the current approved look. Web layout and >=1024px are untouched.
+   Per-step companions: min-height 100/f vh (100vh scales under zoom)
+   and the body.preview-on offset at 54 x f px, matching the rendered
+   height of the fixed #preview-banner (it and #toast sit inside #app
+   and scale with the zoom; the offset lives on body, outside it). */
+@media (max-width:1023.98px){
   html[data-layout="auto"] body, html[data-layout="mobile"] body{font-size:18px}
   html[data-layout="auto"] h1, html[data-layout="mobile"] h1{font-size:29px}
   html[data-layout="auto"] h2, html[data-layout="mobile"] h2{font-size:23px}
@@ -570,211 +570,63 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   html[data-layout="auto"] [style*="font-size:14.5px"], html[data-layout="mobile"] [style*="font-size:14.5px"]{font-size:16.5px !important}
   html[data-layout="auto"] [style*="font-size:15px"], html[data-layout="mobile"] [style*="font-size:15px"]{font-size:17px !important}
   html[data-layout="auto"] [style*="font-size:15.5px"], html[data-layout="mobile"] [style*="font-size:15.5px"]{font-size:17.5px !important}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:54px}
 }
 @media (max-width:380px){
   html[data-layout="auto"] h1, html[data-layout="mobile"] h1{font-size:26px}
 }
 @media (min-width:431px) and (max-width:1023.98px){
-  html[data-layout="auto"] body, html[data-layout="mobile"] body{font-size:19px}
-  html[data-layout="auto"] h1, html[data-layout="mobile"] h1{font-size:31px}
-  html[data-layout="auto"] h2, html[data-layout="mobile"] h2{font-size:25px}
-  html[data-layout="auto"] h3, html[data-layout="mobile"] h3{font-size:20.5px}
-  html[data-layout="auto"] .lead, html[data-layout="mobile"] .lead{font-size:20.5px}
-  html[data-layout="auto"] .small, html[data-layout="mobile"] .small{font-size:16px}
-  html[data-layout="auto"] .btn, html[data-layout="mobile"] .btn{font-size:19.5px}
-  html[data-layout="auto"] .btn.sm, html[data-layout="mobile"] .btn.sm{font-size:17.5px}
-  html[data-layout="auto"] label, html[data-layout="mobile"] label{font-size:17.5px}
-  html[data-layout="auto"] input, html[data-layout="mobile"] input, html[data-layout="auto"] select, html[data-layout="mobile"] select, html[data-layout="auto"] textarea, html[data-layout="mobile"] textarea{font-size:19px}
-  html[data-layout="auto"] .field-err, html[data-layout="mobile"] .field-err{font-size:16px}
-  html[data-layout="auto"] .help, html[data-layout="mobile"] .help{font-size:16px}
-  html[data-layout="auto"] .msg, html[data-layout="mobile"] .msg{font-size:17.5px}
-  html[data-layout="auto"] .topbar .ttl, html[data-layout="mobile"] .topbar .ttl{font-size:20.5px}
-  html[data-layout="auto"] .topbar .tbtn, html[data-layout="mobile"] .topbar .tbtn{font-size:17px}
-  html[data-layout="auto"] #preview-banner, html[data-layout="mobile"] #preview-banner{font-size:16px}
-  html[data-layout="auto"] .brk-tag, html[data-layout="mobile"] .brk-tag{font-size:12.5px}
-  html[data-layout="auto"] .brk-main, html[data-layout="mobile"] .brk-main{font-size:18px}
-  html[data-layout="auto"] .brk-chip, html[data-layout="mobile"] .brk-chip{font-size:14.5px}
-  html[data-layout="auto"] .brk-new, html[data-layout="mobile"] .brk-new{font-size:12px}
-  html[data-layout="auto"] .spec-box b, html[data-layout="mobile"] .spec-box b{font-size:19.5px}
-  html[data-layout="auto"] .spec-box .sub, html[data-layout="mobile"] .spec-box .sub{font-size:16px}
-  html[data-layout="auto"] .mysec-h, html[data-layout="mobile"] .mysec-h{font-size:20px}
-  html[data-layout="auto"] .rec-why, html[data-layout="mobile"] .rec-why{font-size:16px}
-  html[data-layout="auto"] .maq-row .ph, html[data-layout="mobile"] .maq-row .ph{font-size:19.5px}
-  html[data-layout="auto"] .tag, html[data-layout="mobile"] .tag{font-size:15px}
-  html[data-layout="auto"] .kv, html[data-layout="mobile"] .kv{font-size:18px}
-  html[data-layout="auto"] .certprev .ct, html[data-layout="mobile"] .certprev .ct{font-size:26px}
-  html[data-layout="auto"] .certprev .pl, html[data-layout="mobile"] .certprev .pl{font-size:14px}
-  html[data-layout="auto"] .certprev .pt, html[data-layout="mobile"] .certprev .pt{font-size:15px}
-  html[data-layout="auto"] .certprev .nm, html[data-layout="mobile"] .certprev .nm{font-size:24px}
-  html[data-layout="auto"] .certprev .bd, html[data-layout="mobile"] .certprev .bd{font-size:15px}
-  html[data-layout="auto"] .certprev .ft, html[data-layout="mobile"] .certprev .ft{font-size:13px}
-  html[data-layout="auto"] .certprev .sg b, html[data-layout="mobile"] .certprev .sg b{font-size:16px}
-  html[data-layout="auto"] .home-head .ttl .appname, html[data-layout="mobile"] .home-head .ttl .appname{font-size:clamp(12.5px,3.7vw,18px)}
-  html[data-layout="auto"] .hub-row, html[data-layout="mobile"] .hub-row{font-size:19px}
-  html[data-layout="auto"] .hub-row .tx b, html[data-layout="mobile"] .hub-row .tx b{font-size:20px}
-  html[data-layout="auto"] .hub-row .tx span, html[data-layout="mobile"] .hub-row .tx span{font-size:16px}
-  html[data-layout="auto"] .hub-row .cnt, html[data-layout="mobile"] .hub-row .cnt{font-size:15.5px}
-  html[data-layout="auto"] .seg button, html[data-layout="mobile"] .seg button{font-size:17.5px}
-  html[data-layout="auto"] .opp-meta, html[data-layout="mobile"] .opp-meta{font-size:16.5px}
-  html[data-layout="auto"] .tab, html[data-layout="mobile"] .tab{font-size:17px}
-  html[data-layout="auto"] .res-item .nm, html[data-layout="mobile"] .res-item .nm{font-size:18.5px}
-  html[data-layout="auto"] .res-item .ds, html[data-layout="mobile"] .res-item .ds{font-size:16.5px}
-  html[data-layout="auto"] .res-item .open, html[data-layout="mobile"] .res-item .open{font-size:16.5px}
-  html[data-layout="auto"] .stat-chip, html[data-layout="mobile"] .stat-chip{font-size:16.5px}
-  html[data-layout="auto"] .stat-chip b, html[data-layout="mobile"] .stat-chip b{font-size:28px}
-  html[data-layout="auto"] .notif-item .nd, html[data-layout="mobile"] .notif-item .nd{font-size:15px}
-  html[data-layout="auto"] .status-pill, html[data-layout="mobile"] .status-pill{font-size:15px}
-  html[data-layout="auto"] .empty, html[data-layout="mobile"] .empty{font-size:17.5px}
-  html[data-layout="auto"] .demo-note, html[data-layout="mobile"] .demo-note{font-size:14.5px}
-  html[data-layout="auto"] .footer-note, html[data-layout="mobile"] .footer-note{font-size:14.5px}
-  html[data-layout="auto"] .hero-title, html[data-layout="mobile"] .hero-title{font-size:33px}
-  html[data-layout="auto"] .hero-tag, html[data-layout="mobile"] .hero-tag{font-size:19.5px}
-  html[data-layout="auto"] .hero-ur, html[data-layout="mobile"] .hero-ur{font-size:19.5px}
-  html[data-layout="auto"] .refresh-btn, html[data-layout="mobile"] .refresh-btn{font-size:16.5px}
-  html[data-layout="auto"] .info-btn, html[data-layout="mobile"] .info-btn{font-size:18px}
-  html[data-layout="auto"] .guide-step, html[data-layout="mobile"] .guide-step{font-size:18px}
-  html[data-layout="auto"] .guide-ur, html[data-layout="mobile"] .guide-ur{font-size:18px}
-  html[data-layout="auto"] .group-label, html[data-layout="mobile"] .group-label{font-size:15.5px}
-  html[data-layout="auto"] .hub-card b, html[data-layout="mobile"] .hub-card b{font-size:20px}
-  html[data-layout="auto"] .hub-card .sub, html[data-layout="mobile"] .hub-card .sub{font-size:15.5px}
-  html[data-layout="auto"] .tile b, html[data-layout="mobile"] .tile b{font-size:17px}
-  html[data-layout="auto"] .tile .sub, html[data-layout="mobile"] .tile .sub{font-size:14px}
-  html[data-layout="auto"] .tile .cnt, html[data-layout="mobile"] .tile .cnt{font-size:14.5px}
-  html[data-layout="auto"] .disc-grid .tile b, html[data-layout="mobile"] .disc-grid .tile b{font-size:15px}
-  html[data-layout="auto"] .consult-bar .tx b, html[data-layout="mobile"] .consult-bar .tx b{font-size:19.5px}
-  html[data-layout="auto"] .consult-bar .tx span, html[data-layout="mobile"] .consult-bar .tx span{font-size:15.5px}
-  html[data-layout="auto"] .idc-head .t b, html[data-layout="mobile"] .idc-head .t b{font-size:16px}
-  html[data-layout="auto"] .idc-head .t span, html[data-layout="mobile"] .idc-head .t span{font-size:13px}
-  html[data-layout="auto"] .idc-pill, html[data-layout="mobile"] .idc-pill{font-size:13px}
-  html[data-layout="auto"] .idc-lines, html[data-layout="mobile"] .idc-lines{font-size:15px}
-  html[data-layout="auto"] .idc-lines .nm, html[data-layout="mobile"] .idc-lines .nm{font-size:20px}
-  html[data-layout="auto"] .idc-lines .sm, html[data-layout="mobile"] .idc-lines .sm{font-size:13.5px}
-  html[data-layout="auto"] .idc-foot .sm, html[data-layout="mobile"] .idc-foot .sm{font-size:13px}
-  html[data-layout="auto"] .score-big, html[data-layout="mobile"] .score-big{font-size:52px}
-  html[data-layout="auto"] .level-pill, html[data-layout="mobile"] .level-pill{font-size:17px}
-  html[data-layout="auto"] .doc-item .nm, html[data-layout="mobile"] .doc-item .nm{font-size:18px}
-  html[data-layout="auto"] .doc-item .ds, html[data-layout="mobile"] .doc-item .ds{font-size:15.5px}
-  html[data-layout="auto"] textarea.ur-in, html[data-layout="mobile"] textarea.ur-in{font-size:19.5px}
-  html[data-layout="auto"] .save-btn, html[data-layout="mobile"] .save-btn{font-size:16.5px}
-  html[data-layout="auto"] .acct-main .nm, html[data-layout="mobile"] .acct-main .nm{font-size:18.5px}
-  html[data-layout="auto"] .acct-main .ds, html[data-layout="mobile"] .acct-main .ds{font-size:16.5px}
-  html[data-layout="auto"] .open-link, html[data-layout="mobile"] .open-link{font-size:16px}
-  html[data-layout="auto"] .perf-head, html[data-layout="mobile"] .perf-head{font-size:15.5px}
-  html[data-layout="auto"] .perf-chip .pn, html[data-layout="mobile"] .perf-chip .pn{font-size:15px}
-  html[data-layout="auto"] .perf-chip .pu, html[data-layout="mobile"] .perf-chip .pu{font-size:13px}
-  html[data-layout="auto"] .perf-badge, html[data-layout="mobile"] .perf-badge{font-size:15.5px}
-  html[data-layout="auto"] .lb-rank, html[data-layout="mobile"] .lb-rank{font-size:22.5px}
-  html[data-layout="auto"] .lb-inf .ds, html[data-layout="mobile"] .lb-inf .ds{font-size:15.5px}
-  html[data-layout="auto"] .lb-score b, html[data-layout="mobile"] .lb-score b{font-size:24.5px}
-  html[data-layout="auto"] .lb-score .lv, html[data-layout="mobile"] .lb-score .lv{font-size:14px}
-  html[data-layout="auto"] .work-note, html[data-layout="mobile"] .work-note{font-size:17px}
-  html[data-layout="auto"] .or-divider, html[data-layout="mobile"] .or-divider{font-size:16px}
-  html[data-layout="auto"] [style*="font-size:13.5px"], html[data-layout="mobile"] [style*="font-size:13.5px"]{font-size:16.5px !important}
-  html[data-layout="auto"] [style*="font-size:14px"], html[data-layout="mobile"] [style*="font-size:14px"]{font-size:17px !important}
-  html[data-layout="auto"] [style*="font-size:14.5px"], html[data-layout="mobile"] [style*="font-size:14.5px"]{font-size:17.5px !important}
-  html[data-layout="auto"] [style*="font-size:15px"], html[data-layout="mobile"] [style*="font-size:15px"]{font-size:18px !important}
-  html[data-layout="auto"] [style*="font-size:15.5px"], html[data-layout="mobile"] [style*="font-size:15.5px"]{font-size:18.5px !important}
+  html[data-layout="auto"] .home-head .ttl .appname, html[data-layout="mobile"] .home-head .ttl .appname{font-size:15.5px}
 }
-@media (min-width:600px) and (max-width:1023.98px){
-  html[data-layout="auto"] body, html[data-layout="mobile"] body{font-size:20px}
-  html[data-layout="auto"] h1, html[data-layout="mobile"] h1{font-size:33px}
-  html[data-layout="auto"] h2, html[data-layout="mobile"] h2{font-size:27px}
-  html[data-layout="auto"] h3, html[data-layout="mobile"] h3{font-size:22px}
-  html[data-layout="auto"] .lead, html[data-layout="mobile"] .lead{font-size:22px}
-  html[data-layout="auto"] .small, html[data-layout="mobile"] .small{font-size:17px}
-  html[data-layout="auto"] .btn, html[data-layout="mobile"] .btn{font-size:20px}
-  html[data-layout="auto"] .btn.sm, html[data-layout="mobile"] .btn.sm{font-size:18px}
-  html[data-layout="auto"] label, html[data-layout="mobile"] label{font-size:18.5px}
-  html[data-layout="auto"] input, html[data-layout="mobile"] input, html[data-layout="auto"] select, html[data-layout="mobile"] select, html[data-layout="auto"] textarea, html[data-layout="mobile"] textarea{font-size:20px}
-  html[data-layout="auto"] .field-err, html[data-layout="mobile"] .field-err{font-size:17px}
-  html[data-layout="auto"] .help, html[data-layout="mobile"] .help{font-size:17px}
-  html[data-layout="auto"] .msg, html[data-layout="mobile"] .msg{font-size:18.5px}
-  html[data-layout="auto"] .topbar .ttl, html[data-layout="mobile"] .topbar .ttl{font-size:22px}
-  html[data-layout="auto"] .topbar .tbtn, html[data-layout="mobile"] .topbar .tbtn{font-size:18px}
-  html[data-layout="auto"] #preview-banner, html[data-layout="mobile"] #preview-banner{font-size:17px}
-  html[data-layout="auto"] .brk-tag, html[data-layout="mobile"] .brk-tag{font-size:13px}
-  html[data-layout="auto"] .brk-main, html[data-layout="mobile"] .brk-main{font-size:19px}
-  html[data-layout="auto"] .brk-chip, html[data-layout="mobile"] .brk-chip{font-size:15px}
-  html[data-layout="auto"] .brk-new, html[data-layout="mobile"] .brk-new{font-size:13px}
-  html[data-layout="auto"] .spec-box b, html[data-layout="mobile"] .spec-box b{font-size:21px}
-  html[data-layout="auto"] .spec-box .sub, html[data-layout="mobile"] .spec-box .sub{font-size:17px}
-  html[data-layout="auto"] .mysec-h, html[data-layout="mobile"] .mysec-h{font-size:21.5px}
-  html[data-layout="auto"] .rec-why, html[data-layout="mobile"] .rec-why{font-size:17px}
-  html[data-layout="auto"] .maq-row .ph, html[data-layout="mobile"] .maq-row .ph{font-size:21px}
-  html[data-layout="auto"] .tag, html[data-layout="mobile"] .tag{font-size:16px}
-  html[data-layout="auto"] .kv, html[data-layout="mobile"] .kv{font-size:19.5px}
-  html[data-layout="auto"] .certprev .ct, html[data-layout="mobile"] .certprev .ct{font-size:28px}
-  html[data-layout="auto"] .certprev .pl, html[data-layout="mobile"] .certprev .pl{font-size:15px}
-  html[data-layout="auto"] .certprev .pt, html[data-layout="mobile"] .certprev .pt{font-size:15.5px}
-  html[data-layout="auto"] .certprev .nm, html[data-layout="mobile"] .certprev .nm{font-size:26px}
-  html[data-layout="auto"] .certprev .bd, html[data-layout="mobile"] .certprev .bd{font-size:16px}
-  html[data-layout="auto"] .certprev .ft, html[data-layout="mobile"] .certprev .ft{font-size:14px}
-  html[data-layout="auto"] .certprev .sg b, html[data-layout="mobile"] .certprev .sg b{font-size:17px}
-  html[data-layout="auto"] .home-head .ttl .appname, html[data-layout="mobile"] .home-head .ttl .appname{font-size:clamp(13px,3.8vw,19.5px)}
-  html[data-layout="auto"] .hub-row, html[data-layout="mobile"] .hub-row{font-size:20px}
-  html[data-layout="auto"] .hub-row .tx b, html[data-layout="mobile"] .hub-row .tx b{font-size:21px}
-  html[data-layout="auto"] .hub-row .tx span, html[data-layout="mobile"] .hub-row .tx span{font-size:17px}
-  html[data-layout="auto"] .hub-row .cnt, html[data-layout="mobile"] .hub-row .cnt{font-size:16.5px}
-  html[data-layout="auto"] .seg button, html[data-layout="mobile"] .seg button{font-size:18.5px}
-  html[data-layout="auto"] .opp-meta, html[data-layout="mobile"] .opp-meta{font-size:18px}
-  html[data-layout="auto"] .tab, html[data-layout="mobile"] .tab{font-size:18px}
-  html[data-layout="auto"] .res-item .nm, html[data-layout="mobile"] .res-item .nm{font-size:20px}
-  html[data-layout="auto"] .res-item .ds, html[data-layout="mobile"] .res-item .ds{font-size:17.5px}
-  html[data-layout="auto"] .res-item .open, html[data-layout="mobile"] .res-item .open{font-size:17.5px}
-  html[data-layout="auto"] .stat-chip, html[data-layout="mobile"] .stat-chip{font-size:17.5px}
-  html[data-layout="auto"] .stat-chip b, html[data-layout="mobile"] .stat-chip b{font-size:30px}
-  html[data-layout="auto"] .notif-item .nd, html[data-layout="mobile"] .notif-item .nd{font-size:16px}
-  html[data-layout="auto"] .status-pill, html[data-layout="mobile"] .status-pill{font-size:16px}
-  html[data-layout="auto"] .empty, html[data-layout="mobile"] .empty{font-size:18.5px}
-  html[data-layout="auto"] .demo-note, html[data-layout="mobile"] .demo-note{font-size:15.5px}
-  html[data-layout="auto"] .footer-note, html[data-layout="mobile"] .footer-note{font-size:15.5px}
-  html[data-layout="auto"] .hero-title, html[data-layout="mobile"] .hero-title{font-size:36px}
-  html[data-layout="auto"] .hero-tag, html[data-layout="mobile"] .hero-tag{font-size:21px}
-  html[data-layout="auto"] .hero-ur, html[data-layout="mobile"] .hero-ur{font-size:21px}
-  html[data-layout="auto"] .refresh-btn, html[data-layout="mobile"] .refresh-btn{font-size:17.5px}
-  html[data-layout="auto"] .info-btn, html[data-layout="mobile"] .info-btn{font-size:19.5px}
-  html[data-layout="auto"] .guide-step, html[data-layout="mobile"] .guide-step{font-size:19.5px}
-  html[data-layout="auto"] .guide-ur, html[data-layout="mobile"] .guide-ur{font-size:19px}
-  html[data-layout="auto"] .group-label, html[data-layout="mobile"] .group-label{font-size:16.5px}
-  html[data-layout="auto"] .hub-card b, html[data-layout="mobile"] .hub-card b{font-size:21px}
-  html[data-layout="auto"] .hub-card .sub, html[data-layout="mobile"] .hub-card .sub{font-size:16px}
-  html[data-layout="auto"] .tile b, html[data-layout="mobile"] .tile b{font-size:18px}
-  html[data-layout="auto"] .tile .sub, html[data-layout="mobile"] .tile .sub{font-size:15px}
-  html[data-layout="auto"] .tile .cnt, html[data-layout="mobile"] .tile .cnt{font-size:15.5px}
-  html[data-layout="auto"] .disc-grid .tile b, html[data-layout="mobile"] .disc-grid .tile b{font-size:16px}
-  html[data-layout="auto"] .consult-bar .tx b, html[data-layout="mobile"] .consult-bar .tx b{font-size:21px}
-  html[data-layout="auto"] .consult-bar .tx span, html[data-layout="mobile"] .consult-bar .tx span{font-size:16.5px}
-  html[data-layout="auto"] .idc-head .t b, html[data-layout="mobile"] .idc-head .t b{font-size:17px}
-  html[data-layout="auto"] .idc-head .t span, html[data-layout="mobile"] .idc-head .t span{font-size:14px}
-  html[data-layout="auto"] .idc-pill, html[data-layout="mobile"] .idc-pill{font-size:13.5px}
-  html[data-layout="auto"] .idc-lines, html[data-layout="mobile"] .idc-lines{font-size:16px}
-  html[data-layout="auto"] .idc-lines .nm, html[data-layout="mobile"] .idc-lines .nm{font-size:21px}
-  html[data-layout="auto"] .idc-lines .sm, html[data-layout="mobile"] .idc-lines .sm{font-size:14.5px}
-  html[data-layout="auto"] .idc-foot .sm, html[data-layout="mobile"] .idc-foot .sm{font-size:14px}
-  html[data-layout="auto"] .score-big, html[data-layout="mobile"] .score-big{font-size:56px}
-  html[data-layout="auto"] .level-pill, html[data-layout="mobile"] .level-pill{font-size:18px}
-  html[data-layout="auto"] .doc-item .nm, html[data-layout="mobile"] .doc-item .nm{font-size:19.5px}
-  html[data-layout="auto"] .doc-item .ds, html[data-layout="mobile"] .doc-item .ds{font-size:16.5px}
-  html[data-layout="auto"] textarea.ur-in, html[data-layout="mobile"] textarea.ur-in{font-size:21px}
-  html[data-layout="auto"] .save-btn, html[data-layout="mobile"] .save-btn{font-size:17.5px}
-  html[data-layout="auto"] .acct-main .nm, html[data-layout="mobile"] .acct-main .nm{font-size:20px}
-  html[data-layout="auto"] .acct-main .ds, html[data-layout="mobile"] .acct-main .ds{font-size:17.5px}
-  html[data-layout="auto"] .open-link, html[data-layout="mobile"] .open-link{font-size:17px}
-  html[data-layout="auto"] .perf-head, html[data-layout="mobile"] .perf-head{font-size:16.5px}
-  html[data-layout="auto"] .perf-chip .pn, html[data-layout="mobile"] .perf-chip .pn{font-size:16px}
-  html[data-layout="auto"] .perf-chip .pu, html[data-layout="mobile"] .perf-chip .pu{font-size:14px}
-  html[data-layout="auto"] .perf-badge, html[data-layout="mobile"] .perf-badge{font-size:16.5px}
-  html[data-layout="auto"] .lb-rank, html[data-layout="mobile"] .lb-rank{font-size:24px}
-  html[data-layout="auto"] .lb-inf .ds, html[data-layout="mobile"] .lb-inf .ds{font-size:16.5px}
-  html[data-layout="auto"] .lb-score b, html[data-layout="mobile"] .lb-score b{font-size:26px}
-  html[data-layout="auto"] .lb-score .lv, html[data-layout="mobile"] .lb-score .lv{font-size:15px}
-  html[data-layout="auto"] .work-note, html[data-layout="mobile"] .work-note{font-size:18.5px}
-  html[data-layout="auto"] .or-divider, html[data-layout="mobile"] .or-divider{font-size:17px}
-  html[data-layout="auto"] [style*="font-size:13.5px"], html[data-layout="mobile"] [style*="font-size:13.5px"]{font-size:18px !important}
-  html[data-layout="auto"] [style*="font-size:14px"], html[data-layout="mobile"] [style*="font-size:14px"]{font-size:18.5px !important}
-  html[data-layout="auto"] [style*="font-size:14.5px"], html[data-layout="mobile"] [style*="font-size:14.5px"]{font-size:19px !important}
-  html[data-layout="auto"] [style*="font-size:15px"], html[data-layout="mobile"] [style*="font-size:15px"]{font-size:19.5px !important}
-  html[data-layout="auto"] [style*="font-size:15.5px"], html[data-layout="mobile"] [style*="font-size:15.5px"]{font-size:20px !important}
+@media (min-width:431px) and (max-width:451.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.05}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:95.24vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:56.7px}
+}
+@media (min-width:452px) and (max-width:494.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.1}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:90.91vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:59.4px}
+}
+@media (min-width:495px) and (max-width:537.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.2}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:83.33vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:64.8px}
+}
+@media (min-width:538px) and (max-width:580.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.3}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:76.92vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:70.2px}
+}
+@media (min-width:581px) and (max-width:623.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.4}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:71.43vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:75.6px}
+}
+@media (min-width:624px) and (max-width:666.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.5}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:66.67vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:81px}
+}
+@media (min-width:667px) and (max-width:709.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.6}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:62.5vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:86.4px}
+}
+@media (min-width:710px) and (max-width:752.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.7}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:58.82vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:91.8px}
+}
+@media (min-width:753px) and (max-width:795.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.8}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:55.56vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:97.2px}
+}
+@media (min-width:796px) and (max-width:1023.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{zoom:1.9}
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:52.63vh}
+  html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:102.6px}
 }
 </style>
 </head>

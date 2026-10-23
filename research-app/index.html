@@ -38,6 +38,10 @@ a{color:var(--navy-l)}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 [hidden]{display:none !important}
+/* Admin User Preview banner */
+#preview-banner{position:fixed;top:0;left:0;right:0;z-index:95;background:var(--gold);color:#2E2303;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;font-size:13.5px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.18);white-space:nowrap;overflow:hidden}
+#preview-banner button{flex:0 0 auto;background:#2E2303;color:#F7E08B;border:0;border-radius:8px;padding:6px 12px;font:inherit;font-weight:700;cursor:pointer}
+body.preview-on{padding-top:44px}
 
 /* ---------- App shell & layout modes ---------- */
 #app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;box-shadow:0 0 30px rgba(6,31,58,.18)}
@@ -1242,6 +1246,11 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
           <button class="brk-arrow" id="adm-brk-next" aria-label="Next announcement">&rsaquo;</button>
         </div>
       </div>
+  <div class="card" id="adm-preview-card">
+    <p style="margin:0 0 4px"><b>👁 User Preview</b> · <span class="urn">طالب علم کی نظر سے دیکھیں</span></p>
+    <p class="small" style="margin:0 0 8px">See and use the app exactly as a student does — with your own member record. Everything works (saving, writing, sharing); admin controls are hidden until you exit.</p>
+    <button class="btn sm" id="adm-preview-btn">👁 Enter User Preview</button>
+  </div>
   <div class="card" id="adm-notif-settings">
     <p style="margin:0 0 4px"><b>🔔 Push notifications (admin)</b></p>
     <p class="small" id="adm-notif-status" style="margin:0 0 8px">Checking…</p>
@@ -1309,6 +1318,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <p class="demo-note" id="demo-note-admin" hidden>Preview build — live database connects at launch.</p>
 </section>
 
+<div id="preview-banner" hidden><span>👁 User Preview · <span class="urn">طالب علم کی حیثیت سے</span></span><button id="preview-exit" type="button">Exit ✕</button></div>
 <div id="toast" style="display:none;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;z-index:99;max-width:92vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)"></div>
 </div><!-- /#app -->
 
@@ -1934,7 +1944,7 @@ function notifyAdmin(title, body){
 }
 function myNotifications(){
   if(!ME) return [];
-  return DB.notifications.filter(n => n.to === "all" || n.to === ME.email || (n.to === "admin" && ME.role === "admin"));
+  return DB.notifications.filter(n => n.to === "all" || n.to === ME.email || (n.to === "admin" && ME.role === "admin" && !isPreview()));
 }
 function unreadCount(){ return myNotifications().filter(n => !(n.readBy||[]).includes(ME.email)).length; }
 
@@ -1990,11 +2000,11 @@ function initialsOf(name){
 }
 function isSaved(id){ return !!(ME && ME.activity && (ME.activity.oppsSaved || []).includes(id)); }
 function trackOppView(id){
-  if(!ME || ME.role !== "student") return;
+  if(!asStudent()) return;
   if(!ME.activity.oppsViewed.includes(id)){ ME.activity.oppsViewed.push(id); touch(); }
 }
 function toggleSave(id){
-  if(!ME || ME.role !== "student") return;
+  if(!asStudent()) return;
   const a = ME.activity, ix = a.oppsSaved.indexOf(id);
   if(ix >= 0){ a.oppsSaved.splice(ix, 1); toast("Removed from your saved list."); }
   else {
@@ -2347,7 +2357,7 @@ function recGo(act){
   if(!ME) return;
   if(act === "disc"){
     const id = disciplineOf(ME);
-    if(ME.role === "student" && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
+    if(asStudent() && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
     renderDiscipline(id); showView("view-discipline"); return;
   }
   if(act.indexOf("opps:") === 0){ const c = act.slice(5); if(CAT_LABEL[c]){ renderOpps(c); showView("view-opps"); } else { showView("view-hub-opps"); } return; }
@@ -2414,6 +2424,8 @@ function adminToggleFeatured(ownerId, workId){
 /* ================= Router ================= */
 let NAV_BACK = {};   // viewId -> viewId it returns to
 function showView(id){
+  applyPreview();
+  if(id === "view-admin" && isPreview()) id = "view-home";
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   window.scrollTo(0,0);
   if(id === "view-home" || id === "view-hub-space" || id === "view-hub-opps" || id === "view-hub-research" || id === "view-hub-more") renderHome();
@@ -2548,11 +2560,38 @@ async function linkSubmit(){
   }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); }
   btn.disabled = false; btn.textContent = "Link & sign in";
 }
+/* ---------- Admin User Preview ----------
+   The admin sees the pure student experience on his OWN member record.
+   The flag lives in sessionStorage: it survives in-app navigation and
+   reloads within this session, and a fresh app launch always starts in
+   normal mode — the admin can never get stuck in preview. Only an
+   admin (admins/{email} marker / role) can ever activate it. */
+function previewFlag(){ try{ return sessionStorage.getItem("rh_preview") === "1"; }catch(e){ return false; } }
+function isPreview(){ return previewFlag() && !!ME && ME.role === "admin"; }
+/* In preview the admin counts as a student for every student-feature guard,
+   so saving, tracking, scoring and the invite all act on his real record. */
+function asStudent(){ return !!ME && (ME.role === "student" || isPreview()); }
+function applyPreview(){
+  const on = isPreview();
+  document.body.classList.toggle("preview-on", on);
+  const b = document.getElementById("preview-banner"); if(b) b.hidden = !on;
+}
+function enterPreview(){
+  try{ sessionStorage.setItem("rh_preview", "1"); }catch(e){}
+  applyPreview();
+  goAfterLogin();
+}
+function exitPreview(){
+  try{ sessionStorage.removeItem("rh_preview"); }catch(e){}
+  applyPreview();
+  showView("view-admin");
+}
 function goAfterLogin(){
   if(!ME) return showView("view-welcome");
   normalizeUser(ME);
   if(ME.role === "student"){ ME.lastActive = nowISO(); ensureMemberId(ME); persist(); if(FB) FB.saveUser(ME); }
-  if(ME.role === "admin") return showView("view-admin");
+  if(ME.role === "admin" && !isPreview()) return showView("view-admin");
+  if(isPreview()) return showView("view-home");   /* preview always lands on the student home */
   if(ME.status !== "approved") return renderVerify(), showView("view-verify");
   if(!accessComplete(ME)) return renderGates(), showView("view-gates");
   showView("view-home");
@@ -2784,7 +2823,7 @@ function renderHome(){
   renderTopStrip();
   renderBreaking();
   const inv = document.getElementById("home-notif-invite");
-  if(inv) inv.hidden = !(ME && ME.role === "student" && !(ME.fcmTokens || []).length && !ME.notifInviteDismissed);
+  if(inv) inv.hidden = !(asStudent() && !(ME.fcmTokens || []).length && !ME.notifInviteDismissed);
 }
 function renderDisciplines(){
   document.getElementById("discipline-list").innerHTML = '<div class="tile-grid disc-grid">' + DISCIPLINES.map(d =>
@@ -2793,7 +2832,7 @@ function renderDisciplines(){
   ).join("") + '</div>';
   document.querySelectorAll("[data-disc]").forEach(b => b.addEventListener("click", ()=>{
     const id = b.dataset.disc;
-    if(ME && ME.role === "student" && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
+    if(ME && asStudent() && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
     renderDiscipline(id); showView("view-discipline");
   }));
 }
@@ -3777,7 +3816,7 @@ function wire(){
     $("demo-student-btn").addEventListener("click", ()=>{ ME = findUser("student@demo.local"); setSession(ME.email); goAfterLogin(); });
     $("demo-admin-btn").addEventListener("click", ()=>{ ME = findUser(DEMO_ADMIN_EMAIL); setSession(ME.email); goAfterLogin(); });
   }
-  function logout(){ ME = null; setSession(null); exitGoogleProfileMode(); if(FB) FB.signOut(); showView("view-welcome"); }
+  function logout(){ try{ sessionStorage.removeItem("rh_preview"); }catch(e){} ME = null; setSession(null); exitGoogleProfileMode(); applyPreview(); if(FB) FB.signOut(); showView("view-welcome"); }
   $("verify-logout").addEventListener("click", logout);
   $("gates-logout").addEventListener("click", logout);
   $("profile-logout").addEventListener("click", logout);
@@ -3863,7 +3902,7 @@ function wire(){
   $("toolkit-islamic-btn").addEventListener("click", ()=> openIslamic("view-toolkit"));
   $("islamic-back").addEventListener("click", ()=> showView(ISLAMIC_BACK));
   $("islamic-disc-btn").addEventListener("click", ()=>{
-    if(ME && ME.role === "student" && !ME.activity.guidesOpened.includes("islamic")){ ME.activity.guidesOpened.push("islamic"); touch(); }
+    if(ME && asStudent() && !ME.activity.guidesOpened.includes("islamic")){ ME.activity.guidesOpened.push("islamic"); touch(); }
     renderDiscipline("islamic"); showView("view-discipline");
   });
   $("home-help-btn").addEventListener("click", ()=> btnHelp("view-hub-research"));
@@ -3906,6 +3945,8 @@ function wire(){
   $("my-web").href = MAQAMAT_WEBSITE;
   $("notif-enable").addEventListener("click", ()=> enableNotifications());
   $("notif-disable").addEventListener("click", ()=> disableNotifications());
+  $("adm-preview-btn").addEventListener("click", ()=> enterPreview());
+  $("preview-exit").addEventListener("click", ()=> exitPreview());
   $("adm-notif-enable").addEventListener("click", ()=> enableNotifications());
   $("adm-notif-disable").addEventListener("click", ()=> disableNotifications());
   $("invite-notif-yes").addEventListener("click", ()=> enableNotifications());

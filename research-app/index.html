@@ -280,6 +280,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 /* ---------- Compact tile grid (home + landings) ---------- */
 .group-label{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold-d);margin:16px 0 2px}
 .tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:4px 0 6px}
+.hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0 4px}
+.hub-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:98px;padding:16px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.hub-card .ic{font-size:30px;line-height:1.2}
+.hub-card b{font-size:17px;color:var(--navy)}
+.hub-card .sub{font-size:12.5px;color:var(--mut)}
+.hub-card .cnt{position:absolute;top:8px;right:8px}
 html[data-layout="web"] .tile-grid{grid-template-columns:repeat(4,1fr)}
 @media (min-width:1024px){ html[data-layout="auto"] .tile-grid{grid-template-columns:repeat(4,1fr)} }
 html[data-layout="web"] .tile-grid.cols3{grid-template-columns:repeat(3,1fr)}
@@ -599,7 +605,25 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   </div>
   <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
 
-  <div class="group-label">My Space</div>
+  <div class="hub-grid">
+    <button class="hub-card" id="hub-space-btn"><span class="cnt" id="hub-space-badge" hidden>0</span><span class="ic">👤</span><b>My Space</b><span class="sub">Profile, ID card, progress &amp; certificates</span></button>
+    <button class="hub-card" id="hub-opps-btn"><span class="ic">💼</span><b>Opportunities</b><span class="sub">Jobs, scholarships &amp; conferences</span></button>
+    <button class="hub-card" id="hub-research-btn"><span class="ic">🧭</span><b>Research</b><span class="sub">Toolkit, writing help &amp; student hub</span></button>
+    <button class="hub-card" id="hub-more-btn"><span class="ic">☰</span><b>More</b><span class="sub">Brochure, install, layout &amp; about</span></button>
+  </div>
+
+  <div id="home-top-wrap" hidden>
+    <button class="perf-head" id="home-top-head"><span>🏆 Top Performers · <span class="urn">نمایاں طلبہ</span></span><span class="arr">›</span></button>
+    <div class="perf-strip" id="home-top-strip"></div>
+  </div>
+
+    <button class="consult-bar" id="home-consult-btn"><span class="ic">🤝</span><span class="tx"><b>Consultation &amp; Contact</b><span>Talk to Mufti — ask for consultation</span></span><span class="arr">›</span></button>
+  <p class="footer-note">Research with Mufti Hassan · A Learn with Mufti Hassan platform</p>
+  <p class="demo-note" id="demo-note-home" hidden>Preview build — live database connects at launch.</p>
+</section>
+<!-- ================= HUB: MY SPACE ================= -->
+<section class="view" id="view-hub-space">
+  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">My Space</div><span style="width:44px"></span></div>
   <div class="tile-grid">
     <button class="tile" id="home-profile-btn"><span class="ic">👤</span><b>My Profile</b><span class="sub">Academic identity</span></button>
     <button class="tile" id="home-idcard-btn"><span class="ic">🪪</span><b>My ID Card</b><span class="sub">Student card</span></button>
@@ -608,29 +632,20 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <button class="tile" id="home-notif-btn"><span class="cnt" id="tile-notif-cnt" hidden>0</span><span class="ic">🔔</span><b>Notifications</b><span class="sub">Replies &amp; announcements</span></button>
     <button class="tile" id="home-certs-btn"><span class="cnt" id="tile-cert-cnt" hidden>0</span><span class="ic">🏅</span><b>My Certificates</b><span class="sub">Top Performer awards</span></button>
   </div>
-
-  <div class="group-label">More</div>
-  <div class="tile-grid">
-    <a class="tile" href="https://research-with-mufti-hassan.web.app/assets/app-brochure.pdf" target="_blank" rel="noopener"><span class="ic">📖</span><b>App Brochure</b><span class="sub">How to use the app</span></a>
-    <button class="tile" id="home-install-btn"><span class="ic">📲</span><b>Install App</b><span class="sub">Add to home screen</span></button>
-    <button class="tile" id="home-layout-btn"><span class="ic">🖥️</span><b>Layout</b><span class="sub" id="tile-layout-sub">Auto</span></button>
-    <button class="tile" id="home-about-btn"><span class="ic">ℹ️</span><b>About</b><span class="sub">About this app</span></button>
-  </div>
-
-  <div id="home-top-wrap" hidden>
-    <button class="perf-head" id="home-top-head"><span>🏆 Top Performers · <span class="urn">نمایاں طلبہ</span></span><span class="arr">›</span></button>
-    <div class="perf-strip" id="home-top-strip"></div>
-  </div>
-
-  <div class="group-label">Opportunities</div>
+</section>
+<!-- ================= HUB: OPPORTUNITIES ================= -->
+<section class="view" id="view-hub-opps">
+  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">Opportunities</div><span style="width:44px"></span></div>
   <div class="tile-grid">
     <button class="tile" data-opp="job"><span class="cnt" id="cnt-jobs">0</span><span class="ic">💼</span><b>Jobs &amp; Internships</b><span class="sub">Pakistan &amp; worldwide</span></button>
     <button class="tile" data-opp="scholarship"><span class="cnt" id="cnt-scholarships">0</span><span class="ic">🎓</span><b>Scholarships</b><span class="sub">Fully funded, worldwide</span></button>
     <button class="tile" data-opp="conference"><span class="cnt" id="cnt-conferences">0</span><span class="ic">🎤</span><b>Conferences</b><span class="sub">Incl. fully funded</span></button>
     <button class="tile" data-opp="news"><span class="cnt" id="cnt-news">0</span><span class="ic">📰</span><b>News</b><span class="sub">Announcements</span></button>
   </div>
-
-  <div class="group-label">Research</div>
+</section>
+<!-- ================= HUB: RESEARCH ================= -->
+<section class="view" id="view-hub-research">
+  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">Research</div><span style="width:44px"></span></div>
   <div class="tile-grid">
     <button class="tile" id="home-toolkit-btn"><span class="ic">🧭</span><b>Discipline Guidance</b><span class="sub">Data · AI tools · journals</span></button>
     <button class="tile" id="home-help-btn"><span class="ic">✍️</span><b>Writing Help</b><span class="sub">Ask Mufti — English / اردو</span></button>
@@ -638,15 +653,21 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <button class="tile" id="home-heritage-btn"><span class="ic">📚</span><b>Islamic Sources</b><span class="sub">Al-Turath · Shamila</span></button>
     <button class="tile" id="home-hub-btn"><span class="ic">🌍</span><b>Global Student Hub</b><span class="sub">Study abroad · accounts · skills</span></button>
   </div>
-
-  <button class="consult-bar" id="home-consult-btn"><span class="ic">🤝</span><span class="tx"><b>Consultation &amp; Contact</b><span>Talk to Mufti — ask for consultation</span></span><span class="arr">›</span></button>
-  <p class="footer-note">Research with Mufti Hassan · A Learn with Mufti Hassan platform</p>
-  <p class="demo-note" id="demo-note-home" hidden>Preview build — live database connects at launch.</p>
+</section>
+<!-- ================= HUB: MORE ================= -->
+<section class="view" id="view-hub-more">
+  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">More</div><span style="width:44px"></span></div>
+  <div class="tile-grid">
+    <a class="tile" href="https://research-with-mufti-hassan.web.app/assets/app-brochure.pdf" target="_blank" rel="noopener"><span class="ic">📖</span><b>App Brochure</b><span class="sub">How to use the app</span></a>
+    <button class="tile" id="home-install-btn"><span class="ic">📲</span><b>Install App</b><span class="sub">Add to home screen</span></button>
+    <button class="tile" id="home-layout-btn"><span class="ic">🖥️</span><b>Layout</b><span class="sub" id="tile-layout-sub">Auto</span></button>
+    <button class="tile" id="home-about-btn"><span class="ic">ℹ️</span><b>About</b><span class="sub">About this app</span></button>
+  </div>
 </section>
 
 <!-- ================= OPPORTUNITIES ================= -->
 <section class="view" id="view-opps">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl" id="opps-title">Opportunities</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-opps">‹ Back</button><div class="ttl" id="opps-title">Opportunities</div><span style="width:44px"></span></div>
   <div class="tabs" id="opps-tabs">
     <button class="tab" data-tab="job">💼 Jobs &amp; Internships</button>
     <button class="tab" data-tab="scholarship">🎓 Scholarships</button>
@@ -666,7 +687,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= TOOLKIT ================= -->
 <section class="view" id="view-toolkit">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">Research Toolkit</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-research">‹ Back</button><div class="ttl">Research Toolkit</div><span style="width:44px"></span></div>
   <p class="lead">Pick your discipline — where to find data, which AI tools &amp; software to use, and where to publish.</p>
   <div id="discipline-list"></div>
   <div class="group-label">Writing services</div>
@@ -736,7 +757,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= PROFILE ================= -->
 <section class="view" id="view-profile">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">My Profile</div><button class="tbtn" id="profile-logout">Log out</button></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-space">‹ Back</button><div class="ttl">My Profile</div><button class="tbtn" id="profile-logout">Log out</button></div>
   <div class="card accent">
     <h3 id="prof-name">—</h3>
     <div id="prof-kv"></div>
@@ -786,13 +807,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= NOTIFICATIONS ================= -->
 <section class="view" id="view-notifications">
-  <div class="topbar"><button class="tbtn" data-back="view-home" id="notif-back">‹ Back</button><div class="ttl">Notifications</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-space" id="notif-back">‹ Back</button><div class="ttl">Notifications</div><span style="width:44px"></span></div>
   <div id="notif-list"></div>
 </section>
 
 <!-- ================= ABOUT ================= -->
 <section class="view" id="view-about">
-  <div class="topbar"><button class="tbtn" data-back="view-home" id="about-back">‹ Back</button><div class="ttl">About</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-more" id="about-back">‹ Back</button><div class="ttl">About</div><span style="width:44px"></span></div>
   <div class="center"><img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="Research with Mufti Hassan logo" style="width:84px;height:84px;border-radius:18px"></div>
   <h2 class="center" style="margin-top:8px">Research with Mufti Hassan</h2>
   <p>A free platform by <b>Learn with Mufti Hassan</b> for non-Ulama university students of every department, worldwide: jobs &amp; internships, scholarships, fully funded conferences, and honest, discipline-wise research guidance — where to find data, which AI tools to use, and where to publish.</p>
@@ -818,13 +839,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= ID CARD ================= -->
 <section class="view" id="view-idcard">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">My ID Card</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-space">‹ Back</button><div class="ttl">My ID Card</div><span style="width:44px"></span></div>
   <div id="idcard-body"></div>
 </section>
 
 <!-- ================= MY PROGRESS ================= -->
 <section class="view" id="view-progress">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">My Progress</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-space">‹ Back</button><div class="ttl">My Progress</div><span style="width:44px"></span></div>
   <div id="progress-body"></div>
 </section>
 
@@ -836,7 +857,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= MY CERTIFICATES ================= -->
 <section class="view" id="view-certificates">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">My Certificates</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-space">‹ Back</button><div class="ttl">My Certificates</div><span style="width:44px"></span></div>
   <p class="small">Certificates of Achievement are issued <b>automatically</b> to each month's Top 3 performers — no application, no admin step.</p>
   <div id="certs-list"></div>
 </section>
@@ -849,7 +870,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= MY ACADEMIC WORK ================= -->
 <section class="view" id="view-work">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">My Academic Work</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-space">‹ Back</button><div class="ttl">My Academic Work</div><span style="width:44px"></span></div>
   <p class="lead">Share what you are doing — every paper, presentation and milestone counts.</p>
   <p class="small">Each entry earns <b>My Progress points</b>, can bring <b>Mufti's personal feedback</b>, and unlocks <b>guidance</b> matched to your work: which journals to target, which conferences and scholarships fit what you are doing.</p>
   <div class="ur" style="font-size:15.5px;margin-bottom:4px">اپنی علمی کارگذاری یہاں درج کریں — نمبر بھی بڑھیں گے اور آگے کی راہ بھی کھلے گی۔</div>
@@ -914,7 +935,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 
 <!-- ================= GLOBAL STUDENT HUB ================= -->
 <section class="view" id="view-hub">
-  <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">Global Student Hub</div><span style="width:44px"></span></div>
+  <div class="topbar"><button class="tbtn" data-back="view-hub-research">‹ Back</button><div class="ttl">Global Student Hub</div><span style="width:44px"></span></div>
   <p class="lead">Going global — study abroad, the accounts every researcher needs, and free places to learn data analysis, research and skills.</p>
 
   <h3>✈️ Study Abroad — Malaysia, Turkey &amp; Worldwide</h3>
@@ -1927,7 +1948,7 @@ let NAV_BACK = {};   // viewId -> viewId it returns to
 function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   window.scrollTo(0,0);
-  if(id === "view-home") renderHome();
+  if(id === "view-home" || id === "view-hub-space" || id === "view-hub-opps" || id === "view-hub-research" || id === "view-hub-more") renderHome();
   if(id === "view-profile") renderProfile();
   if(id === "view-admin") renderAdmin();
   if(id === "view-notifications") renderNotifications();
@@ -2083,6 +2104,8 @@ function renderHome(){
   b.hidden = un === 0; b.textContent = un > 9 ? "9+" : un;
   const tn = document.getElementById("tile-notif-cnt");
   tn.hidden = un === 0; tn.textContent = un > 9 ? "9+" : un;
+  const hb = document.getElementById("hub-space-badge");
+  hb.hidden = un === 0; hb.textContent = un > 9 ? "9+" : un;
   const cn = document.getElementById("tile-cert-cnt");
   const ncert = (ME.certificates || []).length;
   cn.hidden = ncert === 0; cn.textContent = ncert > 9 ? "9+" : ncert;
@@ -2918,22 +2941,26 @@ function wire(){
 
   /* ---- Home ---- */
   $("home-avatar").addEventListener("click", ()=> showView("view-profile"));
-  $("home-bell").addEventListener("click", ()=> { NAV_BACK["view-notifications"] = "view-home"; showView("view-notifications"); });
+  $("home-bell").addEventListener("click", ()=> { NAV_BACK["view-notifications"] = "view-hub-space"; showView("view-notifications"); });
   $("home-consult-btn").addEventListener("click", ()=> showView("view-consult"));
+  $("hub-space-btn").addEventListener("click", ()=> showView("view-hub-space"));
+  $("hub-opps-btn").addEventListener("click", ()=> showView("view-hub-opps"));
+  $("hub-research-btn").addEventListener("click", ()=> showView("view-hub-research"));
+  $("hub-more-btn").addEventListener("click", ()=> showView("view-hub-more"));
   document.querySelectorAll("[data-opp]").forEach(b => b.addEventListener("click", ()=>{ renderOpps(b.dataset.opp); showView("view-opps"); }));
   $("home-toolkit-btn").addEventListener("click", ()=> showView("view-toolkit"));
   $("home-heritage-btn").addEventListener("click", ()=> showView("view-toolkit"));
-  $("home-help-btn").addEventListener("click", ()=> btnHelp("view-home"));
-  $("home-write-btn").addEventListener("click", ()=> { WRITE_BACK = "view-home"; showView("view-write"); });
+  $("home-help-btn").addEventListener("click", ()=> btnHelp("view-hub-research"));
+  $("home-write-btn").addEventListener("click", ()=> { WRITE_BACK = "view-hub-research"; showView("view-write"); });
   $("home-profile-btn").addEventListener("click", ()=> showView("view-profile"));
   $("home-idcard-btn").addEventListener("click", ()=> showView("view-idcard"));
   $("home-progress-btn").addEventListener("click", ()=> showView("view-progress"));
-  $("home-notif-btn").addEventListener("click", ()=> { NAV_BACK["view-notifications"] = "view-home"; showView("view-notifications"); });
+  $("home-notif-btn").addEventListener("click", ()=> { NAV_BACK["view-notifications"] = "view-hub-space"; showView("view-notifications"); });
   $("home-install-btn").addEventListener("click", tryInstall);
   $("home-layout-btn").addEventListener("click", cycleLayout);
   $("hdr-layout-btn").addEventListener("click", cycleLayout);
   $("hero-layout").addEventListener("click", cycleLayout);
-  $("home-about-btn").addEventListener("click", ()=> { NAV_BACK["view-about"] = "view-home"; showView("view-about"); });
+  $("home-about-btn").addEventListener("click", ()=> { NAV_BACK["view-about"] = "view-hub-more"; showView("view-about"); });
   $("home-hub-btn").addEventListener("click", ()=> showView("view-hub"));
   // MAQAMAT contact points — single source: the CONFIG constants above.
   const telOf = p => "tel:" + p.replace(/[^+\d]/g, "");
@@ -2954,8 +2981,8 @@ function wire(){
   $("home-work-btn").addEventListener("click", ()=> showView("view-work"));
   $("home-certs-btn").addEventListener("click", ()=> showView("view-certificates"));
   $("about-layout-btn").addEventListener("click", cycleLayout);
-  $("about-back").addEventListener("click", ()=> showView(NAV_BACK["view-about"] || "view-home"));
-  $("notif-back").addEventListener("click", ()=> showView(NAV_BACK["view-notifications"] || "view-home"));
+  $("about-back").addEventListener("click", ()=> showView(NAV_BACK["view-about"] || "view-hub-more"));
+  $("notif-back").addEventListener("click", ()=> showView(NAV_BACK["view-notifications"] || "view-hub-space"));
 
   /* ---- Opportunities tabs ---- */
   document.querySelectorAll("#opps-tabs .tab").forEach(t => t.addEventListener("click", ()=> renderOpps(t.dataset.tab)));

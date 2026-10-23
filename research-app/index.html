@@ -37,6 +37,7 @@ img{max-width:100%}
 a{color:var(--navy-l)}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+[hidden]{display:none !important}
 
 /* ---------- App shell & layout modes ---------- */
 #app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;box-shadow:0 0 30px rgba(6,31,58,.18)}
@@ -684,7 +685,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
           <button class="brk-arrow" id="home-brk-next" aria-label="Next announcement">&rsaquo;</button>
         </div>
       </div>
-      <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
+      <div class="card" id="home-notif-invite" hidden>
+    <p style="margin:0 0 4px"><b>🔔 Never miss a deadline</b></p>
+    <p class="small" style="margin:0 0 8px">Turn on notifications so new jobs, scholarships and Mufti's replies reach you in time.</p>
+    <button class="btn sm" id="invite-notif-yes">Turn on notifications 🔔</button>
+    <button class="btn sm ghost" id="invite-notif-no">Not now</button>
+  </div>
+  <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
 
   <div class="hub-grid">
     <button class="hub-card" id="hub-space-btn"><span class="cnt" id="hub-space-badge" hidden>0</span><span class="ic">👤</span><b>My Space</b><span class="sub">Profile, ID card, progress &amp; certificates</span></button>
@@ -940,6 +947,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <!-- ================= NOTIFICATIONS ================= -->
 <section class="view" id="view-notifications">
   <div class="topbar"><button class="tbtn" data-back="view-hub-space" id="notif-back">‹ Back</button><div class="ttl">Notifications</div><span style="width:44px"></span></div>
+  <div class="card" id="notif-settings">
+    <p style="margin:0 0 4px"><b>🔔 Push notifications</b></p>
+    <p class="small" id="notif-status" style="margin:0 0 8px">Checking…</p>
+    <button class="btn sm" id="notif-enable" hidden>Turn on notifications 🔔</button>
+    <button class="btn sm ghost" id="notif-disable" hidden>Turn off</button>
+    <p class="small" id="notif-hint" style="margin:8px 0 0"></p>
+  </div>
   <div id="notif-list"></div>
 </section>
 
@@ -1228,6 +1242,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
           <button class="brk-arrow" id="adm-brk-next" aria-label="Next announcement">&rsaquo;</button>
         </div>
       </div>
+  <div class="card" id="adm-notif-settings">
+    <p style="margin:0 0 4px"><b>🔔 Push notifications (admin)</b></p>
+    <p class="small" id="adm-notif-status" style="margin:0 0 8px">Checking…</p>
+    <button class="btn sm" id="adm-notif-enable" hidden>Turn on notifications 🔔</button>
+    <button class="btn sm ghost" id="adm-notif-disable" hidden>Turn off</button>
+    <p class="small" id="adm-notif-hint" style="margin:8px 0 0">New registrations, academic work and student requests notify you here in the app — turn push on to also register this device for push alerts.</p>
+  </div>
         <div class="stat-row">
     <div class="stat-chip"><b id="adm-stat-total">0</b>Total members</div>
     <div class="stat-chip"><b id="adm-stat-week">0</b>Joined this week</div>
@@ -1905,9 +1926,15 @@ function notify(to, title, body){
   DB.notifications.unshift({ id:uid(), to:to, title:title, body:body, createdAt:nowISO(), readBy:[] });
   if(DB.notifications.length > 300) DB.notifications.length = 300;
 }
+/* Admin-addressed notifications use the reserved recipient "admin" (the
+   Firestore rules allow a signed-in member to create ONLY this shape). */
+function notifyAdmin(title, body){
+  DB.notifications.unshift({ id:uid(), to:"admin", title:title, body:body, createdAt:nowISO(), readBy:[] });
+  if(DB.notifications.length > 300) DB.notifications.length = 300;
+}
 function myNotifications(){
   if(!ME) return [];
-  return DB.notifications.filter(n => n.to === "all" || n.to === ME.email);
+  return DB.notifications.filter(n => n.to === "all" || n.to === ME.email || (n.to === "admin" && ME.role === "admin"));
 }
 function unreadCount(){ return myNotifications().filter(n => !(n.readBy||[]).includes(ME.email)).length; }
 
@@ -2756,6 +2783,8 @@ function renderHome(){
   document.getElementById("demo-note-home").hidden = !DEMO_MODE;
   renderTopStrip();
   renderBreaking();
+  const inv = document.getElementById("home-notif-invite");
+  if(inv) inv.hidden = !(ME && ME.role === "student" && !(ME.fcmTokens || []).length && !ME.notifInviteDismissed);
 }
 function renderDisciplines(){
   document.getElementById("discipline-list").innerHTML = '<div class="tile-grid disc-grid">' + DISCIPLINES.map(d =>
@@ -2915,7 +2944,70 @@ function notifHTML(n){
   return '<div class="notif-item' + (unread ? ' unread' : '') + '"><div class="nt">' + esc(n.title) + '</div>'
     + '<div>' + esc(n.body) + '</div><div class="nd">' + fmtDate(n.createdAt) + '</div></div>';
 }
+/* ---------- Notification settings (student + admin share the logic) ---------- */
+function notifPerm(){
+  if(DEMO_MODE) return window.__demoNotifPerm || "default";
+  return ("Notification" in window) ? Notification.permission : "unsupported";
+}
+function notifState(){
+  if(!ME) return "off";
+  const perm = notifPerm();
+  if(perm === "unsupported") return "unsupported";
+  if(perm === "denied") return "blocked";
+  const has = !!((ME.fcmTokens || []).length);
+  if(has && !ME.notifOff && (perm === "granted" || DEMO_MODE)) return "on";
+  return "off";
+}
+function renderNotifSettings(p){
+  const st = document.getElementById(p + "notif-status"); if(!st) return;
+  const en = document.getElementById(p + "notif-enable"), dis = document.getElementById(p + "notif-disable"), hint = document.getElementById(p + "notif-hint");
+  const k = notifState();
+  if(k === "on"){ st.textContent = "\u{1F7E2} On — this device is registered for push alerts; in-app notifications always arrive here too."; en.hidden = true; dis.hidden = false; if(hint && !p) hint.textContent = ""; }
+  else if(k === "blocked"){ st.textContent = "\u{1F515} Blocked by the browser — open the browser's site settings for this app, allow Notifications, then tap Turn on again."; en.hidden = false; dis.hidden = true; }
+  else if(k === "unsupported"){ st.textContent = "This browser does not support push notifications — in-app notifications still arrive here."; en.hidden = true; dis.hidden = true; }
+  else { st.textContent = "\u26AA Off — turn on to register this device for push alerts. In-app notifications still arrive here."; en.hidden = false; dis.hidden = true; }
+}
+function renderNotifSettingsAll(){ renderNotifSettings(""); renderNotifSettings("adm-"); }
+async function enableNotifications(){
+  if(!ME) return;
+  let perm = notifPerm();
+  if(DEMO_MODE){
+    perm = window.__demoNotifPermResult || "granted";
+    window.__demoNotifPerm = perm;
+    if(perm === "granted") ME.fcmTokens = ["demo-" + ME.id];
+  } else {
+    if(!FB || !FB.enablePush){ toast("Notifications are not available right now."); return; }
+    let res = null;
+    try{ res = await FB.enablePush(); }catch(e){}
+    if(!res){ toast("Could not turn on notifications — please try again."); renderNotifSettingsAll(); return; }
+    perm = res.perm;
+    if(perm === "granted" && res.token && (ME.fcmTokens || []).indexOf(res.token) < 0) ME.fcmTokens = (ME.fcmTokens || []).concat([res.token]);
+  }
+  if(perm === "granted"){
+    ME.notifOff = false;
+    ME.notifInviteDismissed = true;
+    if(FB) FB.saveUser(ME);
+    notify(ME.email, "\u{1F514} Notifications are on", "You turned on notifications for this device. New opportunities, replies and updates will reach you here in the app.");
+    persist();
+    renderNotifications();
+    toast("Notifications are on \u{1F514}");
+  } else if(perm === "denied"){
+    toast("Notifications are blocked by the browser — allow them in the site settings, then try again.");
+  }
+  renderNotifSettingsAll(); renderHome();
+}
+async function disableNotifications(){
+  if(!ME) return;
+  if(!DEMO_MODE && FB && FB.disablePush){ try{ await FB.disablePush(); }catch(e){} }
+  ME.fcmTokens = []; ME.notifOff = true;
+  if(FB) FB.saveUser(ME);
+  persist();
+  toast("Notifications turned off for this device.");
+  renderNotifSettingsAll(); renderHome();
+}
+
 function renderNotifications(){
+  renderNotifSettings("");
   const list = myNotifications();
   document.getElementById("notif-list").innerHTML = list.length ? list.map(notifHTML).join("") : '<div class="empty">No notifications yet.</div>';
   if(ME){ list.forEach(n => { if(!(n.readBy||[]).includes(ME.email)){ n.readBy = (n.readBy||[]).concat(ME.email); } }); persist(); }
@@ -2999,6 +3091,7 @@ function renderAdmin(){
   document.querySelectorAll("[data-afeat]").forEach(b => b.addEventListener("click", ()=> adminToggleFeatured(b.dataset.owner, b.dataset.afeat)));
   document.getElementById("demo-note-admin").hidden = !DEMO_MODE;
   renderBreaking();
+  renderNotifSettings("adm-");
 }
 function renderAdminMembers(){
   const q = (document.getElementById("adm-search").value || "").toLowerCase();
@@ -3636,7 +3729,7 @@ function wire(){
           whatsapp:v("reg-wa"), gates:{group:false,channel:false},
           identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:nowISO(), fcmTokens:[] });
         DB.users.push(gu); ME = gu; setSession(email);
-        notify(DEMO_ADMIN_EMAIL, "New registration", gu.name + " (" + gu.university + ") joined with Google — email already verified.");
+        notifyAdmin("New registration", gu.name + " (" + gu.university + ") joined with Google — email already verified.");
         saveDB(); exitGoogleProfileMode();
         toast("Welcome, " + gu.name.split(" ")[0] + "!");
         goAfterLogin();
@@ -3646,7 +3739,7 @@ function wire(){
         university:v("reg-uni"), dept:v("reg-dept"), degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"),
         whatsapp:v("reg-wa"), gates:{group:false,channel:false},
         identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:nowISO(), fcmTokens:[] });
-      DB.users.push(u); ME = u; setSession(email); notify(DEMO_ADMIN_EMAIL, "New registration", u.name + " (" + u.university + ") has registered; their email verification is pending."); saveDB();
+      DB.users.push(u); ME = u; setSession(email); notifyAdmin("New registration", u.name + " (" + u.university + ") has registered; their email verification is pending."); saveDB();
       renderVerify(); showView("view-verify");
     } else {
       try{
@@ -3654,12 +3747,13 @@ function wire(){
           const u2 = await FB.completeGoogleProfile({ name:v("reg-name"), university:v("reg-uni"), dept:v("reg-dept"),
             degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
           ME = u2; exitGoogleProfileMode();
+          notifyAdmin("New registration", u2.name + " (" + u2.university + ") joined with Google — email already verified."); persist();
           toast("Welcome, " + (ME.name || "").split(" ")[0] + "!");
           goAfterLogin();
         } else {
           const u = await FB.signUp({ name:v("reg-name"), email:email, pass:v("reg-pass"), university:v("reg-uni"), dept:v("reg-dept"),
             degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
-          ME = u; renderVerify(); showView("view-verify");
+          ME = u; notifyAdmin("New registration", u.name + " (" + u.university + ") has registered; their email verification is pending."); persist(); renderVerify(); showView("view-verify");
         }
       }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); if(err && err.code === "auth/email-already-in-use") $("reg-goto-login").hidden = false; }
     }
@@ -3810,6 +3904,18 @@ function wire(){
   $("my-sch-ph").textContent = MAQAMAT_SCHOLARSHIPS_PHONE;
   $("my-sch-wa").href = MAQAMAT_SCHOLARSHIPS_WA;
   $("my-web").href = MAQAMAT_WEBSITE;
+  $("notif-enable").addEventListener("click", ()=> enableNotifications());
+  $("notif-disable").addEventListener("click", ()=> disableNotifications());
+  $("adm-notif-enable").addEventListener("click", ()=> enableNotifications());
+  $("adm-notif-disable").addEventListener("click", ()=> disableNotifications());
+  $("invite-notif-yes").addEventListener("click", ()=> enableNotifications());
+  $("invite-notif-no").addEventListener("click", ()=>{
+    if(!ME) return;
+    ME.notifInviteDismissed = true;
+    if(FB) FB.saveUser(ME);
+    persist();
+    const inv = $("home-notif-invite"); if(inv) inv.hidden = true;
+  });
   $("news-box-malaysia").addEventListener("click", ()=> showView("view-malaysia"));
   $("news-box-iium").addEventListener("click", ()=> showView("view-iium"));
   $("home-top-head").addEventListener("click", ()=> showView("view-leaderboard"));
@@ -3952,7 +4058,7 @@ function wire(){
     if(!title){ msg.className = "msg err"; msg.textContent = "Please give the post a title."; return; }
     const post = { id:uid(), kind:"post", cat:(CAT_KEYS.indexOf($("adm-post-cat").value) >= 0 ? $("adm-post-cat").value : "news"), title:title, org:$("adm-post-org").value.trim(),
       country:$("adm-post-country").value.trim(), deadline:$("adm-post-deadline").value.trim(), link:$("adm-post-link").value.trim(),
-      details:$("adm-post-details").value.trim(), createdAt:nowISO() };
+      details:$("adm-post-details").value.trim(), notify:true, createdAt:nowISO() };
     DB.news.unshift(post); persist(); if(FB) FB.saveNews(post);
     notify("all", "New in " + (CAT_LABEL[post.cat] || "Opportunities"), title); persist();
     ["adm-post-title","adm-post-org","adm-post-country","adm-post-deadline","adm-post-link","adm-post-details"].forEach(id => $(id).value = "");
@@ -3986,6 +4092,7 @@ function wire(){
       featured:false, note:"", noteAt:"", createdAt:nowISO() });
     ME.lastActive = nowISO(); workFile = null;
     persist(); if(FB) FB.saveUser(ME);
+    notifyAdmin("New academic work shared", ME.name + " shared \u201c" + title + "\u201d — see Admin Panel \u2192 Academic Work."); persist();
     e.target.reset();
     $("work-date").value = new Date().toISOString().slice(0, 10);
     $("work-file-status").textContent = "A photo or PDF — poster, certificate or first page — up to ~700 KB.";
@@ -4043,6 +4150,7 @@ function wire(){
       message:"Destination: " + dest + ". Current qualification: " + qual + ". Degree wanted: " + degree + ". Field of study: " + field + ". — " + msg,
       status:"open", response:"", createdAt:nowISO() };
     DB.requests.unshift(r); persist(); if(FB) FB.saveRequest(r);
+    notifyAdmin("New Study Abroad request", ME.name + " — " + r.topic); persist();
     const m = $("hub-sa-ok"); m.className = "msg ok";
     m.textContent = "Sent to Mufti. His reply will appear under My Profile → My Requests.";
     e.target.reset(); $("hub-sa-other-wrap").hidden = true;
@@ -4059,6 +4167,7 @@ function submitRequest(o){
   const r = { id:uid(), email:ME.email, name:ME.name, topic:o.topic, type:o.type, lang:o.lang, message:o.message,
               status:"open", response:"", createdAt:nowISO() };
   DB.requests.unshift(r); persist(); if(FB) FB.saveRequest(r);
+  notifyAdmin("New " + o.type + " request", ME.name + " — " + o.topic); persist();
   const m = $(o.okEl); m.className = "msg ok";
   m.textContent = "Request sent. Mufti will reply here in the app — check My Profile → My Requests.";
   toast("Request sent.");
@@ -4096,7 +4205,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = authMod.getAuth(app);
     const db = fsMod.getFirestore(app);
-    const { collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, arrayUnion, runTransaction } = fsMod;
+    const { collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, arrayUnion, arrayRemove, runTransaction } = fsMod;
     const clean = o => JSON.parse(JSON.stringify(o));
     const authErrText = e => (window.authErrText ? window.authErrText(e) : "Something went wrong — please try again.");
     let pendingGoogleCred = null;   // Google credential captured from an account-exists error, spent by linkGoogle()
@@ -4212,20 +4321,33 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       ME = doc;
       if(isAdmin) subAll(); else subMine(user.email, user.uid);
       fetchPerformers();
-      registerFCM(user.uid);
+      registerFCM(user.uid, doc);
       return doc;
     }
-    async function registerFCM(uidUser){
+    async function registerFCM(uidUser, userDoc){
+      /* Silent refresh ONLY: never prompt at sign-in (the browser prompt now
+         belongs to the "Turn on notifications" button, a real user gesture),
+         and never resurrect a token the user deliberately turned off. */
       try{
         if(!FCM_VAPID_KEY || !("Notification" in window) || !("serviceWorker" in navigator)) return;
+        if(Notification.permission !== "granted") return;
+        if(userDoc && userDoc.notifOff) return;
         const msgMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js");
         const messaging = msgMod.getMessaging(app);
         const reg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
-        const perm = await Notification.requestPermission();
-        if(perm !== "granted") return;
         const token = await msgMod.getToken(messaging, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
         if(token) await updateDoc(doc(db,"users",uidUser), { fcmTokens: arrayUnion(token) });
       }catch(e){ console.warn("FCM registration skipped:", e && e.message); }
+    }
+    async function pushTokenNow(){
+      const msgMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js");
+      const messaging = msgMod.getMessaging(app);
+      const reg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+      const token = await msgMod.getToken(messaging, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
+      return { messaging, msgMod, token };
+    }
+    async function isAdminEmail(email){
+      try{ const snap = await getDoc(doc(db,"admins",email)); return snap.exists(); }catch(e){ return false; }
     }
     /* Decide where a completed Google sign-in lands. Three outcomes:
          ok      — a member doc (or the admin marker) exists for this UID:
@@ -4339,6 +4461,33 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       async saveUser(u){ if(u && u.id) await setDoc(doc(db,"users",u.id), clean(u), { merge:true }); },
       async saveNews(n){ await setDoc(doc(db,"news",n.id), clean(n), { merge:true }); },
       async saveRequest(r){ await setDoc(doc(db,"requests",r.id), clean(r), { merge:true }); },
+      async enablePush(){
+        const u = auth.currentUser; if(!u) return { perm:"denied" };
+        if(!("Notification" in window) || !("serviceWorker" in navigator)) return { perm:"unsupported" };
+        const perm = await Notification.requestPermission();
+        if(perm !== "granted") return { perm };
+        const { token } = await pushTokenNow();
+        if(token){
+          await updateDoc(doc(db,"users",u.uid), { fcmTokens: arrayUnion(token) });
+          if(await isAdminEmail(u.email)){
+            /* The rules allow an admin to write ONLY the fcmTokens field of
+               their own admins/{email} doc — the sender targets it too. */
+            try{ await updateDoc(doc(db,"admins",u.email), { fcmTokens: arrayUnion(token) }); }catch(e){ console.warn("admin token store:", e && e.code); }
+          }
+        }
+        return { perm, token: token || "" };
+      },
+      async disablePush(){
+        const u = auth.currentUser; if(!u) return;
+        try{
+          const { messaging, msgMod, token } = await pushTokenNow();
+          if(token){
+            await updateDoc(doc(db,"users",u.uid), { fcmTokens: arrayRemove(token) });
+            if(await isAdminEmail(u.email)){ try{ await updateDoc(doc(db,"admins",u.email), { fcmTokens: arrayRemove(token) }); }catch(e){} }
+          }
+          try{ await msgMod.deleteToken(messaging); }catch(e){}
+        }catch(e){ console.warn("disablePush:", e && e.message); }
+      },
       async persistAll(){
         for(const n of DB.notifications){ if(!savedNotifIds.has(n.id)){ try{ await setDoc(doc(db,"notifications",n.id), clean(n), { merge:true }); savedNotifIds.add(n.id); }catch(e){} } }
         if(ME && ME.role === "admin"){ /* admin edits flow through saveUser/saveRequest/saveNews above */ }

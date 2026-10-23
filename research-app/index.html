@@ -260,10 +260,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 @keyframes rfspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .hero-actions{position:absolute;top:12px;right:12px;z-index:5;display:flex;gap:8px}
 .home-head .hbtn .ly-ic{font-size:16px;line-height:1}
-.notice-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:var(--radius);padding:16px;margin:18px 0 12px}
-.notice-card p:last-child{margin-bottom:0}
-.guide-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:18px 0 12px}
-.guide-card h3{margin:0 0 10px}
+.info-btn{min-height:46px;font-size:15.5px;border-radius:10px;margin:8px 0 6px}
+.info-btn .ht-chev{display:inline-block;font-size:14px;transition:transform .2s ease}
+.info-btn[aria-expanded="true"] .ht-chev{transform:rotate(180deg)}
+.ulama-btn{border-left:4px solid var(--gold);background:var(--gold-xl)}
+.info-panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:0 0 10px}
+.info-panel:not([hidden]){animation:howtoIn .25s ease}
+@keyframes howtoIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .guide-step{display:flex;gap:10px;align-items:flex-start;margin:9px 0;font-size:15.5px;line-height:1.5}
 .guide-step .gn{width:26px;height:26px;flex:0 0 auto;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14.5px;margin-top:1px}
 .guide-step .gt{flex:1;min-width:0}
@@ -413,23 +416,23 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <p class="hero-tag">Jobs, internships, scholarships, fully funded conferences — and research guidance for every university discipline.</p>
     <div class="ur hero-ur">یونیورسٹی کے طلبہ و طالبات کے لیے ملازمتوں، اسکالرشپس اور تحقیق کی رہنمائی — ایک ہی جگہ۔</div>
   </div>
-  <div class="guide-card">
-    <h3>📖 How to use this app</h3>
-    <div class="guide-step"><div class="gn">1</div><div class="gt"><b>Create your free account</b> — tap the button below; it takes a minute.</div></div>
+  <button class="btn" id="welcome-register-btn">Create my free account</button>
+  <button class="btn ghost" id="welcome-login-btn">I already have an account — Log in</button>
+  <button class="btn ghost info-btn" id="btn-howto" aria-expanded="false" aria-controls="howto-panel"><span>📖 How to use</span><span class="ht-chev" aria-hidden="true">▾</span></button>
+  <div class="info-panel" id="howto-panel" hidden>
+    <div class="guide-step"><div class="gn">1</div><div class="gt"><b>Create your free account</b> — tap the button above; it takes a minute.</div></div>
     <div class="guide-step"><div class="gn">2</div><div class="gt"><b>Verify your email</b> — tap the link we send you, then press “I've verified”.</div></div>
     <div class="guide-step"><div class="gn">3</div><div class="gt"><b>Join the WhatsApp group &amp; follow the channel</b> (required).</div></div>
     <div class="guide-step"><div class="gn">4</div><div class="gt"><b>Complete your profile</b> — CV, LinkedIn &amp; Google Scholar (required).</div></div>
     <div class="guide-step"><div class="gn">5</div><div class="gt"><b>Explore</b> jobs, scholarships, conferences &amp; your discipline's research toolkit.</div></div>
     <div class="ur guide-ur">پہلے اکاؤنٹ بنائیں، ای میل کی تصدیق کریں، پھر واٹس ایپ گروپ و چینل سے جُڑ کر پروفائل مکمل کریں — اور مواقع سے فائدہ اٹھائیں۔</div>
   </div>
-  <div class="notice-card">
-    <p><b>Who is this app for?</b> University students of <b>all departments</b> — BS, MS, MPhil and PhD — anywhere in the world. Registration is free and open.</p>
-    <p><b>Ulama &amp; Alimat (madrasa scholars)</b> — this app is not for you. Please use the <b>Ilmi Mashghuliyat</b> app of Madrasa.pk instead:</p>
-    <a class="btn goldb" id="welcome-ulama-btn" href="#" target="_blank" rel="noopener">Open the Ilmi Mashghuliyat App (for Ulama &amp; Alimat)</a>
+  <button class="btn ghost info-btn" id="btn-who" aria-expanded="false" aria-controls="who-panel"><span>🎓 Who is this app for?</span><span class="ht-chev" aria-hidden="true">▾</span></button>
+  <div class="info-panel" id="who-panel" hidden>
+    <p style="margin:0 0 10px">University students of <b>all departments</b> — BS, MS, MPhil and PhD — anywhere in the world. Registration is free and open.</p>
     <div class="ur" style="font-size:15.5px">یہ ایپ یونیورسٹی طلبہ کے لیے ہے۔ علماء و عالمات براہِ کرم «علمی مشغولیت» ایپ استعمال فرمائیں۔</div>
   </div>
-  <button class="btn" id="welcome-register-btn">Create my free account</button>
-  <button class="btn ghost" id="welcome-login-btn">I already have an account — Log in</button>
+  <a class="btn ghost info-btn ulama-btn" id="welcome-ulama-btn" href="#" target="_blank" rel="noopener"><span>🕌 Ulama &amp; Alimat — Open the Ilmi Mashghuliyat App ↗</span></a>
   <p class="footer-note">By <b>Learn with Mufti Hassan</b> · <a id="welcome-site-link" href="#" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">learnwithmuftihassan.com</a></p>
   <p class="demo-note" id="demo-note-welcome" hidden>Preview build — live database connects at launch.</p>
 </section>
@@ -2677,6 +2680,15 @@ function wire(){
   $("toolkit-alturath").href = ALTURATH_HUB_URL;
   $("welcome-register-btn").addEventListener("click", ()=> showView("view-register"));
   $("welcome-login-btn").addEventListener("click", ()=> showView("view-login"));
+  const toggleInfoPanel = (btnId, panelId)=>{
+    const b = $(btnId), p = $(panelId), open = p.hidden;
+    [["btn-howto","howto-panel"],["btn-who","who-panel"]].forEach(([bi,pi])=>{
+      $(pi).hidden = true; $(bi).setAttribute("aria-expanded","false");
+    });
+    if (open){ p.hidden = false; b.setAttribute("aria-expanded","true"); }
+  };
+  $("btn-howto").addEventListener("click", ()=> toggleInfoPanel("btn-howto","howto-panel"));
+  $("btn-who").addEventListener("click", ()=> toggleInfoPanel("btn-who","who-panel"));
   $("welcome-refresh-btn").addEventListener("click", appRefresh);
   $("home-refresh-btn").addEventListener("click", appRefresh);
   $("reg-to-login").addEventListener("click", e => { e.preventDefault(); showView("view-login"); });

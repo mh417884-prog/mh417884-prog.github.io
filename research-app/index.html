@@ -529,6 +529,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <div class="help">With country code. Used only for study-related contact.</div>
     <div class="field-err" id="err-reg-wa">Please enter your WhatsApp number with country code.</div>
     <div class="msg" id="reg-msg"></div>
+    <button class="btn ghost" type="button" id="reg-goto-login" hidden>Log in with this email →</button>
     <button class="btn" type="submit">Submit registration</button>
   </form>
   <p class="center small">Already registered? <a href="#" id="reg-to-login">Log in</a></p>
@@ -2359,8 +2360,18 @@ window.authErrText = function(err){
       return pair("Network problem — please check your connection and try again.", "نیٹ ورک کا مسئلہ ہے؛ کنکشن دیکھ کر دوبارہ کوشش کریں۔");
     case "auth/too-many-requests":
       return pair("Too many attempts — please wait a few minutes and try again.", "کوششیں زیادہ ہو گئیں؛ چند منٹ رک کر دوبارہ کوشش کریں۔");
-    case "auth/wrong-password": case "auth/invalid-credential": case "auth/user-not-found":
-      return pair("That password does not match this account. Please check it and try again.", "یہ پاس ورڈ اس اکاؤنٹ سے نہیں ملتا؛ جانچ کر دوبارہ لکھیں۔");
+    case "auth/wrong-password": case "auth/invalid-credential": case "auth/user-not-found": case "auth/invalid-login-credentials":
+      return pair("The email or password does not match our records — please check both and try again.", "ای میل یا پاس ورڈ درست نہیں ہے — دونوں جانچ کر دوبارہ کوشش کریں۔");
+    case "auth/email-already-in-use":
+      return pair("This email is already registered.", "یہ ای میل پہلے سے رجسٹرڈ ہے۔");
+    case "auth/weak-password": case "auth/missing-password":
+      return pair("That password is too weak — please use at least 6 characters.", "یہ پاس ورڈ کمزور ہے — کم از کم 6 حروف استعمال کریں۔");
+    case "auth/user-disabled":
+      return pair("This account has been disabled — please contact us for help.", "یہ اکاؤنٹ بند کر دیا گیا ہے — مدد کے لیے رابطہ کریں۔");
+    case "auth/account-exists-with-different-credential":
+      return pair("This email already has an account — please log in with your password first.", "اس ای میل کا اکاؤنٹ پہلے سے موجود ہے — پہلے پاس ورڈ سے لاگ اِن کریں۔");
+    case "auth/credential-already-in-use":
+      return pair("That Google account is already linked to a different login.", "یہ گوگل اکاؤنٹ کسی اور لاگ اِن سے پہلے ہی جڑا ہوا ہے۔");
     case "auth/invalid-email":
       return pair("That email address does not look right.", "یہ ای میل درست نہیں لگتی۔");
     case "auth/unauthorized-domain":
@@ -3455,6 +3466,12 @@ function wire(){
   $("welcome-refresh-btn").addEventListener("click", appRefresh);
   $("home-refresh-btn").addEventListener("click", appRefresh);
   $("reg-to-login").addEventListener("click", e => { e.preventDefault(); showView("view-login"); });
+  $("reg-goto-login").addEventListener("click", ()=>{
+    $("login-email").value = $("reg-email").value.trim();
+    const lm = $("login-msg"); lm.className = "msg"; lm.textContent = "";
+    $("reg-goto-login").hidden = true;
+    showView("view-login");
+  });
   $("login-to-register").addEventListener("click", e => { e.preventDefault(); showView("view-register"); });
   /* ---- Google sign-in wiring ---- */
   $("welcome-google-btn").addEventListener("click", googleClicked);
@@ -3508,10 +3525,11 @@ function wire(){
     ok = showErr("err-reg-city", !v("reg-city")) && ok;
     ok = showErr("err-reg-wa", v("reg-wa").replace(/\D/g,"").length < 7) && ok;
     const msg = $("reg-msg"); msg.className = "msg"; msg.textContent = "";
+    $("reg-goto-login").hidden = true;
     if(!ok) return;
     const email = v("reg-email");
     if(DEMO_MODE){
-      if(findUser(email)){ msg.className = "msg err"; msg.textContent = "This email is already registered. Please log in instead."; return; }
+      if(findUser(email)){ msg.className = "msg err"; msg.textContent = authErrText({ code:"auth/email-already-in-use" }); $("reg-goto-login").hidden = false; return; }
       if(GOOGLE_PROFILE){
         /* Google sign-in (demo): the email is already verified by Google,
            so the member is approved instantly — no verify screen. */
@@ -3545,7 +3563,7 @@ function wire(){
             degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
           ME = u; renderVerify(); showView("view-verify");
         }
-      }catch(err){ msg.className = "msg err"; msg.textContent = "Registration failed: " + ((err && err.message) || err); }
+      }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); if(err && err.code === "auth/email-already-in-use") $("reg-goto-login").hidden = false; }
     }
   });
 
@@ -3556,11 +3574,11 @@ function wire(){
     const msg = $("login-msg"); msg.className = "msg"; msg.textContent = "";
     if(DEMO_MODE){
       const u = findUser(email);
-      if(!u || u.pass !== pass){ msg.className = "msg err"; msg.textContent = "Email or password is incorrect. New here? Create an account first."; return; }
+      if(!u || u.pass !== pass){ msg.className = "msg err"; msg.textContent = authErrText({ code:"auth/invalid-credential" }); return; }
       ME = u; setSession(u.email); toast("Welcome, " + u.name.split(" ")[0] + "."); goAfterLogin();
     } else {
       try{ ME = await FB.signIn(email, pass); goAfterLogin(); }
-      catch(err){ msg.className = "msg err"; msg.textContent = "Login failed: " + ((err && err.message) || err); }
+      catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); }
     }
   });
   if(DEMO_MODE){
@@ -3583,14 +3601,14 @@ function wire(){
       const fresh = await FB.checkVerified(); if(fresh) ME = fresh;
       if(ME && ME.status === "approved"){ toast("Email verified — welcome!"); goAfterLogin(); }
       else { msg.className = "msg err"; msg.textContent = "Not verified yet — tap the link in the email we sent you first (check the spam / promotions folder), then press Continue again."; }
-    }catch(err){ msg.className = "msg err"; msg.textContent = "Could not check just now — please try again in a moment."; }
+    }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); }
   });
   $("verify-resend").addEventListener("click", async e => {
     const btn = e.currentTarget;
     if(DEMO_MODE){ toast("Demo build — no email is sent. Use “Simulate verification (demo)” below."); return; }
     btn.disabled = true; btn.textContent = "Sending…";
     try{ await FB.resendVerification(); btn.textContent = "Verification email sent ✓"; toast("Verification email sent — check your inbox."); }
-    catch(err){ btn.textContent = "Resend verification email"; toast("Could not resend just now — wait a minute and try again."); }
+    catch(err){ btn.textContent = "Resend verification email"; toast(authErrText(err)); }
     setTimeout(()=>{ btn.disabled = false; btn.textContent = "Resend verification email"; }, 30000);
   });
   $("verify-simulate").addEventListener("click", ()=>{

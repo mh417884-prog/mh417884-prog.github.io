@@ -1288,6 +1288,22 @@ const SOURCE_CARDS = [
  {cat:"conference", kind:"source", title:"Fully funded conferences — posted here", org:"Research with Mufti Hassan", country:"Worldwide", link:"", details:"Fully funded conferences, summits and academic forums are posted in this section as they are announced. Turn on notifications so you never miss a deadline."}
 ];
 const CAT_LABEL = { job:"Jobs & Internships", scholarship:"Scholarships", conference:"Conferences", news:"News", saved:"Saved Items" };
+const CAT_KEYS = ["job", "scholarship", "conference", "news"];
+/* The stored `cat` field is the ONE authoritative category of an item.
+   Anything missing or unknown is treated as News (never dropped). */
+function catOf(n){ return CAT_KEYS.indexOf(n && n.cat) >= 0 ? n.cat : "news"; }
+/* The trusted-source cards are app content, not postings: they are merged
+   into the feed in LIVE mode too (the demo seed already contains them),
+   so every category screen shows its own sources on the live app as well. */
+function sourceDocs(){
+  const t = Date.now();
+  return SOURCE_CARDS.map((sc, i)=> Object.assign({ id:"src-" + i, createdAt:new Date(t - 86400000 * (i + 2)).toISOString() }, sc));
+}
+function withSources(docs){
+  const ids = {};
+  docs.forEach(d => { ids[d.id] = true; });
+  return docs.concat(sourceDocs().filter(sc => !ids[sc.id]));
+}
 const CAT_INTRO = {
  job:"Real postings appear here as Mufti verifies them. Meanwhile, search these trusted boards — they are where genuine openings live:",
  scholarship:"Announcements appear here as they open. These official portals are the sources to trust — never pay an 'agent' for a scholarship form:",
@@ -2052,7 +2068,7 @@ function oppCard(n){
   ].filter(Boolean).join(" · ");
   const saved = isSaved(n.id);
   return '<div class="opp-card">'
-    + '<span class="tag ' + esc(n.cat) + '">' + esc(CAT_LABEL[n.cat] || "News") + '</span>'
+    + '<span class="tag ' + esc(catOf(n)) + '">' + esc(CAT_LABEL[catOf(n)] || "News") + '</span>'
     + (isSrc ? '<span class="tag source">Trusted source</span>' : '')
     + '<h3>' + esc(n.title) + '</h3>'
     + '<div class="opp-meta">' + meta + '</div>'
@@ -2082,7 +2098,7 @@ function renderOpps(cat){
     attachOppListeners();
     return;
   }
-  if(cat !== "all") items = items.filter(n => n.cat === cat);
+  if(cat !== "all") items = items.filter(n => catOf(n) === cat);
   const posts = items.filter(n => n.kind !== "source"), srcs = items.filter(n => n.kind === "source");
   document.getElementById("opps-list").innerHTML =
     (posts.map(oppCard).join("") || "")
@@ -2095,7 +2111,7 @@ function renderHome(){
   maybeIssueCertificates();
   document.getElementById("home-hello").textContent = ME.name.split(" ")[0];
   document.getElementById("home-avatar").textContent = (ME.name || "S").trim().charAt(0).toUpperCase();
-  const c = cat => DB.news.filter(n => n.cat === cat && n.kind !== "source").length;
+  const c = cat => DB.news.filter(n => catOf(n) === cat).length;
   document.getElementById("cnt-jobs").textContent = c("job");
   document.getElementById("cnt-scholarships").textContent = c("scholarship");
   document.getElementById("cnt-conferences").textContent = c("conference");
@@ -3120,7 +3136,7 @@ function wire(){
     const title = $("adm-post-title").value.trim();
     const msg = $("adm-post-msg"), okm = $("adm-post-ok"); msg.className = "msg"; okm.className = "msg";
     if(!title){ msg.className = "msg err"; msg.textContent = "Please give the post a title."; return; }
-    const post = { id:uid(), kind:"post", cat:$("adm-post-cat").value, title:title, org:$("adm-post-org").value.trim(),
+    const post = { id:uid(), kind:"post", cat:(CAT_KEYS.indexOf($("adm-post-cat").value) >= 0 ? $("adm-post-cat").value : "news"), title:title, org:$("adm-post-org").value.trim(),
       country:$("adm-post-country").value.trim(), deadline:$("adm-post-deadline").value.trim(), link:$("adm-post-link").value.trim(),
       details:$("adm-post-details").value.trim(), createdAt:nowISO() };
     DB.news.unshift(post); persist(); if(FB) FB.saveNews(post);
@@ -3307,7 +3323,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       stopSubs();
       subSettings();
       unsubs.push(onSnapshot(collection(db,"users"), s => applyColl("users", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("users snap", e && e.code)));
-      unsubs.push(onSnapshot(collection(db,"news"), s => applyColl("news", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("news snap", e && e.code)));
+      unsubs.push(onSnapshot(collection(db,"news"), s => applyColl("news", withSources(s.docs.map(d => Object.assign(d.data(), {id:d.id})))), e => console.warn("news snap", e && e.code)));
       unsubs.push(onSnapshot(collection(db,"requests"), s => applyColl("requests", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("req snap", e && e.code)));
       unsubs.push(onSnapshot(collection(db,"notifications"), s => applyColl("notifications", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("notif snap", e && e.code)));
     }
@@ -3315,7 +3331,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       stopSubs();
       subSettings();
       unsubs.push(onSnapshot(doc(db,"users",uid), s => { if(s.exists()){ const me = Object.assign(s.data(), {id:s.id}); DB.users = [me]; ME = me; rerender(); } }, e => console.warn("me snap", e && e.code)));
-      unsubs.push(onSnapshot(collection(db,"news"), s => applyColl("news", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("news snap", e && e.code)));
+      unsubs.push(onSnapshot(collection(db,"news"), s => applyColl("news", withSources(s.docs.map(d => Object.assign(d.data(), {id:d.id})))), e => console.warn("news snap", e && e.code)));
       unsubs.push(onSnapshot(query(collection(db,"requests"), where("email","==",email)), s => applyColl("requests", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("req snap", e && e.code)));
       unsubs.push(onSnapshot(query(collection(db,"notifications"), where("to","in",["all",email])), s => applyColl("notifications", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("notif snap", e && e.code)));
     }

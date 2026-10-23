@@ -100,6 +100,10 @@ p{margin-bottom:10px}
 .btn.sm{width:auto;display:inline-flex;min-height:44px;font-size:15px;padding:7px 16px;margin:4px 2px}
 .btn[disabled]{opacity:.45;pointer-events:none}
 .btn.danger{background:#fff;color:var(--err);border-color:#E3B7AE}
+.btn-google{background:#fff;color:var(--navy);border:1px solid #C3CEDA;font-weight:600}
+.btn-google .gmark{display:inline-flex;flex:0 0 auto}
+.or-divider{display:flex;align-items:center;gap:12px;margin:14px 0 2px;color:#8494A7;font-size:13.5px}
+.or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* ---------- Cards (14px radius, thin gold accent bar on section cards) ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
@@ -432,6 +436,8 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   </div>
   <button class="btn" id="welcome-register-btn">Create my free account</button>
   <button class="btn ghost" id="welcome-login-btn">I already have an account — Log in</button>
+  <div class="or-divider"><span>or</span></div>
+  <button class="btn btn-google" id="welcome-google-btn"><span class="gmark"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34.5 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34.5 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg></span> Continue with Google</button>
   <button class="btn ghost info-btn" id="btn-howto" aria-expanded="false" aria-controls="howto-panel"><span>📖 How to use</span><span class="ht-chev" aria-hidden="true">▾</span></button>
   <div class="info-panel" id="howto-panel" hidden>
     <div class="guide-step"><div class="gn">1</div><div class="gt"><b>Create your free account</b> — tap the button above; it takes a minute.</div></div>
@@ -458,6 +464,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <h2>Register — it takes a minute</h2>
   <p class="small">Fill in your details. After registering, we email you a verification link — tap it, then complete two quick steps (community + academic identity) and you are in.</p>
   <div class="notice"><p style="margin:0"><b>Just for non-Ulama university students.</b></p><p style="margin:6px 0 0">Ulama university students — please log in with the <a id="register-ulama-link" href="#" target="_blank" rel="noopener">Ilmi Mashghuliyat app</a>.</p></div>
+  <div class="notice" id="reg-google-note" hidden><p style="margin:0"><b>✓ Signed in with Google</b> as <b id="reg-google-email"></b>. Just complete your student profile below — no password and no email verification needed, because Google has already verified your email.</p><div class="ur" style="font-size:15px;margin-top:6px">آپ Google سے سائن اِن ہیں — بس ذیل میں طالب علم پروفائل مکمل کریں؛ نہ پاس ورڈ چاہیے نہ ای میل تصدیق، کیونکہ Google آپ کی ای میل پہلے ہی تصدیق کر چکا ہے۔</div></div>
   <form id="reg-form" novalidate>
     <label for="reg-name">Full name <span class="req">*</span></label>
     <input id="reg-name" type="text" autocomplete="name" placeholder="e.g. Ayesha Khan">
@@ -516,6 +523,26 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div class="topbar"><button class="tbtn" data-back="view-welcome">‹ Back</button><div class="ttl">Log In</div><span style="width:44px"></span></div>
   <img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="" style="width:72px;height:72px;border-radius:16px;display:block;margin:10px auto">
   <h2 class="center">Welcome back</h2>
+  <div class="card accent" id="link-panel" hidden>
+    <h3 style="margin-top:0">Link Google to your existing account</h3>
+    <p style="margin:0 0 6px">The email <b id="link-email"></b> already has an app account with a password. Enter that password once — Google will be linked to the <b>same</b> account, and from then on either sign-in opens it.</p>
+    <div class="ur" style="font-size:15px">یہ ای میل پہلے سے پاس ورڈ والے اکاؤنٹ سے جُڑی ہے۔ اپنا ایپ پاس ورڈ ایک بار لکھیں — Google اسی اکاؤنٹ سے منسلک ہو جائے گا، اور پھر دونوں طریقوں سے ایک ہی اکاؤنٹ کھلے گا۔</div>
+    <label for="link-pass">App password</label>
+    <div class="passwrap"><input id="link-pass" type="password" autocomplete="current-password" placeholder="Your app password"><button type="button" class="pass-eye" data-eye="link-pass" aria-label="Show password">👁</button></div>
+    <div class="msg" id="link-msg"></div>
+    <button class="btn" id="link-submit" type="button">Link &amp; sign in</button>
+    <button class="btn ghost" id="link-cancel" type="button">Not now</button>
+  </div>
+  <button class="btn btn-google" id="login-google-btn" type="button"><span class="gmark"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34.5 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34.5 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg></span> Continue with Google</button>
+  <div class="or-divider"><span>or use your email &amp; password</span></div>
+  <div class="card" id="google-demo-panel" hidden>
+    <h3 style="margin-top:0">Continue with Google — demo simulation</h3>
+    <p class="small">This preview build has no real Google sign-in. Pick a simulated Google account to walk each path:</p>
+    <button class="btn ghost sm" id="gdemo-member" type="button" style="display:flex;width:100%">Ayesha Khan — ayesha.khan.demo@gmail.com · already a member</button>
+    <button class="btn ghost sm" id="gdemo-new" type="button" style="display:flex;width:100%">Bilal Ahmad — bilal.ahmad.demo@gmail.com · new, first time</button>
+    <button class="btn ghost sm" id="gdemo-link" type="button" style="display:flex;width:100%">Mufti Muhammad Hassan — the admin email · has a password account (linking)</button>
+    <p class="demo-note">Demo simulation only — in the live app, Google's own account chooser appears here instead.</p>
+  </div>
   <form id="login-form" novalidate>
     <label for="login-email">Email</label>
     <input id="login-email" type="email" autocomplete="email" placeholder="you@example.com">
@@ -2271,6 +2298,109 @@ function toast(text, ms){
   const t = document.getElementById("toast"); t.textContent = text; t.style.display = "block";
   clearTimeout(t._h); t._h = setTimeout(()=>{ t.style.display = "none"; }, ms || 3200);
 }
+/* ================= Google sign-in (UI side) =================
+   The Firebase module (live mode) does the real work through
+   FB.signInWithGoogle() / FB.linkGoogle() / FB.completeGoogleProfile()
+   and returns a small route object; everything user-facing is decided
+   here. Demo mode simulates the same three outcomes. */
+window.authErrText = function(err){
+  const code = (err && err.code) || "";
+  const pair = (en, ur) => en + " — " + ur;
+  switch(code){
+    case "auth/popup-closed-by-user": case "auth/cancelled-popup-request":
+      return pair("Google sign-in was closed before it finished. Please try again.", "گوگل سائن اِن مکمل ہونے سے پہلے بند ہو گیا؛ دوبارہ کوشش کریں۔");
+    case "auth/popup-blocked":
+      return pair("Your browser blocked the Google pop-up. Please allow pop-ups for this site and try again.", "براؤزر نے گوگل ونڈو روک دی؛ پاپ اپ کی اجازت دے کر دوبارہ کوشش کریں۔");
+    case "auth/network-request-failed":
+      return pair("Network problem — please check your connection and try again.", "نیٹ ورک کا مسئلہ ہے؛ کنکشن دیکھ کر دوبارہ کوشش کریں۔");
+    case "auth/too-many-requests":
+      return pair("Too many attempts — please wait a few minutes and try again.", "کوششیں زیادہ ہو گئیں؛ چند منٹ رک کر دوبارہ کوشش کریں۔");
+    case "auth/wrong-password": case "auth/invalid-credential": case "auth/user-not-found":
+      return pair("That password does not match this account. Please check it and try again.", "یہ پاس ورڈ اس اکاؤنٹ سے نہیں ملتا؛ جانچ کر دوبارہ لکھیں۔");
+    case "auth/invalid-email":
+      return pair("That email address does not look right.", "یہ ای میل درست نہیں لگتی۔");
+    case "auth/unauthorized-domain":
+      return pair("Google sign-in is not enabled for this website address yet — please use your email and password for now.", "اس ویب سائٹ کے لیے گوگل سائن اِن ابھی فعال نہیں؛ فی الحال ای میل و پاس ورڈ استعمال کریں۔");
+    case "auth/operation-not-allowed":
+      return pair("Google sign-in is being switched on — please try again shortly, or use your email and password.", "گوگل سائن اِن فعال کیا جا رہا ہے — تھوڑی دیر بعد کوشش کریں، یا ای میل و پاس ورڈ سے داخل ہوں۔");
+    default:
+      return pair("Something went wrong — please try again.", "کچھ مسئلہ ہو گیا؛ دوبارہ کوشش کریں۔");
+  }
+};
+let GOOGLE_PROFILE = null;   // {email,name} while a Google user completes the profile form
+let LINK_EMAIL = "";         // email shown in the account-linking prompt
+function routeGoogleResult(res){
+  if(!res) return;   /* null = redirect sign-in in progress; the module routes the return */
+  if(res.status === "ok"){ ME = res.user; toast("Welcome, " + (ME.name || "").split(" ")[0] + "."); goAfterLogin(); }
+  else if(res.status === "profile"){ enterGoogleProfileMode(res); }
+  else if(res.status === "link"){ showView("view-login"); openLinkPanel(res.email); }
+  else if(res.status === "error"){ toast(res.message || authErrText(null)); }
+}
+window.__googleReady = routeGoogleResult;   /* the module script calls this after a redirect return */
+function enterGoogleProfileMode(p){
+  GOOGLE_PROFILE = { email:p.email || "", name:p.name || "" };
+  showView("view-register");
+  $("reg-name").value = p.name || "";
+  $("reg-email").value = p.email || "";
+  $("reg-email").readOnly = true;
+  document.querySelector('label[for="reg-pass"]').style.display = "none";
+  document.querySelector('#view-register .passwrap').style.display = "none";
+  $("reg-google-note").hidden = false;
+  $("reg-google-email").textContent = p.email || "";
+  $("reg-form").querySelector('button[type="submit"]').textContent = "Complete my profile";
+  setTimeout(()=>{ const u = $("reg-uni"); if(u) u.focus(); }, 80);
+}
+function exitGoogleProfileMode(){
+  if(!GOOGLE_PROFILE) return;
+  GOOGLE_PROFILE = null;
+  $("reg-email").readOnly = false;
+  document.querySelector('label[for="reg-pass"]').style.display = "";
+  document.querySelector('#view-register .passwrap').style.display = "";
+  $("reg-google-note").hidden = true;
+  $("reg-form").querySelector('button[type="submit"]').textContent = "Submit registration";
+}
+function openLinkPanel(email){
+  LINK_EMAIL = email || "";
+  $("link-email").textContent = LINK_EMAIL;
+  $("link-pass").value = "";
+  const m = $("link-msg"); m.className = "msg"; m.textContent = "";
+  $("link-panel").hidden = false;
+  $("link-panel").scrollIntoView({ block:"center", behavior:"smooth" });
+}
+async function googleClicked(){
+  if(DEMO_MODE){
+    showView("view-login");
+    $("google-demo-panel").hidden = false;
+    $("google-demo-panel").scrollIntoView({ block:"center" });
+    return;
+  }
+  if(!FB || !FB.signInWithGoogle){ toast(authErrText({ code:"auth/operation-not-allowed" })); return; }
+  toast("Opening Google sign-in…");
+  const res = await FB.signInWithGoogle();
+  routeGoogleResult(res);
+}
+async function linkSubmit(){
+  const pass = $("link-pass").value;
+  const msg = $("link-msg"); msg.className = "msg"; msg.textContent = "";
+  if(!LINK_EMAIL){ msg.className = "msg err"; msg.textContent = "Please tap “Continue with Google” again first."; return; }
+  if(!pass){ msg.className = "msg err"; msg.textContent = "Please enter your app password. — اپنا ایپ پاس ورڈ لکھیں۔"; return; }
+  if(DEMO_MODE){
+    const u = findUser(LINK_EMAIL);
+    if(!u || u.pass !== pass){ msg.className = "msg err"; msg.textContent = authErrText({ code:"auth/wrong-password" }); return; }
+    ME = u; setSession(u.email); $("link-panel").hidden = true;
+    toast("Google linked to your account (demo) — welcome!");
+    goAfterLogin();
+    return;
+  }
+  const btn = $("link-submit"); btn.disabled = true; btn.textContent = "Linking…";
+  try{
+    ME = await FB.linkGoogle(LINK_EMAIL, pass);
+    $("link-panel").hidden = true;
+    toast("Google linked — both sign-ins now open this one account.");
+    goAfterLogin();
+  }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); }
+  btn.disabled = false; btn.textContent = "Link & sign in";
+}
 function goAfterLogin(){
   if(!ME) return showView("view-welcome");
   normalizeUser(ME);
@@ -3228,6 +3358,29 @@ function wire(){
   $("home-refresh-btn").addEventListener("click", appRefresh);
   $("reg-to-login").addEventListener("click", e => { e.preventDefault(); showView("view-login"); });
   $("login-to-register").addEventListener("click", e => { e.preventDefault(); showView("view-register"); });
+  /* ---- Google sign-in wiring ---- */
+  $("welcome-google-btn").addEventListener("click", googleClicked);
+  $("login-google-btn").addEventListener("click", googleClicked);
+  $("link-submit").addEventListener("click", linkSubmit);
+  $("link-cancel").addEventListener("click", ()=>{ $("link-panel").hidden = true; });
+  $("reg-to-login").addEventListener("click", exitGoogleProfileMode);
+  document.querySelector('#view-register [data-back]').addEventListener("click", exitGoogleProfileMode);
+  if(DEMO_MODE){
+    $("gdemo-member").addEventListener("click", ()=>{
+      $("google-demo-panel").hidden = true;
+      ME = findUser("student@demo.local"); if(!ME) return;
+      setSession(ME.email); toast("Signed in with Google (demo) — welcome, " + ME.name.split(" ")[0] + ".");
+      goAfterLogin();
+    });
+    $("gdemo-new").addEventListener("click", ()=>{
+      $("google-demo-panel").hidden = true;
+      routeGoogleResult({ status:"profile", email:"bilal.ahmad.demo@gmail.com", name:"Bilal Ahmad" });
+    });
+    $("gdemo-link").addEventListener("click", ()=>{
+      $("google-demo-panel").hidden = true;
+      routeGoogleResult({ status:"link", email:DEMO_ADMIN_EMAIL });
+    });
+  }
   $("demo-note-welcome").hidden = !DEMO_MODE;
   $("demo-helpers").hidden = !DEMO_MODE;
 
@@ -3238,7 +3391,7 @@ function wire(){
     let ok = true;
     ok = showErr("err-reg-name", !v("reg-name")) && ok;
     ok = showErr("err-reg-email", !validEmail(v("reg-email"))) && ok;
-    ok = showErr("err-reg-pass", v("reg-pass").length < 6) && ok;
+    ok = showErr("err-reg-pass", !GOOGLE_PROFILE && v("reg-pass").length < 6) && ok;
     ok = showErr("err-reg-uni", !v("reg-uni")) && ok;
     ok = showErr("err-reg-dept", !v("reg-dept")) && ok;
     ok = showErr("err-reg-degree", !v("reg-degree")) && ok;
@@ -3250,6 +3403,20 @@ function wire(){
     const email = v("reg-email");
     if(DEMO_MODE){
       if(findUser(email)){ msg.className = "msg err"; msg.textContent = "This email is already registered. Please log in instead."; return; }
+      if(GOOGLE_PROFILE){
+        /* Google sign-in (demo): the email is already verified by Google,
+           so the member is approved instantly — no verify screen. */
+        const gu = normalizeUser({ id:uid(), role:"student", status:"approved", emailVerified:true, name:v("reg-name"), email:email, pass:"",
+          university:v("reg-uni"), dept:v("reg-dept"), degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"),
+          whatsapp:v("reg-wa"), gates:{group:false,channel:false},
+          identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:nowISO(), fcmTokens:[] });
+        DB.users.push(gu); ME = gu; setSession(email);
+        notify(DEMO_ADMIN_EMAIL, "New registration", gu.name + " (" + gu.university + ") joined with Google — email already verified.");
+        saveDB(); exitGoogleProfileMode();
+        toast("Welcome, " + gu.name.split(" ")[0] + "!");
+        goAfterLogin();
+        return;
+      }
       const u = normalizeUser({ id:uid(), role:"student", status:"unverified", emailVerified:false, name:v("reg-name"), email:email, pass:v("reg-pass"),
         university:v("reg-uni"), dept:v("reg-dept"), degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"),
         whatsapp:v("reg-wa"), gates:{group:false,channel:false},
@@ -3258,9 +3425,17 @@ function wire(){
       renderVerify(); showView("view-verify");
     } else {
       try{
-        const u = await FB.signUp({ name:v("reg-name"), email:email, pass:v("reg-pass"), university:v("reg-uni"), dept:v("reg-dept"),
-          degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
-        ME = u; renderVerify(); showView("view-verify");
+        if(GOOGLE_PROFILE){
+          const u2 = await FB.completeGoogleProfile({ name:v("reg-name"), university:v("reg-uni"), dept:v("reg-dept"),
+            degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
+          ME = u2; exitGoogleProfileMode();
+          toast("Welcome, " + (ME.name || "").split(" ")[0] + "!");
+          goAfterLogin();
+        } else {
+          const u = await FB.signUp({ name:v("reg-name"), email:email, pass:v("reg-pass"), university:v("reg-uni"), dept:v("reg-dept"),
+            degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
+          ME = u; renderVerify(); showView("view-verify");
+        }
       }catch(err){ msg.className = "msg err"; msg.textContent = "Registration failed: " + ((err && err.message) || err); }
     }
   });
@@ -3283,7 +3458,7 @@ function wire(){
     $("demo-student-btn").addEventListener("click", ()=>{ ME = findUser("student@demo.local"); setSession(ME.email); goAfterLogin(); });
     $("demo-admin-btn").addEventListener("click", ()=>{ ME = findUser(DEMO_ADMIN_EMAIL); setSession(ME.email); goAfterLogin(); });
   }
-  function logout(){ ME = null; setSession(null); if(FB) FB.signOut(); showView("view-welcome"); }
+  function logout(){ ME = null; setSession(null); exitGoogleProfileMode(); if(FB) FB.signOut(); showView("view-welcome"); }
   $("verify-logout").addEventListener("click", logout);
   $("gates-logout").addEventListener("click", logout);
   $("profile-logout").addEventListener("click", logout);
@@ -3691,6 +3866,8 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     const db = fsMod.getFirestore(app);
     const { collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, arrayUnion, runTransaction } = fsMod;
     const clean = o => JSON.parse(JSON.stringify(o));
+    const authErrText = e => (window.authErrText ? window.authErrText(e) : "Something went wrong — please try again.");
+    let pendingGoogleCred = null;   // Google credential captured from an account-exists error, spent by linkGoogle()
     const savedNotifIds = new Set();
     let unsubs = [];
     const stopSubs = ()=>{ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs = []; };
@@ -3818,6 +3995,31 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
         if(token) await updateDoc(doc(db,"users",uidUser), { fcmTokens: arrayUnion(token) });
       }catch(e){ console.warn("FCM registration skipped:", e && e.message); }
     }
+    /* Decide where a completed Google sign-in lands. Three outcomes:
+         ok      — a member doc (or the admin marker) exists for this UID:
+                   the normal startFor() path routes them.
+         link    — the email already owns a PASSWORD account under another
+                   credential. We never create a second member for it: the
+                   user is signed back out and the UI asks for that account's
+                   password once, then links Google onto the same UID.
+         profile — a genuinely new Google user: no doc yet; the UI sends
+                   them through the same profile form as email registrants
+                   (completeGoogleProfile writes the doc), and startFor()
+                   promotes them instantly because Google tokens arrive
+                   with email_verified == true. */
+    async function resolveGoogleUser(user){
+      const isAdmin = await fetchIsAdmin(user.email);
+      const doc = await fetchUser(user.uid);
+      if(doc || isAdmin){ const u = await startFor(user); return { status:"ok", user:u }; }
+      let methods = [];
+      try{ methods = await authMod.fetchSignInMethodsForEmail(auth, user.email); }catch(e){}
+      const providers = (user.providerData || []).map(p => p.providerId);
+      if(methods.indexOf("password") >= 0 && providers.indexOf("password") < 0){
+        try{ await authMod.signOut(auth); }catch(e){}
+        return { status:"link", email:user.email };
+      }
+      return { status:"profile", email:user.email, name:user.displayName || "", photo:user.photoURL || "" };
+    }
     window.__fbAdapter = {
       async signUp(data){
         const c = await authMod.createUserWithEmailAndPassword(auth, data.email, data.pass);
@@ -3837,6 +4039,61 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
         const u = await startFor(c.user);
         if(!u) throw new Error("Account record not found. Please register first.");
         return u;
+      },
+      async signInWithGoogle(){
+        const provider = new authMod.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt:"select_account" });
+        let cred;
+        try{
+          cred = await authMod.signInWithPopup(auth, provider);
+        }catch(e){
+          if(e && e.code === "auth/account-exists-with-different-credential"){
+            pendingGoogleCred = authMod.GoogleAuthProvider.credentialFromError(e) || null;
+            return { status:"link", email:(e.customData && e.customData.email) || "" };
+          }
+          if(e && ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].indexOf(e.code) >= 0){
+            /* In-app webviews and pop-up blockers: fall back to a full
+               redirect; the startup code routes the return. */
+            try{ await authMod.signInWithRedirect(auth, provider); return null; }
+            catch(e2){ return { status:"error", message:authErrText(e2) }; }
+          }
+          return { status:"error", message:authErrText(e) };
+        }
+        return resolveGoogleUser(cred.user);
+      },
+      /* Spend the password ONCE to weld Google onto the existing account:
+         sign in with the password credential, then link the pending
+         Google credential (from the account-exists error) — or, when the
+         collision was detected after a successful Google sign-in instead,
+         link via a fresh Google pop-up. Either way: one UID, one member
+         doc, both sign-ins. */
+      async linkGoogle(email, pass){
+        const c = await authMod.signInWithEmailAndPassword(auth, email, pass);
+        try{
+          if(pendingGoogleCred){ await authMod.linkWithCredential(c.user, pendingGoogleCred); pendingGoogleCred = null; }
+          else { await authMod.linkWithPopup(c.user, new authMod.GoogleAuthProvider()); }
+        }catch(e){ console.warn("Google link note:", e && e.code); }
+        const u = await startFor(c.user);
+        if(!u) throw new Error("Account record not found. Please register first.");
+        return u;
+      },
+      /* Brand-new Google user: write the member doc for the already
+         signed-in Google UID (same shape and same "unverified" start as
+         email registration — the rules require it), then let startFor()
+         promote it: the Google token carries email_verified == true, so
+         the member lands approved and never sees the verify screen. */
+      async completeGoogleProfile(data){
+        const user = auth.currentUser;
+        if(!user) throw new Error("Your Google session has ended — please tap “Continue with Google” again.");
+        const u = { role:"student", status:"unverified", name:data.name, email:user.email, university:data.university, dept:data.dept,
+          degree:data.degree, country:data.country, city:data.city, whatsapp:data.whatsapp,
+          gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""},
+          memberId:"", photo:data.photo || "", lastActive:new Date().toISOString(),
+          activity:{guidesOpened:[],oppsViewed:[],oppsSaved:[],exports:0}, documents:[], works:[], accounts:[], certificates:[],
+          createdAt:new Date().toISOString(), fcmTokens:[] };
+        await setDoc(doc(db, "users", user.uid), clean(u));
+        const fresh = await startFor(user);
+        return fresh || Object.assign(u, { id:user.uid });
       },
       async signOut(){ stopSubs(); try{ await authMod.signOut(auth); }catch(e){} },
       async refreshMe(){ const u = auth.currentUser; return u ? startFor(u) : null; },
@@ -3858,10 +4115,31 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     FB = window.__fbAdapter;
     /* restore an existing session */
     const first = await new Promise(res => { const un = authMod.onAuthStateChanged(auth, u => { un(); res(u); }); });
+    let bootUser = null;
     if(first){
-      const u = await startFor(first);
-      const deliver = ()=>{ if(window.__fbReady) window.__fbReady(u); else setTimeout(deliver, 300); };
+      bootUser = await startFor(first);
+      const deliver = ()=>{ if(window.__fbReady) window.__fbReady(bootUser); else setTimeout(deliver, 300); };
       deliver();
+    }
+    /* Google REDIRECT sign-in return (the pop-up fallback): route what
+       came back — a brand-new member goes to the profile form, an email
+       collision goes to the linking prompt. A plain returning member was
+       already routed by __fbReady above and is not routed twice. */
+    try{
+      const rr = await authMod.getRedirectResult(auth);
+      if(rr && rr.user){
+        const res = await resolveGoogleUser(rr.user);
+        if(!(res.status === "ok" && bootUser)){
+          const deliverG = ()=>{ if(window.__googleReady) window.__googleReady(res); else setTimeout(deliverG, 300); };
+          deliverG();
+        }
+      }
+    }catch(e){
+      if(e && e.code === "auth/account-exists-with-different-credential"){
+        pendingGoogleCred = authMod.GoogleAuthProvider.credentialFromError(e) || null;
+        const deliverL = ()=>{ if(window.__googleReady) window.__googleReady({ status:"link", email:(e.customData && e.customData.email) || "" }); else setTimeout(deliverL, 300); };
+        deliverL();
+      } else { console.warn("getRedirectResult:", e && e.code); }
     }
   }catch(e){
     console.warn("Firebase failed to start — app stays in demo behaviour:", e);

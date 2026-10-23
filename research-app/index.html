@@ -164,7 +164,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .home-head{
   margin:0 -16px 6px;padding:18px 16px 14px;color:#fff;
   background:linear-gradient(160deg,var(--navy-l),var(--navy) 55%,var(--navy-d));
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:8px;
 }
 .home-head .ttl{flex:1;min-width:0}
 .home-head .ttl .appname{font-size:17px;font-weight:700;line-height:1.3}
@@ -226,6 +226,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .status-pill.pending{background:var(--gold-xl);color:#7A5E08}
 .status-pill.approved{background:var(--ok-bg);color:var(--ok)}
 .status-pill.rejected{background:var(--err-bg);color:var(--err)}
+.status-pill.unverified{background:#E3ECF7;color:var(--navy)}
 .status-pill.open{background:#E3ECF7;color:#0A2A4D}
 .status-pill.responded{background:var(--ok-bg);color:var(--ok)}
 .empty{border:1px dashed var(--line-n);border-radius:12px;padding:18px 14px;text-align:center;color:var(--mut);font-size:15px;margin:10px 0;background:#fff}
@@ -239,7 +240,6 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 }
 .hero-logo{width:106px;height:106px;margin:4px auto 14px;background:#fff;border:2px solid var(--gold);border-radius:26px;padding:7px;box-shadow:0 8px 20px rgba(3,17,33,.35)}
 .hero-logo img{width:100%;height:100%;display:block;border-radius:19px}
-.hero-eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-l);font-weight:700}
 .hero-title{color:#fff;font-size:29px;line-height:1.25;margin:7px 0 6px;font-weight:700}
 .hero-tag{color:#DCE6F2;font-size:16.5px;line-height:1.55;max-width:540px;margin:0 auto}
 .hero-ur{color:#F3E3A1;text-align:center;font-size:16.5px;margin:10px auto 0;padding:0 6px;max-width:560px}
@@ -257,8 +257,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .hero-refresh{position:absolute;top:12px;right:12px;z-index:5}
 .home-head .refresh-btn{flex-direction:column;gap:1px;padding:5px 10px;border-radius:12px;font-size:10.5px;min-width:54px}
 .home-head .refresh-btn .rf-ic{font-size:16px}
+.home-head .layout-btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:44px;padding:5px 8px;border-radius:12px;font-size:10.5px;min-width:50px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.10);color:#fff;font-family:inherit;font-weight:600;cursor:pointer;flex:0 0 auto;line-height:1.2}
+.home-head .layout-btn:active{background:rgba(255,255,255,.24)}
+.home-head .layout-btn .ly-ic{font-size:16px;line-height:1}
 .notice-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:var(--radius);padding:16px;margin:18px 0 12px}
 .notice-card p:last-child{margin-bottom:0}
+.guide-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:18px 0 12px}
+.guide-card h3{margin:0 0 10px}
+.guide-step{display:flex;gap:10px;align-items:flex-start;margin:9px 0;font-size:15.5px;line-height:1.5}
+.guide-step .gn{width:26px;height:26px;flex:0 0 auto;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14.5px;margin-top:1px}
+.guide-step .gt{flex:1;min-width:0}
+.guide-step .gt b{color:var(--navy)}
+.guide-ur{font-size:15.5px;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px}
 .gate-step{display:flex;gap:10px;align-items:center;margin:8px 0}
 .gate-step .n{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
 .gate-step.done .n{background:var(--ok)}
@@ -396,10 +406,18 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div class="hero">
     <button class="refresh-btn hero-refresh" id="welcome-refresh-btn" aria-label="Refresh the app"><span class="rf-ic" aria-hidden="true">⟳</span> Refresh</button>
     <div class="hero-logo"><img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="Research with Mufti Hassan logo"></div>
-    <div class="hero-eyebrow">Learn with Mufti Hassan</div>
     <h1 class="hero-title">Research with Mufti Hassan</h1>
     <p class="hero-tag">Jobs, internships, scholarships, fully funded conferences — and research guidance for every university discipline.</p>
     <div class="ur hero-ur">یونیورسٹی کے طلبہ و طالبات کے لیے ملازمتوں، اسکالرشپس اور تحقیق کی رہنمائی — ایک ہی جگہ۔</div>
+  </div>
+  <div class="guide-card">
+    <h3>📖 How to use this app</h3>
+    <div class="guide-step"><div class="gn">1</div><div class="gt"><b>Create your free account</b> — tap the button below; it takes a minute.</div></div>
+    <div class="guide-step"><div class="gn">2</div><div class="gt"><b>Verify your email</b> — tap the link we send you, then press “I've verified”.</div></div>
+    <div class="guide-step"><div class="gn">3</div><div class="gt"><b>Join the WhatsApp group &amp; follow the channel</b> (required).</div></div>
+    <div class="guide-step"><div class="gn">4</div><div class="gt"><b>Complete your profile</b> — CV, LinkedIn &amp; Google Scholar (required).</div></div>
+    <div class="guide-step"><div class="gn">5</div><div class="gt"><b>Explore</b> jobs, scholarships, conferences &amp; your discipline's research toolkit.</div></div>
+    <div class="ur guide-ur">پہلے اکاؤنٹ بنائیں، ای میل کی تصدیق کریں، پھر واٹس ایپ گروپ و چینل سے جُڑ کر پروفائل مکمل کریں — اور مواقع سے فائدہ اٹھائیں۔</div>
   </div>
   <div class="notice-card">
     <p><b>Who is this app for?</b> University students of <b>all departments</b> — BS, MS, MPhil and PhD — anywhere in the world. Registration is free and open.</p>
@@ -417,7 +435,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <section class="view" id="view-register">
   <div class="topbar"><button class="tbtn" data-back="view-welcome">‹ Back</button><div class="ttl">Create Account</div><span style="width:44px"></span></div>
   <h2>Register — it takes a minute</h2>
-  <p class="small">Fill in your details. Mufti reviews every registration personally; once approved, you will complete two quick steps (community + academic identity) and enter the app.</p>
+  <p class="small">Fill in your details. After registering, we email you a verification link — tap it, then complete two quick steps (community + academic identity) and you are in.</p>
   <div class="notice"><p style="margin:0"><b>University students only.</b> Ulama &amp; Alimat — please use the <a id="register-ulama-link" href="#" target="_blank" rel="noopener">Ilmi Mashghuliyat app</a> instead.</p></div>
   <form id="reg-form" novalidate>
     <label for="reg-name">Full name <span class="req">*</span></label>
@@ -490,24 +508,31 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   </div>
 </section>
 
-<!-- ================= PENDING / REJECTED ================= -->
-<section class="view pad-top" id="view-pending">
+<!-- ================= VERIFY EMAIL ================= -->
+<section class="view pad-top" id="view-verify">
   <div class="center">
     <img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="" style="width:84px;height:84px;border-radius:18px">
-    <h1 id="pending-title" style="margin-top:10px">Registration received</h1>
+    <h1 style="margin-top:10px">Verify your email</h1>
   </div>
-  <div class="card accent" id="pending-card">
-    <p id="pending-text">Thank you. Your registration is <b>pending approval</b>. Mufti reviews new registrations personally — once approved, you will be notified here and can complete the two entry steps.</p>
-    <div class="ur" style="font-size:15.5px">آپ کی رجسٹریشن موصول ہو گئی ہے اور منظوری کی منتظر ہے۔ منظوری ملتے ہی آپ کو یہیں اطلاع مل جائے گی۔</div>
+  <div class="card accent">
+    <p>We have sent a verification link to <b id="verify-email"></b>. Open your inbox (and check the spam / promotions folder), tap the link, then come back here and press the button below.</p>
+    <div class="ur" style="font-size:15.5px">آپ کی ای میل پر تصدیقی لنک بھیج دیا گیا ہے۔ ان باکس (یا سپام فولڈر) کھول کر لنک دبائیں، پھر یہاں واپس آ کر «میں نے تصدیق کر لی ہے» والا بٹن دبائیں۔</div>
+    <div class="msg" id="verify-msg"></div>
   </div>
-  <button class="btn ghost" id="pending-refresh">Check status again</button>
-  <button class="btn danger" id="pending-logout">Log out</button>
+  <button class="btn" id="verify-continue">I've verified — Continue</button>
+  <button class="btn ghost" id="verify-resend">Resend verification email</button>
+  <div id="verify-demo" hidden>
+    <div class="divider"></div>
+    <p class="small center" style="margin-bottom:6px">Preview build only — no real email is sent in this demo:</p>
+    <button class="btn goldb" id="verify-simulate">Simulate verification (demo)</button>
+  </div>
+  <button class="btn danger" id="verify-logout">Log out</button>
 </section>
 
 <!-- ================= GATES ================= -->
 <section class="view" id="view-gates">
   <div class="topbar"><span style="width:44px"></span><div class="ttl">Two Steps to Enter</div><button class="tbtn" id="gates-logout">Log out</button></div>
-  <p class="lead">Welcome — your registration is approved. Two quick steps unlock the app:</p>
+  <p class="lead">Welcome — your email is verified. Two quick steps unlock the app:</p>
   <div class="gate-step" id="gateA-step"><div class="n">1</div><b>Join the community</b></div>
   <div class="card accent">
     <p class="small" style="margin-bottom:6px">Both are required — the group is where students discuss, and the channel carries announcements.</p>
@@ -547,6 +572,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <span class="bellwrap"><button class="iconbtn" id="home-bell" aria-label="Notifications">🔔</button><span class="nbadge" id="home-bell-badge" hidden>0</span></span>
     <span class="avatar-dot" id="home-avatar" title="My Profile">A</span>
     <button class="refresh-btn" id="home-refresh-btn" aria-label="Refresh the app"><span class="rf-ic" aria-hidden="true">⟳</span> Refresh</button>
+    <button class="layout-btn" id="hdr-layout-btn" aria-label="Switch between Mobile and Web layout"><span class="ly-ic" aria-hidden="true">🖥️</span><span class="ly-tx">Auto</span></button>
   </div>
   <p style="margin-top:12px">Assalamu alaikum, <b id="home-hello">Student</b>.</p>
 
@@ -988,7 +1014,6 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <p>Assalamu alaikum, Mufti. <span class="small">New registrations, members, postings and student requests — all in one place.</span></p>
   <div class="stat-row">
     <div class="stat-chip"><b id="adm-stat-total">0</b>Total members</div>
-    <div class="stat-chip"><b id="adm-stat-pending">0</b>Pending approvals</div>
     <div class="stat-chip"><b id="adm-stat-week">0</b>Joined this week</div>
   </div>
   <h3>⚙️ App Settings</h3>
@@ -996,9 +1021,8 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <label class="checkrow" style="margin:2px 0"><input type="checkbox" id="adm-top-toggle"><span><b>Show Top Performers on home</b><br><span class="small">The 🏆 strip and leaderboard, ranked by the My Progress score. Turn off to hide them everywhere.</span></span></label>
     <label class="checkrow" style="margin:10px 0 2px"><input type="checkbox" id="adm-certs-toggle"><span><b>Auto-issue Top Performer certificates</b><br><span class="small">Each month's Top 3 automatically receive a Certificate of Achievement (one per member per month) with a notification. Turn off to stop issuance.</span></span></label>
   </div>
-  <h3>🕐 Pending Registrations <span class="nbadge goldb" id="adm-pending-badge" style="position:static" hidden>0</span></h3>
-  <div id="adm-pending"></div>
   <h3>👥 Members</h3>
+  <p class="small" style="margin:0 0 6px">Everyone who has registered — no approval step. Members marked <b>unverified</b> have not tapped their email verification link yet; they enter automatically once they do.</p>
   <input id="adm-search" type="search" placeholder="Search by name, university, department, email…">
   <div id="adm-members" style="margin-top:8px"></div>
   <button class="btn ghost" id="adm-export">⬇ Export members (CSV)</button>
@@ -1332,7 +1356,7 @@ function seedDB(){
         works:[
           { id:"wk-omar-1", title:"Startups in Lahore: A Student's Field Notes", type:"Article", date:"2026-10-09", desc:"Interviewed three student founders and wrote up what I learned for our business society blog.", link:"", fileName:"", fileData:"", featured:false, note:"", noteAt:"", createdAt:new Date(t-86400000*5).toISOString() }
         ] },
-      { id:"u-pending", role:"student", status:"pending", name:"Bilal Ahmed (demo)", email:"bilal@demo.local", pass:"bilal1234",
+      { id:"u-pending", role:"student", status:"unverified", emailVerified:false, name:"Bilal Ahmed (demo)", email:"bilal@demo.local", pass:"bilal1234",
         university:"University of the Punjab", dept:"Electrical Engineering", degree:"BS / BSc (Undergraduate)", country:"Pakistan", city:"Lahore", whatsapp:"+92 321 0000000",
         gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:new Date(t-86400000*1).toISOString(), fcmTokens:[] }
     ],
@@ -1429,6 +1453,7 @@ function normalizeUser(u){
   if(!Array.isArray(u.certificates)) u.certificates = [];
   if(typeof u.photo !== "string") u.photo = "";
   if(typeof u.memberId !== "string") u.memberId = "";
+  if(DEMO_MODE && typeof u.emailVerified !== "boolean") u.emailVerified = false;
   if(!u.lastActive) u.lastActive = u.createdAt || nowISO();
   return u;
 }
@@ -1894,16 +1919,15 @@ function goAfterLogin(){
   normalizeUser(ME);
   if(ME.role === "student"){ ME.lastActive = nowISO(); ensureMemberId(ME); persist(); if(FB) FB.saveUser(ME); }
   if(ME.role === "admin") return showView("view-admin");
-  if(ME.status === "pending" || ME.status === "rejected") return renderPending(), showView("view-pending");
+  if(ME.status !== "approved") return renderVerify(), showView("view-verify");
   if(!accessComplete(ME)) return renderGates(), showView("view-gates");
   showView("view-home");
 }
-function renderPending(){
-  const rejected = ME && ME.status === "rejected";
-  document.getElementById("pending-title").textContent = rejected ? "Registration not approved" : "Registration received";
-  document.getElementById("pending-text").innerHTML = rejected
-    ? "Thank you for your interest. This registration could not be approved — this app is for enrolled university students. If you believe this is a mistake, register again with your correct university details, or contact Mufti through learnwithmuftihassan.com."
-    : "Thank you, <b>" + esc(ME ? ME.name : "") + "</b>. Your registration is <b>pending approval</b>. Mufti reviews new registrations personally — once approved, you will be notified here and can complete the two entry steps.";
+function renderVerify(){
+  document.getElementById("verify-email").textContent = ME ? (ME.email || "") : "";
+  const msg = document.getElementById("verify-msg"); msg.className = "msg"; msg.textContent = "";
+  document.getElementById("verify-demo").hidden = !DEMO_MODE;
+  const rb = document.getElementById("verify-resend"); rb.disabled = false; rb.textContent = "Resend verification email";
 }
 
 /* ================= Validation helpers ================= */
@@ -2165,33 +2189,22 @@ function renderProfile(){
   const ns = myNotifications().slice(0, 8);
   document.getElementById("prof-notifs").innerHTML = ns.length ? ns.map(notifHTML).join("") : '<div class="empty">No notifications yet.</div>';
 }
-function memberRow(u, adminPending){
+function memberRow(u){
   const pills = '<span class="status-pill ' + esc(u.status) + '">' + esc(u.status) + '</span>';
-  let html = '<div class="member-row"><div class="nm">' + esc(u.name) + ' ' + pills + '</div>'
+  return '<div class="member-row"><div class="nm">' + esc(u.name) + ' ' + pills + '</div>'
     + '<div class="small">' + esc(u.university) + ' · ' + esc(u.dept) + ' · ' + esc(u.degree) + '<br>'
     + esc(u.country) + ' · ' + esc(u.city) + ' · ' + esc(u.email) + (u.whatsapp ? ' · ' + esc(u.whatsapp) : '')
     + (u.memberId ? '<br>Member ID: <b>' + esc(u.memberId) + '</b>' : '')
     + '<br>Registered ' + fmtDate(u.createdAt)
     + (u.role !== "admin" ? ' · Gates: ' + (accessComplete(u) ? 'complete' : 'incomplete') : '')
-    + '</div>';
-  if(adminPending){
-    html += '<div style="margin-top:8px"><button class="btn sm" data-approve="' + u.id + '">✓ Approve</button>'
-          + '<button class="btn sm danger" data-reject="' + u.id + '">✕ Reject</button></div>';
-  }
-  return html + '</div>';
+    + '</div></div>';
 }
 function renderAdmin(){
   if(!ME || ME.role !== "admin") return;
   const members = DB.users.filter(u => u.role !== "admin");
-  const pending = members.filter(u => u.status === "pending");
   const weekAgo = Date.now() - 7*86400000;
   document.getElementById("adm-stat-total").textContent = members.length;
-  document.getElementById("adm-stat-pending").textContent = pending.length;
   document.getElementById("adm-stat-week").textContent = members.filter(u => new Date(u.createdAt).getTime() >= weekAgo).length;
-  const pb = document.getElementById("adm-pending-badge"); pb.hidden = pending.length === 0; pb.textContent = pending.length;
-  document.getElementById("adm-pending").innerHTML = pending.length ? pending.map(u => memberRow(u, true)).join("") : '<div class="empty">No pending registrations.</div>';
-  document.querySelectorAll("[data-approve]").forEach(b => b.addEventListener("click", ()=> adminDecide(b.dataset.approve, "approved")));
-  document.querySelectorAll("[data-reject]").forEach(b => b.addEventListener("click", ()=> adminDecide(b.dataset.reject, "rejected")));
   renderAdminMembers();
   const reqs = DB.requests.slice().sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
   document.getElementById("adm-requests").innerHTML = reqs.length ? reqs.map(r => requestHTML(r, true)).join("") : '<div class="empty">No student requests yet.</div>';
@@ -2209,19 +2222,9 @@ function renderAdminMembers(){
   const members = DB.users.filter(u => u.role !== "admin")
     .filter(u => !q || (u.name + " " + u.university + " " + u.dept + " " + u.email).toLowerCase().includes(q))
     .sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
-  document.getElementById("adm-members").innerHTML = members.length ? members.map(u => memberRow(u, false)).join("") : '<div class="empty">No members match.</div>';
+  document.getElementById("adm-members").innerHTML = members.length ? members.map(u => memberRow(u)).join("") : '<div class="empty">No members match.</div>';
 }
 function persist(){ if(DEMO_MODE) saveDB(); else if(FB) FB.persistAll(); }
-function adminDecide(id, status){
-  const u = DB.users.find(x => x.id === id); if(!u) return;
-  u.status = status; persist();
-  notify(u.email, status === "approved" ? "Your registration is approved" : "Registration update",
-    status === "approved" ? "Welcome to " + APP_NAME + "! Log in and complete the two entry steps (community + academic identity) to enter the app."
-                          : "Your registration could not be approved. If you believe this is a mistake, please register again with correct university details.");
-  if(FB) FB.saveUser(u);
-  toast(status === "approved" ? "Approved: " + u.name : "Rejected: " + u.name);
-  renderAdmin();
-}
 function adminRespond(id){
   const r = DB.requests.find(x => x.id === id); if(!r) return;
   const txt = (document.getElementById("resp-" + id) || {}).value || "";
@@ -2621,6 +2624,8 @@ function applyLayout(){
   document.documentElement.dataset.layout = p;
   const ab = document.getElementById("about-layout-btn"); if(ab) ab.textContent = "🖥️ Layout: " + layoutLabel();
   const tl = document.getElementById("tile-layout-sub"); if(tl) tl.textContent = layoutLabel();
+  const hb = document.getElementById("hdr-layout-btn");
+  if(hb){ hb.querySelector(".ly-tx").textContent = layoutLabel(); hb.querySelector(".ly-ic").textContent = p === "mobile" ? "📱" : "🖥️"; }
 }
 function cycleLayout(){
   const order = ["auto","web","mobile"], next = order[(order.indexOf(layoutPref()) + 1) % order.length];
@@ -2692,17 +2697,17 @@ function wire(){
     const email = v("reg-email");
     if(DEMO_MODE){
       if(findUser(email)){ msg.className = "msg err"; msg.textContent = "This email is already registered. Please log in instead."; return; }
-      const u = normalizeUser({ id:uid(), role:"student", status:"pending", name:v("reg-name"), email:email, pass:v("reg-pass"),
+      const u = normalizeUser({ id:uid(), role:"student", status:"unverified", emailVerified:false, name:v("reg-name"), email:email, pass:v("reg-pass"),
         university:v("reg-uni"), dept:v("reg-dept"), degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"),
         whatsapp:v("reg-wa"), gates:{group:false,channel:false},
         identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:nowISO(), fcmTokens:[] });
-      DB.users.push(u); ME = u; setSession(email); notify(DEMO_ADMIN_EMAIL, "New registration", u.name + " (" + u.university + ") is waiting for approval."); saveDB();
-      renderPending(); showView("view-pending");
+      DB.users.push(u); ME = u; setSession(email); notify(DEMO_ADMIN_EMAIL, "New registration", u.name + " (" + u.university + ") has registered; their email verification is pending."); saveDB();
+      renderVerify(); showView("view-verify");
     } else {
       try{
         const u = await FB.signUp({ name:v("reg-name"), email:email, pass:v("reg-pass"), university:v("reg-uni"), dept:v("reg-dept"),
           degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
-        ME = u; renderPending(); showView("view-pending");
+        ME = u; renderVerify(); showView("view-verify");
       }catch(err){ msg.className = "msg err"; msg.textContent = "Registration failed: " + ((err && err.message) || err); }
     }
   });
@@ -2726,13 +2731,35 @@ function wire(){
     $("demo-admin-btn").addEventListener("click", ()=>{ ME = findUser(DEMO_ADMIN_EMAIL); setSession(ME.email); goAfterLogin(); });
   }
   function logout(){ ME = null; setSession(null); if(FB) FB.signOut(); showView("view-welcome"); }
-  $("pending-logout").addEventListener("click", logout);
+  $("verify-logout").addEventListener("click", logout);
   $("gates-logout").addEventListener("click", logout);
   $("profile-logout").addEventListener("click", logout);
   $("admin-logout").addEventListener("click", logout);
-  $("pending-refresh").addEventListener("click", async ()=>{
-    if(!DEMO_MODE && FB){ const fresh = await FB.refreshMe(); if(fresh) ME = fresh; }
-    goAfterLogin();
+  $("verify-continue").addEventListener("click", async ()=>{
+    const msg = $("verify-msg");
+    if(DEMO_MODE){
+      if(ME && ME.emailVerified){ ME.status = "approved"; persist(); toast("Email verified — welcome!"); goAfterLogin(); }
+      else { msg.className = "msg err"; msg.textContent = "Not verified yet. This demo sends no real email — press “Simulate verification (demo)” below, then Continue."; }
+      return;
+    }
+    try{
+      const fresh = await FB.checkVerified(); if(fresh) ME = fresh;
+      if(ME && ME.status === "approved"){ toast("Email verified — welcome!"); goAfterLogin(); }
+      else { msg.className = "msg err"; msg.textContent = "Not verified yet — tap the link in the email we sent you first (check the spam / promotions folder), then press Continue again."; }
+    }catch(err){ msg.className = "msg err"; msg.textContent = "Could not check just now — please try again in a moment."; }
+  });
+  $("verify-resend").addEventListener("click", async e => {
+    const btn = e.currentTarget;
+    if(DEMO_MODE){ toast("Demo build — no email is sent. Use “Simulate verification (demo)” below."); return; }
+    btn.disabled = true; btn.textContent = "Sending…";
+    try{ await FB.resendVerification(); btn.textContent = "Verification email sent ✓"; toast("Verification email sent — check your inbox."); }
+    catch(err){ btn.textContent = "Resend verification email"; toast("Could not resend just now — wait a minute and try again."); }
+    setTimeout(()=>{ btn.disabled = false; btn.textContent = "Resend verification email"; }, 30000);
+  });
+  $("verify-simulate").addEventListener("click", ()=>{
+    if(!ME) return;
+    ME.emailVerified = true; persist();
+    const msg = $("verify-msg"); msg.className = "msg ok"; msg.textContent = "Verified (demo). Now press “I've verified — Continue” above.";
   });
 
   /* ---- Gates ---- */
@@ -2776,6 +2803,7 @@ function wire(){
   $("home-notif-btn").addEventListener("click", ()=> { NAV_BACK["view-notifications"] = "view-home"; showView("view-notifications"); });
   $("home-install-btn").addEventListener("click", tryInstall);
   $("home-layout-btn").addEventListener("click", cycleLayout);
+  $("hdr-layout-btn").addEventListener("click", cycleLayout);
   $("home-about-btn").addEventListener("click", ()=> { NAV_BACK["view-about"] = "view-home"; showView("view-about"); });
   $("home-hub-btn").addEventListener("click", ()=> showView("view-hub"));
   // MAQAMAT contact points — single source: the CONFIG constants above.
@@ -3146,6 +3174,15 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       const isAdmin = await fetchIsAdmin(user.email);
       let doc = await fetchUser(user.uid);
       if(isAdmin){ if(doc){ doc.role = "admin"; } else { doc = { id:user.uid, role:"admin", status:"approved", name:"Admin", email:user.email, gates:{group:true,channel:true}, identity:{}, createdAt:new Date().toISOString() }; } }
+      /* Email-verification promotion: a student whose Auth email is verified
+         is promoted from "unverified" to "approved" on any sign-in / app
+         start (covers verifying in another tab or browser). The Firestore
+         rules allow this one transition only when the ID token carries
+         email_verified == true. Admins never pass through here. */
+      if(doc && doc.role === "student" && doc.status === "unverified" && user.emailVerified){
+        try{ await fsMod.updateDoc(fsMod.doc(db, "users", user.uid), { status:"approved" }); doc.status = "approved"; }
+        catch(e){ console.warn("verification promotion failed", e && e.code); }
+      }
       if(!doc) return null;
       normalizeUser(doc);
       if(doc.role === "student" && accessComplete(doc) && !doc.memberId){ try{ await claimMemberId(doc); }catch(e){ console.warn("memberId claim failed", e); } }
@@ -3170,13 +3207,14 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     window.__fbAdapter = {
       async signUp(data){
         const c = await authMod.createUserWithEmailAndPassword(auth, data.email, data.pass);
-        const u = { role:"student", status:"pending", name:data.name, email:data.email, university:data.university, dept:data.dept,
+        const u = { role:"student", status:"unverified", name:data.name, email:data.email, university:data.university, dept:data.dept,
           degree:data.degree, country:data.country, city:data.city, whatsapp:data.whatsapp,
           gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""},
           memberId:"", photo:"", lastActive:new Date().toISOString(),
           activity:{guidesOpened:[],oppsViewed:[],oppsSaved:[],exports:0}, documents:[], works:[], accounts:[], certificates:[],
           createdAt:new Date().toISOString(), fcmTokens:[] };
         await setDoc(doc(db,"users",c.user.uid), clean(u));
+        try{ await authMod.sendEmailVerification(c.user); }catch(e){ console.warn("verification email failed to send", e && e.code); }
         subMine(data.email, c.user.uid);
         return Object.assign(u, { id:c.user.uid });
       },
@@ -3188,6 +3226,8 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       },
       async signOut(){ stopSubs(); try{ await authMod.signOut(auth); }catch(e){} },
       async refreshMe(){ const u = auth.currentUser; return u ? startFor(u) : null; },
+      async resendVerification(){ const u = auth.currentUser; if(!u) throw new Error("Not signed in."); await authMod.sendEmailVerification(u); },
+      async checkVerified(){ const u = auth.currentUser; if(!u) return null; try{ await u.reload(); }catch(e){} return startFor(u); },
       async claimMemberId(u){ await claimMemberId(u); },
       async claimCertId(u, cert){ await claimCertId(u, cert); },
       _performers: null,

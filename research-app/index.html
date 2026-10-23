@@ -658,7 +658,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div class="topbar"><button class="tbtn" data-back="view-home">‹ Home</button><div class="ttl">Research</div><span style="width:44px"></span></div>
   <div class="tile-grid">
     <button class="tile" id="home-toolkit-btn"><span class="ic">🧭</span><b>Discipline Guidance</b><span class="sub">Data · AI tools · journals</span></button>
-    <button class="tile" id="home-help-btn"><span class="ic">✍️</span><b>Writing Help</b><span class="sub">Ask Mufti — English / اردو</span></button>
+    <button class="tile" id="home-help-btn"><span class="ic">✍️</span><b>Research &amp; Writing Help</b><span class="sub">Learn step-by-step — playlist, AI tools &amp; a full guide</span></button>
     <button class="tile" id="home-write-btn"><span class="ic">📝</span><b>Write &amp; Export</b><span class="sub">Draft → Word file</span></button>
     <button class="tile" id="home-heritage-btn"><span class="ic">📚</span><b>Islamic Sources</b><span class="sub">Al-Turath · Shamila</span></button>
     <button class="tile" id="home-hub-btn"><span class="ic">🌍</span><b>Global Student Hub</b><span class="sub">Study abroad · accounts · skills</span></button>
@@ -694,7 +694,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div id="discipline-list"></div>
   <div class="group-label">Writing services</div>
   <div class="tile-grid">
-    <button class="tile" id="toolkit-help-btn"><span class="ic">✍️</span><b>Research &amp; Writing Help</b><span class="sub">Request help — English / اردو</span></button>
+    <button class="tile" id="toolkit-help-btn"><span class="ic">✍️</span><b>Research &amp; Writing Help</b><span class="sub">Learn step-by-step — playlist, AI tools &amp; a full guide</span></button>
     <button class="tile" id="toolkit-write-btn"><span class="ic">📝</span><b>Write &amp; Export</b><span class="sub">Article / synopsis → Word file</span></button>
   </div>
   <h3>📚 Islamic &amp; Heritage Sources</h3>
@@ -709,34 +709,21 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <section class="view" id="view-discipline">
   <div class="topbar"><button class="tbtn" data-back="view-toolkit">‹ Toolkit</button><div class="ttl" id="disc-title">Discipline</div><span style="width:44px"></span></div>
   <div id="disc-body"></div>
-  <button class="btn" id="disc-help-btn">✍️ Ask for help in this field</button>
+  <button class="btn" id="disc-help-btn">✍️ Open the research &amp; writing guide</button>
 </section>
 
 <!-- ================= HELP REQUEST ================= -->
 <section class="view" id="view-help">
   <div class="topbar"><button class="tbtn" data-back="view-toolkit" id="help-back">‹ Back</button><div class="ttl">Research &amp; Writing Help</div><span style="width:44px"></span></div>
-  <p class="small">Describe what you are working on. Mufti reads every request personally. Guidance is coaching and feedback — your work stays your own.</p>
-  <form id="help-form" novalidate>
-    <label for="help-topic">Topic / title of your work <span class="req">*</span></label>
-    <input id="help-topic" type="text" placeholder="e.g. AI tools for early diagnosis of diabetic retinopathy">
-    <div class="field-err" id="err-help-topic">Please write your topic.</div>
-    <label for="help-type">Type of work</label>
-    <select id="help-type">
-      <option>Research proposal / synopsis</option>
-      <option>Thesis / dissertation</option>
-      <option>Research article</option>
-      <option>CV / academic profile</option>
-      <option>Other</option>
-    </select>
-    <label>Language of help</label>
-    <label class="radio-line"><input type="radio" name="help-lang" value="English" checked><span>English</span></label>
-    <label class="radio-line"><input type="radio" name="help-lang" value="Urdu"><span class="ur" style="font-size:16px">اردو میں رہنمائی چاہیے</span></label>
-    <label for="help-msg">Your message <span class="req">*</span></label>
-    <textarea id="help-msg" placeholder="Where exactly are you stuck? What have you done so far?"></textarea>
-    <div class="field-err" id="err-help-msg">Please write a short message.</div>
-    <div class="msg" id="help-ok"></div>
-    <button class="btn" type="submit">Send request</button>
-  </form>
+  <p class="small">No forms and no waiting — everything you need is on this page: Mufti's own video series, the AI tools that do the heavy lifting, and a step-by-step guide from choosing a topic to a finished document.</p>
+  <div id="help-watch"></div>
+  <div id="help-tools"></div>
+  <div class="card accent"><h3>🧭 Do your research — start to finish</h3>
+    <div id="help-guide"></div>
+    <button class="btn" id="guide-to-write" style="margin-top:12px">Open Write &amp; Export →</button>
+    <div class="divider"></div>
+    <div id="guide-done-wrap"></div>
+  </div>
 </section>
 
 <!-- ================= CONSULT ================= -->
@@ -1106,6 +1093,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <button class="btn" id="adm-post-btn">Publish post</button>
   </div>
   <h3>✍️ Student Requests</h3>
+  <div class="notice" style="margin-bottom:10px">Writing help is now <b>self-service</b> (playlist + AI tools + step-by-step guide), so students no longer send writing-help requests — only Consultation and Study Abroad requests appear here. Earlier writing-help requests stay untouched on each student's own profile.</div>
   <div id="adm-requests"></div>
   <h3>🌟 Academic Work <span class="small" style="font-weight:400">(علمی کارگذاری — shared by students)</span></h3>
   <p class="small">Congratulate a student with a short note (it reaches them as a notification and stays on their entry), or mark an entry <b>Featured ⭐</b> — featured work puts a star on that student's Top Performers chip and leaderboard row.</p>
@@ -1285,7 +1273,7 @@ const DISCIPLINES = [
     ["Manual first, tools second","Learn to search, read and cite by hand first — AI on top of skill multiplies you; AI instead of skill exposes you."],
     ["Similarity & AI indexes","Universities check both. Write in your own words, cite honestly, and keep drafts — they are your proof of authorship."],
     ["Choose journals by index, not inbox","If a 'journal' emailed you an invitation with a fee, verify it in Scopus/DOAJ before anything else.","https://doaj.org"],
-    ["Ask here","Use Research & Writing Help in this app — proposal, thesis, article or CV, in English or اردو."]
+    ["Learn it step-by-step","Research & Writing Help in this app carries Mufti's playlist, the AI tools and a full start-to-finish guide — everything in one place, no request needed."]
   ]},
 { id:"education", icon:"🎓", name:"Education",
   data:[
@@ -1796,8 +1784,7 @@ function computeProgress(u){
   const guidePts = Math.min(10, (a.guidesOpened || []).length * 2);
   const acctBonus = Math.min(5, (u.accounts || []).length);
   const oppPts = Math.min(15, Math.min(10, (a.oppsViewed || []).length) + Math.min(10, (a.oppsSaved || []).length * 2) + acctBonus);
-  const mine = DB.requests.filter(r => r.email === u.email);
-  const helpPts = Math.min(3, mine.length) + Math.min(2, mine.filter(r => r.status === "responded").length);
+  const helpGuidePts = u.guideRead ? 5 : 0;
   const expPts = Math.min(10, (a.exports || 0) * 5);
   const workPts = Math.min(10, (u.works || []).length * 2);
   const parts = [
@@ -1805,7 +1792,7 @@ function computeProgress(u){
     { label:"Community gates completed", pts:gatePts, max:20, note:"WhatsApp group joined (10) · WhatsApp channel followed (10)" },
     { label:"Discipline guides opened", pts:guidePts, max:10, note:"2 points per guide — " + (a.guidesOpened || []).length + " of " + DISCIPLINES.length + " opened" },
     { label:"Opportunities explored", pts:oppPts, max:15, note:"1 point per post opened (max 10) · 2 points per post saved · +1 per must-have account ticked in the Global Student Hub (max +5, inside this bar) — " + (u.accounts || []).length + " ticked" },
-    { label:"Help requests & replies", pts:helpPts, max:5, note:"1 point per request sent (max 3) · 1 point per reply received (max 2)" },
+    { label:"Research guide completed", pts:helpGuidePts, max:5, note:"Read the full step-by-step guide in Research & Writing Help — playlist, AI tools and method — then tap “I have read the full guide”" },
     { label:"Documents exported", pts:expPts, max:10, note:"5 points per Word file exported from Write & Export (max 10)" },
     { label:"Academic work shared", pts:workPts, max:10, note:"2 points per work entry shared in My Academic Work (max 5 entries) — " + (u.works || []).length + " shared" }
   ];
@@ -2082,7 +2069,7 @@ function workTargets(w, disc){
   const T = {
     publish:{ key:"publish", icon:"📖", title:"Publish it — journals for " + dn, body:"Top venues from your discipline guide: " + disc.publish.slice(0, 3).map(p => p[0]).join(" · "), btn:"Open my discipline guide", act:"disc" },
     conf:{ key:"conf", icon:"🎤", title:"Present & publish — watch Conferences", body:"Fully funded conferences are posted in the Conferences feed as they open.", btn:"Open Conferences", act:"opps:conference" },
-    help:{ key:"help", icon:"✍️", title:"Get Mufti's feedback first", body:"A short review now saves a rejection later — send the work through Writing Help.", btn:"Ask for Writing Help", act:"help" },
+    help:{ key:"help", icon:"✍️", title:"Polish it with the guide first", body:"A careful pass now saves a rejection later — work through the step-by-step guide: playlist, AI tools and the full method.", btn:"Open the Research Guide", act:"help" },
     schol:{ key:"schol", icon:"🎓", title:"Fund the next step — Scholarships", body:"Your growing record is exactly what scholarship committees reward.", btn:"Open Scholarships", act:"opps:scholarship" },
     abroad:{ key:"abroad", icon:"🌍", title:"Take it international — Study Abroad", body:"Malaysia, Turkey and the big worldwide scholarships — plus a form to ask Mufti directly.", btn:"Open Global Student Hub", act:"hub" },
     jobs:{ key:"jobs", icon:"💼", title:"Turn it into a career — Jobs & Internships", body:"Employers and universities read a record like yours first.", btn:"Open Jobs & Internships", act:"opps:job" },
@@ -2517,7 +2504,7 @@ function renderProfile(){
   document.getElementById("prof-cv-status").textContent = i.cvName ? ("Current file: " + i.cvName) : "";
   document.getElementById("prof-verified-note").hidden = !ME.identityVerified;
   const mine = DB.requests.filter(r => r.email === ME.email).sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
-  document.getElementById("prof-requests").innerHTML = mine.length ? mine.map(r => requestHTML(r, false)).join("") : '<div class="empty">No requests yet — use Research &amp; Writing Help or Consultation.</div>';
+  document.getElementById("prof-requests").innerHTML = mine.length ? mine.map(r => requestHTML(r, false)).join("") : '<div class="empty">No requests yet — requests appear here when you send one from Consultation &amp; Contact or the Study Abroad form.</div>';
   const ns = myNotifications().slice(0, 8);
   document.getElementById("prof-notifs").innerHTML = ns.length ? ns.map(notifHTML).join("") : '<div class="empty">No notifications yet.</div>';
 }
@@ -2550,8 +2537,8 @@ function renderAdmin(){
   document.getElementById("adm-stat-total").textContent = members.length;
   document.getElementById("adm-stat-week").textContent = members.filter(u => new Date(u.createdAt).getTime() >= weekAgo).length;
   renderAdminMembers();
-  const reqs = DB.requests.slice().sort((a,b)=> String(b.createdAt).localeCompare(String(a.createdAt)));
-  document.getElementById("adm-requests").innerHTML = reqs.length ? reqs.map(r => requestHTML(r, true)).join("") : '<div class="empty">No student requests yet.</div>';
+  const reqs = DB.requests.filter(r => ["Consultation","Study Abroad"].indexOf(r.type) >= 0).slice().sort((a,b)=> (a.createdAt < b.createdAt ? 1 : -1));
+  document.getElementById("adm-requests").innerHTML = reqs.length ? reqs.map(r => requestHTML(r, true)).join("") : '<div class="empty">No consultation or study-abroad requests yet.</div>';
   document.querySelectorAll("[data-respond]").forEach(b => b.addEventListener("click", ()=> adminRespond(b.dataset.respond)));
   const tt = document.getElementById("adm-top-toggle"); if(tt) tt.checked = showTopEnabled();
   const ctt = document.getElementById("adm-certs-toggle"); if(ctt) ctt.checked = autoCertsEnabled();
@@ -2767,6 +2754,57 @@ async function downloadIdCardPNG(){
   toast("ID card downloaded.");
 }
 
+/* ================= WRITING HELP — SELF-HELP (playlist · tools · guide) ================= */
+const HELP_TOOLS = [
+  ["NotebookLM","Read and question your own PDFs — every answer stays tied to your sources.","https://notebooklm.google.com"],
+  ["Elicit","Find papers and extract their findings into comparison tables.","https://elicit.com"],
+  ["SciSpace","Understand any paper — chat with the PDF, decode tables and equations.","https://scispace.com"],
+  ["Semantic Scholar","Search 200M+ papers with AI summaries and citation graphs.","https://www.semanticscholar.org"],
+  ["Connected Papers","Enter one paper and get a visual map of the whole field around it.","https://www.connectedpapers.com"],
+  ["Google Scholar","The universal search for scholarly literature — and your own citation profile.","https://scholar.google.com"],
+  ["ChatGPT","Brainstorm topics, outlines and arguments — never ask it to invent references.","https://chatgpt.com"],
+  ["Gemini","Google's AI — strong on long documents and Drive-based work.","https://gemini.google.com"],
+  ["Claude","Careful reasoning and drafting help on long texts.","https://claude.ai"],
+  ["Zotero","References and citations — builds your bibliography automatically.","https://www.zotero.org"],
+  ["Grammarly","Polish your English — grammar, clarity and tone — before you submit.","https://www.grammarly.com"]
+];
+const HELP_GUIDE = [
+  ["Pick & narrow your topic","Watch the playlist first, then brainstorm questions with ChatGPT or Gemini until the topic is small enough to actually finish.","موضوع منتخب کریں اور اسے محدود کریں — پہلے پلے لسٹ دیکھیں، پھر AI سے سوالات بنوائیں۔"],
+  ["Find papers","Search Google Scholar and Semantic Scholar, and save everything you might use into Zotero.","مضامین تلاش کریں — Google Scholar اور Semantic Scholar سے؛ ہر چیز Zotero میں محفوظ کریں۔"],
+  ["Map the field","Start from one key paper and open it in Connected Papers to see the whole conversation around it.","اپنے شعبے کا نقشہ بنائیں — ایک اہم مقالے سے Connected Papers کھولیں۔"],
+  ["Extract & compare","Use Elicit and SciSpace to ask the papers your questions and compare their answers side by side.","مضامین سے نکات نکالیں اور موازنہ کریں — Elicit اور SciSpace سے اپنے سوالات پوچھیں۔"],
+  ["Read deeply","Upload your PDFs to NotebookLM, ask questions, and take notes in your own words.","گہرائی سے پڑھیں — NotebookLM میں PDF رکھ کر سوالات کریں اور اپنے الفاظ میں نوٹس لیں۔"],
+  ["Outline","Build the structure from YOUR notes. AI may suggest an order — you decide.","خاکہ بنائیں — اپنے نوٹس سے ڈھانچہ خود ترتیب دیں؛ AI صرف تجویز دے، فیصلہ آپ کا۔"],
+  ["Draft section by section","Your words, your ideas — AI only for language help. Disclose AI assistance where your university requires it, and never submit AI-written text as your own.","حصہ بہ حصہ خود لکھیں — الفاظ اور خیالات آپ کے اپنے؛ AI صرف زبان کی مدد کے لیے۔ جہاں یونیورسٹی چاہے، AI کی مدد کا ذکر کریں؛ AI کا لکھا متن اپنے نام سے جمع نہ کرائیں۔"],
+  ["Cite properly","Let Zotero insert the citations and build the bibliography in the style your department requires.","حوالے درست لگائیں — Zotero مطلوبہ انداز میں حوالے اور کتابیات خود بناتا ہے۔"],
+  ["Polish","Run a language check with Grammarly, then read the whole draft once yourself, start to finish.","زبان کی پالش — Grammarly سے جانچیں؛ پھر پورا مسودہ ایک بار خود شروع سے آخر تک پڑھیں۔"],
+  ["Assemble & export","Paste your finished sections into Write & Export — right here in this app — and download the formatted document.","اب متن اسی ایپ کے Write & Export میں پیسٹ کریں اور دستاویز ڈاؤن لوڈ کر لیں۔"]
+];
+function renderHelp(){
+  const watch = $("help-watch"); if(!watch) return;
+  if(!watch.dataset.done){
+    watch.dataset.done = "1";
+    watch.innerHTML = resBlock("🎥 Watch & learn — Mufti's playlist", [
+      [PLAYLIST_NAME.replace(" | ", " — "), "Mufti's own video series: research methods and AI tools, explained step by step — start here before anything else.", YT_PLAYLIST_URL],
+      ["All playlists — Learn with Mufti Hassan", "Every series on the channel in one page — research, AI tools and digital skills.", "https://www.youtube.com/@Learnwithmuftihassan/playlists"]
+    ]);
+    $("help-tools").innerHTML = resBlock("🤖 AI tools for research & writing", HELP_TOOLS);
+    $("help-guide").innerHTML = HELP_GUIDE.map((g,i)=> '<div class="guide-step"><div class="gn">' + (i+1) + '</div><div class="gt"><b>' + esc(g[0]) + '.</b> ' + esc(g[1]) + '<div class="ur" style="font-size:15px;margin-top:2px">' + g[2] + '</div></div></div>').join("");
+  }
+  const w = $("guide-done-wrap");
+  if(ME && ME.guideRead){
+    w.innerHTML = '<div class="notice" style="margin:0">✓ <b>Guide completed.</b> You have the full method — playlist, tools and steps. Your 5 points are counted in <b>My Progress</b>.</div>';
+  } else {
+    w.innerHTML = '<p class="small" style="margin-bottom:8px">Read all ten steps above, then mark it here — it is 5 points of your progress score, and the method you will use for every piece of research from now on.</p><button class="btn goldb" id="guide-done-btn">I have read the full guide ✓</button>';
+    $("guide-done-btn").addEventListener("click", async ()=>{
+      ME.guideRead = true; persist();
+      if(FB) await FB.saveUser(ME);
+      renderHelp();
+      toast("Guide completed ✓ — 5 points added to your progress.");
+    });
+  }
+}
+
 /* ================= My Progress ================= */
 function renderProgress(){
   const el = document.getElementById("progress-body");
@@ -2786,7 +2824,7 @@ function renderProgress(){
         + '<div class="small">' + esc(pt.note) + '</div></div>'
       ).join("")
     + '</div>'
-    + '<div class="notice"><p style="margin:0">Only you see this page. Nothing here is reported to anyone — it exists so you can judge your own pace: open the discipline guides, save the opportunities you will apply to, ask for help, and export real drafts. Small steps, honestly counted.</p></div>';
+    + '<div class="notice"><p style="margin:0">Only you see this page. Nothing here is reported to anyone — it exists so you can judge your own pace: open the discipline guides, save the opportunities you will apply to, work through the research guide, and export real drafts. Small steps, honestly counted.</p></div>';
 }
 
 /* ================= Write & Export ================= */
@@ -3295,12 +3333,7 @@ function wire(){
   });
   $("disc-help-btn").addEventListener("click", ()=> btnHelp("view-discipline"));
   $("help-back").addEventListener("click", ()=> showView(HELP_BACK));
-  $("help-form").addEventListener("submit", e => {
-    e.preventDefault(); submitRequest({ topic:$("help-topic").value.trim(), type:$("help-type").value,
-      lang:(document.querySelector('input[name="help-lang"]:checked') || {}).value || "English",
-      message:$("help-msg").value.trim(),
-      errTopic:"err-help-topic", errMsg:"err-help-msg", okEl:"help-ok" });
-  });
+  $("guide-to-write").addEventListener("click", ()=> { WRITE_BACK = "view-help"; showView("view-write"); });
   $("consult-form").addEventListener("submit", e => {
     e.preventDefault(); submitRequest({ topic:$("consult-topic").value.trim(), type:"Consultation",
       lang:"English", message:$("consult-msg").value.trim(),
@@ -3466,7 +3499,7 @@ function wire(){
   });
 }
 let HELP_BACK = "view-toolkit";
-function btnHelp(from){ HELP_BACK = from; showView("view-help"); }
+function btnHelp(from){ HELP_BACK = from; renderHelp(); showView("view-help"); }
 function submitRequest(o){
   let ok = true;
   ok = showErr(o.errTopic, !o.topic) && ok;

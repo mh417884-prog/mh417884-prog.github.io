@@ -41,6 +41,14 @@ button{font-family:inherit}
 /* ---------- App shell & layout modes ---------- */
 #app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;box-shadow:0 0 30px rgba(6,31,58,.18)}
 html[data-layout="web"] #app{max-width:1180px}
+/* Full-bleed on phone-sized screens: in Auto and Mobile the shell fills the
+   whole viewport width below 1024px — the centred 430px column may exist
+   only on genuinely wide screens or in Web layout. (Fix: the base 430px cap
+   previously applied in every mode, so phones with a wide CSS viewport got
+   a narrow centred column with page background showing on both sides.) */
+@media (max-width:1023.98px){
+  html[data-layout="auto"] #app, html[data-layout="mobile"] #app{max-width:none;box-shadow:none}
+}
 @media (min-width:1024px){
   html[data-layout="auto"] #app{max-width:1180px}
 }

@@ -628,6 +628,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   html[data-layout="auto"] #app, html[data-layout="mobile"] #app, html[data-layout="auto"] #app .view, html[data-layout="mobile"] #app .view{min-height:52.63vh}
   html[data-layout="auto"] body.preview-on, html[data-layout="mobile"] body.preview-on{padding-top:102.6px}
 }
+/* Research Companion + staged builder (v36) */
+#view-companion select{width:100%;min-height:44px;font-size:18px;padding:9px 10px;border:1px solid var(--line-n);border-radius:10px;background:#fff;color:var(--navy)}
+.comp-actions{margin:6px 0 16px;display:flex;gap:8px;flex-wrap:wrap}
+.stepbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.stepchip{background:#fff;border:1px solid var(--line-n);border-radius:999px;padding:7px 12px;font-size:14px;color:var(--navy);cursor:pointer}
+.stepchip.on{background:var(--navy);color:#fff;font-weight:600}
+.stepchip.done{border-color:var(--gold);background:var(--gold-xl)}
 </style>
 </head>
 <body>
@@ -1077,13 +1084,81 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <section class="view" id="view-help">
   <div class="topbar"><button class="tbtn" data-back="view-toolkit" id="help-back">‹ Back</button><div class="ttl">Research &amp; Writing Help</div><span style="width:44px"></span></div>
   <p class="small">No forms and no waiting — everything you need is on this page: Mufti's own video series, the AI tools that do the heavy lifting, and a step-by-step guide from choosing a topic to a finished document.</p>
+  <div class="card accent"><h3>💬 Research Companion</h3>
+    <p class="small" style="margin-top:0">Ask anything about your research — it answers from this app's real sources: all 16 department toolkits, 288 journals, the Islamic sources and the AI tools — and sends only what you mark final into Write &amp; Export.</p>
+    <button class="btn goldb" id="help-companion-btn" style="width:100%">💬 Open Research Companion →</button></div>
   <div id="help-watch"></div>
-  <div id="help-tools"></div>
+  <button class="btn ghost" id="help-tools-toggle" style="width:100%" aria-expanded="false">🤖 AI Tools — show all 11 tools</button>
+  <div id="help-tools" style="display:none"></div>
   <div class="card accent"><h3>🧭 Do your research — start to finish</h3>
     <div id="help-guide"></div>
     <button class="btn" id="guide-to-write" style="margin-top:12px">Open Write &amp; Export →</button>
     <div class="divider"></div>
     <div id="guide-done-wrap"></div>
+  </div>
+</section>
+
+
+<!-- ================= RESEARCH COMPANION ================= -->
+<section class="view" id="view-companion">
+  <div class="topbar"><button class="tbtn" id="companion-back">‹ Back</button><div class="ttl">Research Companion</div><span style="width:44px"></span></div>
+  <p class="lead">💬 Ask anything about your research. The companion answers from this app's real sources only — every link below can be opened and checked — and sends nothing to Write &amp; Export until you mark a block final.</p>
+  <div class="notice"><b>Honest limits, stated plainly:</b> every source shown is a real entry from this app — open each link and check it yourself. You remain the author: the companion gives outlines, sources and notes; you write in your own voice. No result here is guaranteed to pass or fail any AI-detector — detectors are unreliable, and your own writing with real references is the honest protection.</div>
+  <div class="card accent"><h3>📝 Tell me what you are writing</h3>
+    <label for="comp-topic">Topic / question <span class="req">*</span></label>
+    <input id="comp-topic" type="text" placeholder="e.g. Project-based learning in Pakistani madrasahs">
+    <label for="comp-words">How many words? (optional)</label>
+    <input id="comp-words" type="number" min="100" step="100" placeholder="e.g. 3000">
+    <label>Document kind</label>
+    <div class="seg" id="comp-kind-seg">
+      <button data-kind="article" class="on">📄 Research Article</button>
+      <button data-kind="synopsis">📝 Synopsis / Proposal</button>
+      <button data-kind="thesis">🎓 Thesis / Dissertation</button>
+    </div>
+    <label>Reference style</label>
+    <div class="seg" id="comp-style-seg">
+      <button data-style="APA" class="on">APA</button>
+      <button data-style="MLA">MLA</button>
+      <button data-style="Chicago">Chicago</button>
+      <button data-style="Other">Other</button>
+    </div>
+    <label>Language</label>
+    <div class="seg" id="comp-lang-seg">
+      <button data-lang="en" class="on">English</button>
+      <button data-lang="ur"><span class="ur" style="font-size:15px">اردو</span></button>
+      <button data-lang="ar">العربية</button>
+    </div>
+    <label for="comp-dept">Department</label>
+    <select id="comp-dept">
+      <option value="auto">✨ Auto-suggest from my topic</option>
+      <option value="engineering">Engineering</option>
+      <option value="medicine">Medicine &amp; Health Sciences</option>
+      <option value="cs">Computer Science &amp; IT</option>
+      <option value="cyber">Cybersecurity</option>
+      <option value="social">Social Sciences</option>
+      <option value="general">General Research Skills</option>
+      <option value="education">Education</option>
+      <option value="psychology">Psychology</option>
+      <option value="sciences">Sciences</option>
+      <option value="law">Law</option>
+      <option value="islamic">Islamic Studies</option>
+      <option value="business">Business &amp; Management</option>
+      <option value="agriculture">Agriculture</option>
+      <option value="languages">Languages &amp; Literature</option>
+      <option value="maths">Mathematics &amp; Statistics</option>
+      <option value="media">Media &amp; Communication</option>
+    </select>
+    <div class="small" id="comp-dept-hint"></div>
+    <button class="btn goldb" id="comp-ask" style="width:100%;margin-top:12px">💬 Get guidance &amp; sources</button>
+    <p class="small" style="margin-bottom:0">Nothing is sent to Write &amp; Export until you tap “This is final” on a block — that tap is the agreement between you and the companion.</p>
+  </div>
+  <div id="comp-mentor"></div>
+  <div id="comp-results"></div>
+  <div id="comp-sent-note"></div>
+  <div class="card"><h3>💬 Ask a follow-up</h3>
+    <p class="small" style="margin-top:0">Discuss or revise before you finalise — a follow-up proposes a fresh answer from the same real sources.</p>
+    <input id="comp-follow" type="text" placeholder="e.g. Make the outline shorter, or: more sources on methodology">
+    <button class="btn" id="comp-follow-btn" style="width:100%">Ask follow-up →</button>
   </div>
 </section>
 
@@ -1273,15 +1348,17 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <!-- ================= WRITE & EXPORT ================= -->
 <section class="view" id="view-write">
   <div class="topbar"><button class="tbtn" id="write-back">‹ Back</button><div class="ttl">Write &amp; Export</div><span style="width:44px"></span></div>
-  <p class="small">Draft a research article or a synopsis / proposal in structured sections — in English or اردو — and download a real, formatted Word file (.docx): title block, Times New Roman 12pt, 1.5 spacing, justified text, page numbers. Drafts save automatically in the app.</p>
+  <p class="small">Draft a research article, a synopsis / proposal, or a thesis in structured sections — in English or اردو — and download a real, formatted Word file (.docx): title block, Times New Roman 12pt, 1.5 spacing, justified text, page numbers. Drafts save automatically in the app.</p>
   <div class="seg" id="write-kind-seg">
     <button data-kind="article">📄 Research Article</button>
     <button data-kind="synopsis">📝 Synopsis / Proposal</button>
+    <button data-kind="thesis">🎓 Thesis / Dissertation</button>
   </div>
   <div class="seg" id="write-lang-seg" style="margin-top:8px">
     <button data-lang="en">English</button>
     <button data-lang="ur"><span class="ur" style="font-size:15px">اردو</span></button>
   </div>
+  <div id="write-steps"></div>
   <div id="write-fields"></div>
   <div class="msg" id="write-msg"></div>
   <button class="btn goldb" id="write-download">⬇ Download Word file (.docx)</button>
@@ -3164,8 +3241,10 @@ function renderDiscipline(id){
     + resBlock("🗄️ Where to find data", d.data)
     + resBlock("🤖 AI tools &amp; software for your field", d.tools)
     + resBlock("📖 Where to publish", d.publish)
-    + '<button class="btn ghost" id="disc-journals-btn" style="width:100%">Full journals list for ' + esc(d.name) + ' →</button>';
+    + '<button class="btn ghost" id="disc-journals-btn" style="width:100%">Full journals list for ' + esc(d.name) + ' →</button>'
+    + '<div class="card"><h3>💬 Research Companion</h3><p class="small" style="margin-top:0">All the platforms on this page — data sources, tools and journals — are included in the Research Companion chat. Ask it anything about ' + esc(d.name) + ' and it will bring you the real links from here.</p><button class="btn ghost" id="disc-companion-btn" style="width:100%">💬 Ask Research Companion about ' + esc(d.name) + ' →</button></div>';
   $("disc-journals-btn").addEventListener("click", ()=> openJournalsDept(d.name));
+  $("disc-companion-btn").addEventListener("click", ()=> openCompanion(d.id));
 }
 
 /* ================= Research Journals (dataset: seed/journals-by-department.json — 288 verified entries, embedded verbatim; never hand-edit entries here, update the seed and re-embed) ================= */
@@ -3715,6 +3794,318 @@ function renderHelp(){
   }
 }
 
+
+/* ================= Research Companion — guided writing assistant (v36) =================
+   Rule-based and dataset-only. Every link rendered here comes from an entry in
+   DISCIPLINES, JOURNALS, ISLAMIC_SOURCES, HELP_TOOLS or HELP_GUIDE — nothing is
+   invented: no reference, book, page number or URL is generated, and no copyrighted
+   book text is reproduced (open sources are linked where the dataset already carries
+   the URL). The student remains the author: the companion supplies an outline, real
+   sources and working notes, never a finished submittable paper, and it makes no
+   promise about AI-detector results. Nothing reaches Write & Export until the student
+   taps "This is final" on a block — that tap is the mutual agreement. */
+let COMP_STATE = { kind:"article", style:"APA", lang:"en", dept:"auto" };
+let COMP_LAST = null;
+const COMP_STOP = new Set("a an the of in on for to and or with from by about into is are was were what how why when where which who does do did can could should would i my me we you your our their his her its this that these those as at be been being have has had will shall may might must not no yes if then than so such".split(" "));
+const COMP_DEPT_KW = {
+  engineering:["engineering","mechanical","electrical","civil","structural","robotics","signal processing","circuit","thermal","fluid mechanics","mechatronics"],
+  medicine:["medicine","medical","health","clinical","disease","patient","nursing","pharmacy","dental","therapy","epidemiology","nutrition","biochemistry","biotechnology","physiotherapy"],
+  cs:["computer science","software","programming","algorithm","database","artificial intelligence","machine learning","data science","information technology","app development"],
+  cyber:["cybersecurity","cyber security","network security","hacking","malware","encryption","digital forensic","information security"],
+  social:["sociology","social science","anthropology","political science","politics","economics","culture","cultural","demography","society"],
+  general:["study skills","academic writing","research methods","research design"],
+  education:["education","pedagogy","curriculum","teaching","teacher","classroom","learning","school","student achievement"],
+  psychology:["psychology","psychological","behaviour","behavior","mental health","cognition","cognitive"],
+  sciences:["physics","chemistry","biology","botany","zoology","geology","environmental science"],
+  law:["law","legal","court","judge","constitution","legislation","contract","justice","human rights","advocate","criminal justice"],
+  islamic:["quran","qur'an","quranic","hadith","fiqh","shariah","sharia","seerah","sirah","islam","islamic","muslim","tafseer","tafsir","sunnah","prophet","madrasa","madrasah","ulama","ijtihad","aqeedah"],
+  business:["business","management","marketing","finance","accounting","commerce","entrepreneurship","organisation","organization","leadership"],
+  agriculture:["agriculture","agronomy","horticulture","veterinary","livestock","crop","farming","animal science"],
+  languages:["language","literature","linguistics","poetry","novel","translation","urdu literature","arabic literature","english literature"],
+  maths:["mathematics","mathematical","statistics","statistical","algebra","calculus","probability"],
+  media:["media","journalism","communication","broadcasting","film studies","press","social media","mass communication"]
+};
+function compTokens(q){
+  return q.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(w => w.length > 1 && !COMP_STOP.has(w));
+}
+function compSuggestDept(q){
+  const t = (q || "").toLowerCase();
+  let best = null, bestSc = 0;
+  DISCIPLINES.forEach(d => {
+    let sc = 0;
+    (COMP_DEPT_KW[d.id] || []).forEach(k => { if(t.indexOf(k) >= 0) sc += k.length; });
+    if(sc > bestSc){ bestSc = sc; best = d; }
+  });
+  return bestSc > 0 ? best : null;
+}
+function compSuggestHint(){
+  const sel = $("comp-dept"), hint = $("comp-dept-hint");
+  if(!sel || !hint) return;
+  if(sel.value !== "auto"){ hint.textContent = ""; return; }
+  const sug = compSuggestDept($("comp-topic").value || "");
+  hint.textContent = sug ? "Suggested department: " + sug.name + " — change it above if it is wrong." : "";
+}
+function compQType(q){
+  if(/\boutline\b|\bstructure\b|\bchapters?\b|\bheadings?\b|\borganise\b|\borganize\b/.test(q)) return "outline";
+  if(/\breference|\bcitation|\bcite\b|\bbibliography\b|\bapa\b|\bmla\b|\bchicago\b/.test(q)) return "references";
+  if(/\bmethodology\b|\bmethod\b|\bqualitative\b|\bquantitative\b|\bsurvey\b|\binterview\b|\bsample\b|\bdata collection\b|\bexperiment\b/.test(q)) return "method";
+  if(/\bsources?\b|\bbooks?\b|\bjournals?\b|\bfind (papers|articles|books)\b|\bwhere (can|do) i (find|read)\b/.test(q)) return "sources";
+  if(/^\s*(what is|what are|define|meaning of|explain)\b/.test(q)) return "definition";
+  return "other";
+}
+function compScoreEntry(text, toks){
+  const t = (text || "").toLowerCase();
+  let sc = 0;
+  toks.forEach(w => { if(t.indexOf(w) >= 0) sc += 1; });
+  return sc;
+}
+function compToolkit(deptId, toks, cap){
+  const out = [];
+  DISCIPLINES.forEach(d => {
+    if(deptId && d.id !== deptId) return;
+    ["data", "tools", "publish"].forEach(sec => {
+      (d[sec] || []).forEach(it => {
+        const sc = compScoreEntry(it[0] + " " + it[1], toks);
+        if(sc > 0) out.push({ name: deptId ? it[0] : it[0] + " (" + d.name + ")", desc: it[1], url: it[2], sc: sc });
+      });
+    });
+  });
+  out.sort((a, b) => b.sc - a.sc);
+  return out.slice(0, cap);
+}
+function compJournals(deptName, toks, cap){
+  const out = [];
+  Object.keys(JOURNALS).forEach(dn => {
+    if(deptName && dn !== deptName) return;
+    const j = JOURNALS[dn] || {};
+    ["international", "pakistani"].forEach(sec => {
+      (j[sec] || []).forEach(it => {
+        const sc = compScoreEntry(it.name + " " + (it.note || "") + " " + (it.publisher || ""), toks);
+        if(sc > 0) out.push({ name: deptName ? it.name : it.name + " (" + dn + ")", desc: (it.note || "") + (it.free === true ? " — Free / open access." : ""), url: it.url, sc: sc });
+      });
+    });
+  });
+  out.sort((a, b) => b.sc - a.sc);
+  return out.slice(0, cap);
+}
+function compTools(type, toks, cap){
+  const boost = { references:["Zotero"], sources:["Elicit", "Semantic Scholar", "Google Scholar"], outline:["ChatGPT", "Gemini"], method:["Elicit", "SciSpace"], definition:["NotebookLM", "SciSpace"], other:[] }[type] || [];
+  const out = HELP_TOOLS.map(it => {
+    let sc = compScoreEntry(it[0] + " " + it[1], toks);
+    if(boost.indexOf(it[0]) >= 0) sc += 3;
+    return { name: it[0], desc: it[1], url: it[2], sc: sc };
+  }).filter(x => x.sc > 0);
+  out.sort((a, b) => b.sc - a.sc);
+  return out.slice(0, cap);
+}
+function compGuideSteps(type){
+  const map = { outline:[5, 6], sources:[1, 2], references:[7], method:[3, 4], definition:[0, 1], other:[0] };
+  return (map[type] || [0]).map(i => HELP_GUIDE[i]);
+}
+function compMentor(topic, words, kind, style){
+  const cards = [];
+  const toks = compTokens(topic);
+  if(toks.length <= 2){
+    cards.push({ t:"⚠️ Narrow this topic first — not this way, this way",
+      b:"A topic of only " + toks.length + " words is too broad to finish. Do not start writing yet. Instead, add a group, a place and a period — for example: \"" + topic.trim() + " among [a group] in [a place], [a period]\" — then fix one research question and build the outline from it." });
+  }
+  if(words){
+    if(words < 1500) cards.push({ t:"📝 Short piece — keep it tight",
+      b:"At " + words + " words there is room for one research question and a tight outline only. Do not add a second question or a long literature review." });
+    else if(words > 12000) cards.push({ t:"📝 Long document — outline first",
+      b:"At " + words + " words, write the full chapter outline before any drafting, and finish one section at a time in Write & Export." });
+  }
+  const shapes = {
+    article:"Title → Abstract → Introduction → Literature Review → Methodology → Analysis / Discussion → Conclusion → References",
+    synopsis:"Title → Introduction → Research Questions → Objectives → Literature Review → Methodology → Chapter Outline → References",
+    thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Analysis / Discussion → Conclusion → References"
+  };
+  const shape = shapes[kind] || shapes.article;
+  const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
+  cards.push({ t:"✅ The correct shape for your " + kindLabel,
+    b: shape + ". A common mistake is drafting before the research questions are fixed — questions first, then outline, then section by section." });
+  cards.push({ t:"📚 References — " + style + " style",
+    b: style === "Other"
+      ? "Use exactly the style your university requires — check its handbook first — and keep every entry in that one style. Build the list in Zotero as you read, never from memory at the end."
+      : "Keep every entry in " + style + " style, and build the list in Zotero as you read — never from memory at the end. Zotero handles " + style + " and keeps the formatting consistent." });
+  return cards;
+}
+function compActions(key, label){
+  return '<div class="comp-actions"><button class="btn ghost sm" data-comp-revise="' + key + '">💬 Revise ' + label + '</button><button class="btn goldb sm" data-comp-final="' + key + '">✓ ' + label + ' final — send to Write &amp; Export</button></div>';
+}
+function compAsk(followQ){
+  const topic = ($("comp-topic").value || "").trim();
+  const q = (followQ || topic || "").trim();
+  if(!q){ toast("Write your topic or question first."); return; }
+  const words = parseInt(($("comp-words").value || ""), 10) || null;
+  const st = COMP_STATE;
+  let deptId = st.dept;
+  if(deptId === "auto"){ const sug = compSuggestDept(q); deptId = sug ? sug.id : null; }
+  const deptObj = deptId ? DISCIPLINES.find(d => d.id === deptId) : null;
+  const deptName = deptObj ? deptObj.name : null;
+  const toks = compTokens(q);
+  const type = compQType(q.toLowerCase());
+  const mentor = compMentor(topic || q, words, st.kind, st.style);
+  const tk = compToolkit(deptId, toks, 4);
+  const jn = compJournals(deptName, toks, 4);
+  const isl = (deptId === "islamic" || compScoreEntry(q, ["quran", "hadith", "fiqh", "shariah", "seerah", "islamic"]) > 0)
+    ? ISLAMIC_SOURCES.map(it => ({ name: it[0], desc: it[1], url: it[2] })) : [];
+  const tools = compTools(type, toks, 3);
+  const steps = compGuideSteps(type);
+  const shapes = {
+    article:"Title → Abstract → Introduction → Literature Review → Methodology → Analysis / Discussion → Conclusion → References",
+    synopsis:"Title → Introduction → Research Questions → Objectives → Literature Review → Methodology → Chapter Outline → References",
+    thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Analysis / Discussion → Conclusion → References"
+  };
+  const shape = shapes[st.kind] || shapes.article;
+  const kindLabel = (WRITE_KINDS[st.kind] && WRITE_KINDS[st.kind].label) || st.kind;
+  const outlineText = "Outline (" + kindLabel + "):\n" + shape.split(" → ").join("\n");
+  const srcLines = [];
+  tk.forEach(it => srcLines.push(it.name + " — " + it.url));
+  jn.forEach(it => srcLines.push(it.name + " — " + it.url));
+  isl.forEach(it => srcLines.push(it.name + " — " + it.url));
+  tools.forEach(it => srcLines.push(it.name + " — " + it.url));
+  const sourcesText = srcLines.join("\n");
+  const notesText = mentor.map(m => m.t + "\n" + m.b).join("\n\n") + "\n\nGuide steps:\n" + steps.map((g, i) => (i + 1) + ". " + g[0] + " — " + g[1]).join("\n");
+  COMP_LAST = { topic: topic || q, kind: st.kind, lang: st.lang, style: st.style, blocks: { outline: outlineText, sources: sourcesText, notes: notesText }, sent: {} };
+  let mHtml = "";
+  if(deptObj) mHtml += '<p class="small">Department: <b>' + esc(deptObj.name) + '</b>' + (st.dept === "auto" ? ' (suggested from your words — change it above if it is wrong)' : '') + ' · Kind: <b>' + esc(kindLabel) + '</b> · Style: <b>' + esc(st.style) + '</b>' + (words ? ' · Words: <b>' + words + '</b>' : '') + '</p>';
+  else mHtml += '<p class="small">No department detected from your words — sources below come from all departments. Pick a department above to narrow them.</p>';
+  mHtml += mentor.map(m => '<div class="card"><h3>' + esc(m.t) + '</h3><p class="small" style="margin-bottom:0">' + esc(m.b) + '</p></div>').join("");
+  mHtml += '<p class="small">These notes travel with the guide steps when you finalise Notes below.</p>';
+  $("comp-mentor").innerHTML = mHtml;
+  let rHtml = "";
+  rHtml += '<div class="card accent"><h3>📋 Outline — ' + esc(kindLabel) + '</h3><p class="small" style="margin-bottom:0">' + esc(shape).split(" → ").join("<br>→ ") + '</p></div>' + compActions("outline", "Outline");
+  const linkItems = [];
+  tk.forEach(it => linkItems.push([it.name, it.desc, it.url]));
+  jn.forEach(it => linkItems.push([it.name, it.desc, it.url]));
+  isl.forEach(it => linkItems.push([it.name, it.desc, it.url]));
+  tools.forEach(it => linkItems.push([it.name, it.desc, it.url]));
+  if(linkItems.length){
+    rHtml += resBlock("🔗 Real sources — open each link and check it", linkItems);
+    rHtml += '<p class="small">These are places to find and cite from — not a ready bibliography. Format what you actually use in ' + esc(st.style) + ' style (Zotero does this).</p>';
+    rHtml += compActions("sources", "Sources");
+  } else {
+    rHtml += '<div class="notice">No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the guide below.</div>';
+    if(deptObj){
+      const near = (deptObj.data || []).slice(0, 3).map(it => [it[0], it[1], it[2]]);
+      if(near.length) rHtml += resBlock("🧭 Nearest starting points in " + deptObj.name + " (not matched to your words)", near);
+    }
+    rHtml += '<p class="small">You can also browse the full Toolkit from the Research hub.</p>';
+  }
+  rHtml += '<div class="card"><h3>🧭 Guide steps for this question</h3>' + steps.map((g, i) => '<div class="guide-step"><div class="gn">' + (i + 1) + '</div><div class="gt"><b>' + esc(g[0]) + '.</b> ' + esc(g[1]) + '<div class="ur" style="font-size:15px;margin-top:2px">' + g[2] + '</div></div></div>').join("") + '</div>' + compActions("notes", "Notes");
+  $("comp-results").innerHTML = rHtml;
+  $("comp-sent-note").innerHTML = "";
+  $("comp-results").scrollIntoView({ block:"start" });
+}
+function fieldLabel(kind, key){
+  const f = (WRITE_KINDS[kind] && WRITE_KINDS[kind].fields.find(x => x[0] === key));
+  return f ? f[1] : key;
+}
+function compFinal(key){
+  if(!ME){ toast("Please log in first — the demo student works too."); return; }
+  const last = COMP_LAST;
+  if(!last || !last.blocks[key]) return;
+  if(last.sent[key]){ toast("Already sent — open Write & Export to edit it."); return; }
+  const lang = last.lang === "en" ? "en" : "ur";
+  let keptKind = false;
+  if(!WD) WD = newWD(last.kind, lang);
+  else if(!wdHasContent()){ WD.kind = last.kind; WD.lang = lang; }
+  else if(WD.kind !== last.kind) keptKind = true;
+  if(!WD.fields.title) WD.fields.title = last.topic;
+  let field = "introduction", prefix = "";
+  if(key === "outline") field = (WD.kind === "synopsis" || WD.kind === "thesis") ? "outline" : "introduction";
+  if(key === "sources") field = "references";
+  if(key === "notes"){ field = "introduction"; prefix = "Working notes — remove before submission:\n"; }
+  if(key === "outline" && WD.kind === "article") prefix = "Outline:\n";
+  const cur = (WD.fields[field] || "").trim();
+  WD.fields[field] = cur ? cur + "\n\n" + prefix + last.blocks[key] : prefix + last.blocks[key];
+  WD.step = field;
+  if(!WD.id){ WD.id = uid(); WD.updatedAt = nowISO(); ME.documents = ME.documents || []; ME.documents.unshift(WD); }
+  else {
+    const ix = (ME.documents || []).findIndex(d => d.id === WD.id);
+    if(ix >= 0) ME.documents[ix] = WD; else ME.documents.unshift(WD);
+  }
+  persist(); if(FB) FB.saveUser(ME);
+  last.sent[key] = true;
+  const btn = document.querySelector('[data-comp-final="' + key + '"]');
+  if(btn){ btn.textContent = "✓ Sent to " + WRITE_KINDS[WD.kind].label + " → " + fieldLabel(WD.kind, field); btn.disabled = true; }
+  const secs = WRITE_KINDS[WD.kind].fields.filter(f => f[2] === "ta");
+  const ix = secs.findIndex(f => f[0] === field);
+  const next = (ix >= 0 && ix + 1 < secs.length) ? secs[ix + 1][1] : null;
+  const note = $("comp-sent-note");
+  note.innerHTML = '<div class="notice">✓ <b>Final — sent.</b> This block is now in Write &amp; Export → ' + esc(WRITE_KINDS[WD.kind].label) + ' → ' + esc(fieldLabel(WD.kind, field)) + '.' + (keptKind ? ' Your open draft was kept — the new kind applies to your next document.' : '') + ' ' + (next ? 'When you finish that heading, tap “Heading complete” there and the builder moves you to <b>' + esc(next) + '</b> automatically.' : 'That was the last heading — download your document when ready.') + '<div style="margin-top:10px"><button class="btn goldb" id="comp-open-write">✍️ Open Write &amp; Export →</button></div></div>';
+  $("comp-open-write").addEventListener("click", ()=>{ WRITE_BACK = "view-companion"; showView("view-write"); });
+  toast("Final — sent to Write & Export.");
+}
+function compRevise(key){
+  const labels = { outline:"outline", sources:"sources list", notes:"notes" };
+  const f = $("comp-follow");
+  f.value = "Revise the " + (labels[key] || key) + ": ";
+  f.focus();
+  f.scrollIntoView({ block:"center" });
+  toast("Write what to change, then tap Ask — a fresh answer will be proposed.");
+}
+function compSeg(id, key){
+  document.querySelectorAll("#" + id + " button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("#" + id + " button").forEach(x => x.classList.toggle("on", x === b));
+    COMP_STATE[key] = b.dataset[key];
+  }));
+}
+function openCompanion(deptId){
+  let id = deptId || null;
+  if(!id && ME){ try{ const did = disciplineOf(ME); if(did) id = did; }catch(e){} }
+  const sel = $("comp-dept");
+  if(sel){ sel.value = (id && DISCIPLINES.some(d => d.id === id)) ? id : "auto"; }
+  COMP_STATE.dept = sel ? sel.value : "auto";
+  compSuggestHint();
+  showView("view-companion");
+}
+/* ---- Staged builder: heading stepper in Write & Export ---- */
+function writeSections(){
+  if(!WD) return [];
+  return WRITE_KINDS[WD.kind].fields.filter(f => f[2] === "ta");
+}
+function compFocusField(key){
+  const el = document.querySelector('[data-wf="' + key + '"]');
+  if(el){ el.scrollIntoView({ block:"center" }); try{ el.focus({ preventScroll:true }); }catch(e){ el.focus(); } }
+}
+function renderWriteSteps(){
+  const box = document.getElementById("write-steps");
+  if(!box || !WD) return;
+  const secs = writeSections();
+  if(!secs.length){ box.innerHTML = ""; return; }
+  if(!WD.done) WD.done = [];
+  if(!WD.step || !secs.some(f => f[0] === WD.step)) WD.step = secs[0][0];
+  const cur = secs.find(f => f[0] === WD.step);
+  const allDone = secs.every(f => WD.done.indexOf(f[0]) >= 0);
+  const ix = secs.findIndex(f => f[0] === WD.step);
+  const nextLabel = (ix >= 0 && ix + 1 < secs.length) ? secs[ix + 1][1] : null;
+  let html = '<div class="card"><h3>🧭 Builder — work heading by heading</h3><p class="small" style="margin-top:0">Current heading: <b>' + esc(cur[1]) + '</b>. Tap any heading to go back and edit it — you are never locked forward.</p><div class="stepbar">';
+  secs.forEach(f => {
+    const done = WD.done.indexOf(f[0]) >= 0;
+    const isCur = f[0] === WD.step;
+    html += '<button class="stepchip' + (isCur ? ' on' : '') + (done ? ' done' : '') + '" data-step="' + f[0] + '">' + (done ? '✓ ' : '') + esc(f[1]) + '</button>';
+  });
+  html += '</div>';
+  if(allDone) html += '<p class="small">🎉 All headings complete — download your document below.</p>';
+  else if(nextLabel) html += '<button class="btn goldb" id="write-step-done" style="margin-top:10px">✓ Heading complete — next: ' + esc(nextLabel) + ' →</button>';
+  else html += '<button class="btn goldb" id="write-step-done" style="margin-top:10px">✓ Heading complete — finish</button>';
+  html += '</div>';
+  box.innerHTML = html;
+  box.querySelectorAll("[data-step]").forEach(ch => ch.addEventListener("click", () => {
+    collectWD(); WD.step = ch.dataset.step; renderWriteSteps(); compFocusField(ch.dataset.step);
+  }));
+  const dn = document.getElementById("write-step-done");
+  if(dn) dn.addEventListener("click", () => {
+    collectWD();
+    if(WD.done.indexOf(WD.step) < 0) WD.done.push(WD.step);
+    const ix2 = secs.findIndex(f => f[0] === WD.step);
+    if(ix2 >= 0 && ix2 + 1 < secs.length) WD.step = secs[ix2 + 1][0];
+    saveWD(); renderWriteSteps(); compFocusField(WD.step);
+  });
+}
+
 /* ================= My Progress ================= */
 function renderProgress(){
   const el = document.getElementById("progress-body");
@@ -3747,11 +4138,16 @@ const WRITE_KINDS = {
   synopsis:{ label:"Synopsis / Proposal", fields:[
     ["title","Title","input"],["author","Author name","input"],["affiliation","Affiliation — university · department","input"],
     ["introduction","Introduction","ta"],["questions","Research Questions","ta"],["objectives","Objectives","ta"],
-    ["literature","Literature Review","ta"],["methodology","Methodology","ta"],["outline","Chapter Outline","ta"],["references","References","ta"] ]}
+    ["literature","Literature Review","ta"],["methodology","Methodology","ta"],["outline","Chapter Outline","ta"],["references","References","ta"] ]},
+  thesis:{ label:"Thesis / Dissertation", fields:[
+    ["title","Title","input"],["author","Author name","input"],["affiliation","Affiliation — university · department","input"],
+    ["abstract","Abstract","ta"],["keywords","Keywords (comma-separated)","input"],["introduction","Introduction","ta"],
+    ["literature","Literature Review","ta"],["methodology","Methodology","ta"],["outline","Chapter Outline","ta"],
+    ["discussion","Analysis / Discussion","ta"],["conclusion","Conclusion","ta"],["references","References","ta"] ]}
 };
 let WD = null, WRITE_BACK = "view-toolkit", wdTimer = null;
 function newWD(kind, lang){
-  return { id:null, kind:kind, lang:lang || "en", title:"", exports:0, updatedAt:nowISO(),
+  return { id:null, kind:kind, lang:lang || "en", title:"", exports:0, done:[], step:null, updatedAt:nowISO(),
     fields:{ title:"", author: ME ? ME.name : "", affiliation: ME ? (ME.university + (ME.dept ? " · " + ME.dept : "")) : "" } };
 }
 function renderWrite(){
@@ -3769,6 +4165,7 @@ function paintWriteForm(){
     return '<label>' + f[1] + '</label><textarea data-wf="' + f[0] + '"' + (ur ? ' class="ur-in" dir="rtl"' : '') + '>' + val + '</textarea>';
   }).join("");
   document.querySelectorAll("[data-wf]").forEach(inp => inp.addEventListener("input", onWriteInput));
+  renderWriteSteps();
 }
 function onWriteInput(){
   clearTimeout(wdTimer);
@@ -4345,6 +4742,26 @@ function wire(){
   $("disc-help-btn").addEventListener("click", ()=> btnHelp("view-discipline"));
   $("help-back").addEventListener("click", ()=> showView(HELP_BACK));
   $("guide-to-write").addEventListener("click", ()=> { WRITE_BACK = "view-help"; showView("view-write"); });
+  /* ---- Research Companion (v36) ---- */
+  $("help-companion-btn").addEventListener("click", ()=> openCompanion(null));
+  $("companion-back").addEventListener("click", ()=> showView("view-help"));
+  $("help-tools-toggle").addEventListener("click", ()=>{
+    const t = $("help-tools"); const open = t.style.display === "none";
+    t.style.display = open ? "block" : "none";
+    $("help-tools-toggle").textContent = open ? "🤖 AI Tools — hide" : "🤖 AI Tools — show all 11 tools";
+    $("help-tools-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  compSeg("comp-kind-seg", "kind"); compSeg("comp-style-seg", "style"); compSeg("comp-lang-seg", "lang");
+  $("comp-dept").addEventListener("change", ()=>{ COMP_STATE.dept = $("comp-dept").value; compSuggestHint(); });
+  $("comp-topic").addEventListener("input", compSuggestHint);
+  $("comp-ask").addEventListener("click", ()=> compAsk(null));
+  $("comp-follow-btn").addEventListener("click", ()=> compAsk($("comp-follow").value.trim()));
+  $("view-companion").addEventListener("click", (e)=>{
+    const rv = e.target.closest("[data-comp-revise]");
+    if(rv){ compRevise(rv.dataset.compRevise); return; }
+    const fn = e.target.closest("[data-comp-final]");
+    if(fn){ compFinal(fn.dataset.compFinal); }
+  });
   $("consult-form").addEventListener("submit", e => {
     e.preventDefault(); submitRequest({ topic:$("consult-topic").value.trim(), type:"Consultation",
       lang:"English", message:$("consult-msg").value.trim(),

@@ -1090,11 +1090,14 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
   <div id="help-watch"></div>
   <button class="btn ghost" id="help-tools-toggle" style="width:100%" aria-expanded="false">🤖 AI Tools — show all 11 tools</button>
   <div id="help-tools" style="display:none"></div>
+  <button class="btn ghost" id="help-guide-toggle" style="width:100%" aria-expanded="false">🧭 Do your research — start to finish — show all 10 steps</button>
+  <div id="help-guide-wrap" style="display:none">
   <div class="card accent"><h3>🧭 Do your research — start to finish</h3>
     <div id="help-guide"></div>
     <button class="btn" id="guide-to-write" style="margin-top:12px">Open Write &amp; Export →</button>
     <div class="divider"></div>
     <div id="guide-done-wrap"></div>
+  </div>
   </div>
 </section>
 
@@ -4750,6 +4753,12 @@ function wire(){
     t.style.display = open ? "block" : "none";
     $("help-tools-toggle").textContent = open ? "🤖 AI Tools — hide" : "🤖 AI Tools — show all 11 tools";
     $("help-tools-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  $("help-guide-toggle").addEventListener("click", ()=>{
+    const t = $("help-guide-wrap"); const open = t.style.display === "none";
+    t.style.display = open ? "block" : "none";
+    $("help-guide-toggle").textContent = open ? "🧭 Do your research — start to finish — hide" : "🧭 Do your research — start to finish — show all 10 steps";
+    $("help-guide-toggle").setAttribute("aria-expanded", open ? "true" : "false");
   });
   compSeg("comp-kind-seg", "kind"); compSeg("comp-style-seg", "style"); compSeg("comp-lang-seg", "lang");
   $("comp-dept").addEventListener("change", ()=>{ COMP_STATE.dept = $("comp-dept").value; compSuggestHint(); });

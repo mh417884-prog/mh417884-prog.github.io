@@ -13,7 +13,7 @@
 <style>
 @font-face{
   font-family:'Jameel Noori Nastaleeq';
-  src:url('https://research-with-mufti-hassan.web.app/assets/JameelNooriNastaleeq.ttf') format('truetype');
+  src:url('assets/JameelNooriNastaleeq.woff2') format('woff2');
   font-display:swap;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -834,13 +834,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <label for="gate-linkedin">LinkedIn profile URL</label>
     <input id="gate-linkedin" type="url" placeholder="https://www.linkedin.com/in/your-name">
     <div class="help">No LinkedIn yet? <a href="https://www.linkedin.com/help/linkedin/answer/a1337200" target="_blank" rel="noopener">How to create a LinkedIn profile</a> — it takes 10 minutes and employers check it first.</div>
-    <div class="field-err" id="err-gate-linkedin">Please paste your LinkedIn profile link — it looks like linkedin.com/in/your-name.</div>
-    <div class="field-err ur" id="err-gate-linkedin-ur" style="font-size:14.5px">براہ کرم اپنا LinkedIn پروفائل لنک لگائیں — اس کی شکل linkedin.com/in/your-name جیسی ہوتی ہے۔</div>
+    <div class="field-err" id="err-gate-linkedin">Please enter your LinkedIn profile link.</div>
+    <div class="field-err ur" id="err-gate-linkedin-ur" style="font-size:14.5px">براہ کرم اپنا LinkedIn پروفائل لنک درج کریں۔</div>
     <label for="gate-scholar">Google Scholar profile URL</label>
     <input id="gate-scholar" type="url" placeholder="https://scholar.google.com/citations?user=…">
     <div class="help">No Scholar profile yet? <a href="https://scholar.google.com/intl/en/scholar/citations.html" target="_blank" rel="noopener">How to create a Google Scholar profile</a> — sign in with your university email if you can.</div>
-    <div class="field-err" id="err-gate-scholar">Please paste your Google Scholar profile link — open your profile and copy its link (it contains 'citations?user=…').</div>
-    <div class="field-err ur" id="err-gate-scholar-ur" style="font-size:14.5px">براہ کرم اپنا Google Scholar پروفائل لنک لگائیں — اپنا پروفائل کھول کر اس کا لنک کاپی کریں (اس میں citations?user=… ہوتا ہے)۔</div>
+    <div class="field-err" id="err-gate-scholar">Please enter your Google Scholar profile link.</div>
+    <div class="field-err ur" id="err-gate-scholar-ur" style="font-size:14.5px">براہ کرم اپنا Google Scholar پروفائل لنک درج کریں۔</div>
     <div class="notice" id="gateb-demo-hint" hidden style="margin:10px 0"><b>Demo examples</b> — CV link: https://drive.google.com/file/d/… · LinkedIn: https://www.linkedin.com/in/your-name · Scholar: https://scholar.google.com/citations?user=XXXX</div>
     <div class="msg ok" id="gate-verified-note" hidden>✓ Identity verified — Mufti has reviewed your CV and profile links.</div>
     <div class="msg" id="gates-msg"></div>
@@ -1211,12 +1211,12 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     <div class="msg ok" id="prof-verified-note" hidden>✓ Identity verified — Mufti has reviewed your CV and profile links.</div>
     <label for="prof-linkedin-in">LinkedIn profile URL</label>
     <input id="prof-linkedin-in" type="url" placeholder="https://www.linkedin.com/in/your-name">
-    <div class="field-err" id="err-prof-linkedin">Please paste your LinkedIn profile link — it looks like linkedin.com/in/your-name.</div>
-    <div class="field-err ur" id="err-prof-linkedin-ur" style="font-size:14.5px">براہ کرم اپنا LinkedIn پروفائل لنک لگائیں — اس کی شکل linkedin.com/in/your-name جیسی ہوتی ہے۔</div>
+    <div class="field-err" id="err-prof-linkedin">Please enter your LinkedIn profile link.</div>
+    <div class="field-err ur" id="err-prof-linkedin-ur" style="font-size:14.5px">براہ کرم اپنا LinkedIn پروفائل لنک درج کریں۔</div>
     <label for="prof-scholar-in">Google Scholar profile URL</label>
     <input id="prof-scholar-in" type="url" placeholder="https://scholar.google.com/citations?user=…">
-    <div class="field-err" id="err-prof-scholar">Please paste your Google Scholar profile link — open your profile and copy its link (it contains 'citations?user=…').</div>
-    <div class="field-err ur" id="err-prof-scholar-ur" style="font-size:14.5px">براہ کرم اپنا Google Scholar پروفائل لنک لگائیں — اپنا پروفائل کھول کر اس کا لنک کاپی کریں (اس میں citations?user=… ہوتا ہے)۔</div>
+    <div class="field-err" id="err-prof-scholar">Please enter your Google Scholar profile link.</div>
+    <div class="field-err ur" id="err-prof-scholar-ur" style="font-size:14.5px">براہ کرم اپنا Google Scholar پروفائل لنک درج کریں۔</div>
     <label for="prof-cvlink-in">CV link (or upload a new CV in the field below)</label>
     <input id="prof-cvlink-in" type="url" placeholder="https://drive.google.com/…">
     <div class="field-err" id="err-prof-cvlink">Please paste the share link of your CV (Google Drive / Dropbox / OneDrive).</div>
@@ -2894,22 +2894,18 @@ function renderVerify(){
 /* ================= Validation helpers ================= */
 function showErr(id, bad){ const e = document.getElementById(id); if(e) e.classList.toggle("show", !!bad); return !bad; }
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||"").trim()); }
-/* Gate B identity validation (strict — this data powers later guidance).
-   LinkedIn: a PROFILE link only — https://<any-subdomain.>linkedin.com/in/<slug>.
-   Scholar: a PROFILE link only — https://scholar.google.<tld>/citations?user=…
-   CV link: valid https only; known file hosts and direct .pdf links pass
-   cleanly; any other https host passes but is flagged (cvLinkOther) so the
-   admin can give it a closer look. */
-function validLinkedIn(v){
-  return /^https:\/\/([a-z0-9-]+\.)*linkedin\.com\/in\/[^\s/?#]+\/?([?#]\S*)?$/i.test(String(v||"").trim());
-}
-function validScholar(v){
-  try{
-    const u = new URL(String(v||"").trim());
-    return u.protocol === "https:" && /^scholar\.google\.[a-z.]+$/i.test(u.hostname)
-      && u.pathname.replace(/\/+$/,"") === "/citations" && !!(u.searchParams.get("user") || "").trim();
-  }catch(e){ return false; }
-}
+/* Gate B identity validation (Mufti 2026-10-25 — EASY links: the app
+   was troubling students on these two fields, so format-based rejection
+   is GONE. LinkedIn and Scholar accept ANY non-empty value — a pasted
+   link with stray spaces, trailing slash, www/locale variants, reordered
+   query params, even a plain string ("kuch bhi"). The only blocking
+   condition is EMPTY. The admin "Identity verified" toggle remains the
+   human identity check. CV link: valid https only; known file hosts and
+   direct .pdf links pass cleanly; any other https host passes but is
+   flagged (cvLinkOther) so the admin can give it a closer look. */
+function validLinkedIn(v){ return String(v || "").trim().length > 0; }
+function validScholar(v){ return String(v || "").trim().length > 0; }
+function safeHref(v){ try{ const u = new URL(String(v || "").trim()); return (u.protocol === "http:" || u.protocol === "https:") ? String(v).trim() : "#"; }catch(e){ return "#"; } }
 function cvLinkInfo(v){
   v = String(v||"").trim();
   if(!v) return { ok:true, other:false };
@@ -3471,8 +3467,8 @@ function renderProfile(){
   function kv(k,v){ return '<div class="kv"><span>' + esc(k) + '</span><b>' + esc(v || "—") + '</b></div>'; }
   const i = ME.identity || {};
   document.getElementById("prof-cv").textContent = i.cvName ? i.cvName : (i.cvLink ? "Linked CV" : "Not added");
-  const li = document.getElementById("prof-linkedin"); li.textContent = i.linkedin ? "View profile" : "—"; li.href = i.linkedin || "#";
-  const sc = document.getElementById("prof-scholar"); sc.textContent = i.scholar ? "View profile" : "—"; sc.href = i.scholar || "#";
+  const li = document.getElementById("prof-linkedin"); li.textContent = i.linkedin ? "View profile" : "—"; li.href = i.linkedin ? safeHref(i.linkedin) : "#";
+  const sc = document.getElementById("prof-scholar"); sc.textContent = i.scholar ? "View profile" : "—"; sc.href = i.scholar ? safeHref(i.scholar) : "#";
   document.getElementById("prof-linkedin-in").value = i.linkedin || "";
   document.getElementById("prof-scholar-in").value = i.scholar || "";
   document.getElementById("prof-cvlink-in").value = i.cvLink || "";
@@ -3490,8 +3486,8 @@ function identityBlock(u){
   if(i.cvData) h += '<div class="small">CV file: <a href="#" data-cvdl="' + esc(u.email) + '">⬇ Download ' + esc(i.cvName || "CV") + '</a></div>';
   if(i.cvLink) h += '<div class="small">CV link: <a href="' + esc(i.cvLink) + '" target="_blank" rel="noopener">Open CV link ↗</a>' + (i.cvLinkOther ? ' <span style="color:#9a6a00"><b>⚠ other host — closer look</b></span>' : '') + '</div>';
   if(!i.cvData && !i.cvLink) h += '<div class="small">CV: —</div>';
-  h += '<div class="small">LinkedIn: ' + (i.linkedin ? '<a href="' + esc(i.linkedin) + '" target="_blank" rel="noopener">View profile ↗</a>' : '—') + '</div>';
-  h += '<div class="small">Google Scholar: ' + (i.scholar ? '<a href="' + esc(i.scholar) + '" target="_blank" rel="noopener">View profile ↗</a>' : '—') + '</div>';
+  h += '<div class="small">LinkedIn: ' + (i.linkedin ? '<a href="' + esc(safeHref(i.linkedin)) + '" target="_blank" rel="noopener">View profile ↗</a>' : '—') + '</div>';
+  h += '<div class="small">Google Scholar: ' + (i.scholar ? '<a href="' + esc(safeHref(i.scholar)) + '" target="_blank" rel="noopener">View profile ↗</a>' : '—') + '</div>';
   h += '<label class="checkrow" style="margin-top:6px"><input type="checkbox" data-idv="' + esc(u.email) + '"' + (u.identityVerified ? ' checked' : '') + '><span>Identity verified ✓</span></label>';
   return h + '</div>';
 }
@@ -4807,6 +4803,14 @@ function wire(){
   });
   $("prof-linkedin-in").addEventListener("blur", ()=>{ const bad = !validLinkedIn($("prof-linkedin-in").value.trim()); showErr("err-prof-linkedin", bad); showErr("err-prof-linkedin-ur", bad); });
   $("prof-scholar-in").addEventListener("blur", ()=>{ const bad = !validScholar($("prof-scholar-in").value.trim()); showErr("err-prof-scholar", bad); showErr("err-prof-scholar-ur", bad); });
+
+  /* v38 paste hygiene: trim stray spaces/newlines on paste and blur for
+     LinkedIn / Scholar (both forms), so a copied link saves cleanly. */
+  ["gate-linkedin","gate-scholar","prof-linkedin-in","prof-scholar-in"].forEach(id => {
+    const el = document.getElementById(id); if(!el) return;
+    el.addEventListener("paste", ()=> setTimeout(()=>{ el.value = el.value.trim(); }, 0));
+    el.addEventListener("blur", ()=>{ el.value = el.value.trim(); });
+  });
   $("prof-cvlink-in").addEventListener("blur", ()=>{ const v = $("prof-cvlink-in").value.trim(); const bad = !!v && !cvLinkInfo(v).ok; showErr("err-prof-cvlink", bad); showErr("err-prof-cvlink-ur", bad); });
 
   /* ---- Admin ---- */

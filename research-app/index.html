@@ -825,6 +825,21 @@ body{background:#E6E2D5}
 </style>
 
 
+<style id="v42-simple">
+/* v42 focus mode: during a build only the current heading is on screen */
+#comp-summary{display:none;margin:12px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+#comp-summary .sum-line{font-size:15px;line-height:1.5}
+#comp-draft-toggle-wrap{display:none;margin:12px 0}
+#comp-intake-toggle{width:100%}
+#wiz-build-progress{margin:10px 0 4px}
+#wiz-build-progress-text{font-size:15px}
+.wbar{height:8px;border-radius:99px;background:var(--track);overflow:hidden;margin-top:6px}
+.wbar > div{height:100%;background:var(--gold);border-radius:99px;transition:width 200ms}
+#view-companion.focus-build > .lead,#view-companion.focus-build > .notice,#view-companion.focus-build #comp-wizard > h3,#view-companion.focus-build #comp-wizard > p{display:none}
+#view-companion.focus-build #comp-intake-toggle,#view-companion.focus-build #comp-intake-card,#view-companion.focus-build #comp-follow-card,#view-companion.focus-build #comp-mentor,#view-companion.focus-build #comp-results,#view-companion.focus-build #comp-sent-note,#view-companion.focus-build #comp-draft{display:none}
+#view-companion.focus-build #comp-draft-toggle-wrap{display:block}
+#view-companion.focus-build.draft-open #comp-draft{display:block}
+</style>
 </head>
 <body>
 <div id="app">
@@ -1362,11 +1377,15 @@ body{background:#E6E2D5}
   </div>
   <div id="wiz-build" style="display:none">
     <div class="divider"></div>
+    <div id="wiz-build-progress"><span id="wiz-build-progress-text"></span><div class="wbar"><div id="wiz-build-progress-bar" style="width:0%"></div></div></div>
     <p class="small" id="wiz-narrate"></p>
     <div id="wiz-current"></div>
   </div>
 </div>
-  <div class="card accent"><h3>📝 Tell me what you are writing</h3>
+  <div id="comp-summary"><div class="sum-line" id="comp-summary-text"></div><div style="margin-top:8px"><button class="btn ghost sm" id="comp-summary-edit">✏️ Edit these details</button></div></div>
+  <div id="comp-draft-toggle-wrap"><button class="btn ghost" id="comp-draft-toggle" style="width:100%">📝 See full draft ▾</button></div>
+  <button class="btn ghost" id="comp-intake-toggle">💬 Ask a single question instead ▸</button>
+  <div class="card accent" id="comp-intake-card" style="display:none"><h3>📝 Tell me what you are writing</h3>
     <label for="comp-topic">Topic / question <span class="req">*</span></label>
     <input id="comp-topic" type="text" placeholder="e.g. Project-based learning in Pakistani madrasahs">
     <label for="comp-words">How many words? (optional)</label>
@@ -1418,7 +1437,7 @@ body{background:#E6E2D5}
   <div id="comp-mentor"></div>
   <div id="comp-results"></div>
   <div id="comp-sent-note"></div>
-  <div class="card"><h3>💬 Ask a follow-up</h3>
+  <div class="card" id="comp-follow-card"><h3>💬 Ask a follow-up</h3>
     <p class="small" style="margin-top:0">Ask for one heading at a time — for example “Introduction for my topic”, “Research questions”, “Methodology” — each answer appears in your draft panel above, with its full text.</p>
     <input id="comp-follow" type="text" placeholder="e.g. Introduction for my topic, or: Research questions">
     <button class="btn" id="comp-follow-btn" style="width:100%">Ask follow-up →</button>
@@ -4574,6 +4593,7 @@ function wizStart(){
   $("wiz-build").style.display = "block";
   renderCompDraft();
   wizBuildNext();
+  compSetFocus("build");
   $("wiz-build").scrollIntoView({ block:"start" });
 }
 const WIZ_LABELS_UR = { title:"عنوان", introduction:"تعارف", questions:"تحقیقی سوالات", objectives:"مقاصد", literature:"ادب کا جائزہ", methodology:"طریقہ تحقیق", outline:"ابواب کا خاکہ", references:"حوالہ جات", abstract:"خلاصہ", keywords:"کلیدی الفاظ", discussion:"تجزیہ و بحث", conclusion:"نتیجہ" };
@@ -4615,11 +4635,13 @@ function wizRestart(){
   WIZ.buildIdx = 0; WIZ.building = false; WIZ.ctx = null;
   $("wiz-build").style.display = "none";
   $("wiz-current").innerHTML = "";
+  compSetFocus("off");
   wizShow(1);
 }
 
 function wizShowCurrent(f, text){
   wizNarrate(f[0]);
+  wizBuildProgress();
   const box = $("wiz-current");
   const label = wizLabel(f);
   const t = wizT();
@@ -4627,9 +4649,12 @@ function wizShowCurrent(f, text){
     + '<p class="small"><b>' + esc(t.approve) + '</b> ' + esc(t.approveSub) + '</p>'
     + '<label for="wiz-revise-in">' + esc(t.changePre) + esc(label) + esc(t.changePost) + '</label>'
     + '<input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">'
+    + (WIZ.buildIdx > 0 ? '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>' : '')
     + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + esc(t.finalBtn) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div></div>';
   $("wiz-final-btn").addEventListener("click", wizFinal);
   $("wiz-revise-btn").addEventListener("click", wizRevise);
+  const pv = $("wiz-prev-btn");
+  if(pv) pv.addEventListener("click", wizPrevHeading);
   box.scrollIntoView({ block:"start" });
 }
 function wizBuildNext(){
@@ -4637,6 +4662,8 @@ function wizBuildNext(){
   const fields = draftFields(WIZ.kind);
   if(WIZ.buildIdx >= fields.length){ wizFinish(); return; }
   const f = fields[WIZ.buildIdx];
+  const stored = (d.heads[f[0]] && d.heads[f[0]].text) || "";
+  if(stored.trim()){ wizShowCurrent(f, stored); return; }
   const text = compDraftText(f[0], WIZ.ctx);
   d.heads[f[0]] = { text: text, status: "drafted" };
   renderCompDraft();
@@ -4667,6 +4694,8 @@ function wizRevise(){
 }
 function wizFinish(){
   WIZ.building = false;
+  compSetFocus("done");
+  wizBuildProgress();
   const box = $("wiz-current");
   const kindLabel = (WRITE_KINDS[WIZ.kind] && WRITE_KINDS[WIZ.kind].label) || WIZ.kind;
   const t = wizT();
@@ -4679,6 +4708,98 @@ function wizFinish(){
   box.scrollIntoView({ block:"start" });
 }
 
+/* ---- v42: focus mode helpers ---- */
+function compSummaryText(){
+  const kindLabel = (WRITE_KINDS[WIZ.kind] && WRITE_KINDS[WIZ.kind].label) || WIZ.kind;
+  const langLabel = WIZ.lang === "ur" ? "اردو" : (WIZ.lang === "ar" ? "العربية" : "English");
+  const styleLabel = WIZ.manual ? ("University manual" + (WIZ.uni ? " (" + WIZ.uni + ")" : "")) : (COMP_STATE.style || WIZ.style);
+  const parts = [];
+  if(WIZ.topic) parts.push(WIZ.topic);
+  parts.push(kindLabel);
+  if(WIZ.words) parts.push(WIZ.words + " words");
+  parts.push(styleLabel);
+  parts.push(langLabel);
+  if(WIZ.degree) parts.push(WIZ.degree);
+  return parts.join(" • ");
+}
+function compRenderSummary(){
+  const el = $("comp-summary-text");
+  if(el) el.textContent = compSummaryText();
+}
+function compSetFocus(mode){
+  const sec = $("view-companion");
+  const sum = $("comp-summary");
+  const dt = $("comp-draft-toggle");
+  if(mode === "build"){
+    if(sec) sec.classList.add("focus-build");
+    if(sum) sum.style.display = "block";
+  } else if(mode === "done"){
+    if(sec) sec.classList.remove("focus-build", "draft-open");
+    if(sum) sum.style.display = "block";
+    if(dt) dt.textContent = "📝 See full draft ▾";
+  } else {
+    if(sec) sec.classList.remove("focus-build", "draft-open");
+    if(sum) sum.style.display = "none";
+    if(dt) dt.textContent = "📝 See full draft ▾";
+  }
+  compRenderSummary();
+}
+function wizBuildProgress(){
+  const txt = $("wiz-build-progress-text"), bar = $("wiz-build-progress-bar");
+  if(!txt || !bar) return;
+  const fields = draftFields(WIZ.kind);
+  const total = fields.length || 1;
+  if(!WIZ.building && WIZ.buildIdx >= total){
+    txt.textContent = "✓ Complete — all headings final";
+    bar.style.width = "100%";
+    return;
+  }
+  const idx = Math.min(WIZ.buildIdx, total - 1);
+  const label = wizLabel(fields[idx] || ["", ""]);
+  const pct = Math.round((WIZ.buildIdx / total) * 100);
+  if(WIZ.lang === "ur") txt.textContent = "ہیڈنگ " + (WIZ.buildIdx + 1) + " از " + total + " — " + label;
+  else if(WIZ.lang === "ar") txt.textContent = "القسم " + (WIZ.buildIdx + 1) + " من " + total + " — " + label;
+  else txt.textContent = "Heading " + (WIZ.buildIdx + 1) + " of " + total + " — " + label;
+  bar.style.width = pct + "%";
+}
+function wizPrevHeading(){
+  if(WIZ.buildIdx <= 0) return;
+  WIZ.buildIdx--;
+  const d = compDraftFor(WIZ.kind);
+  const fields = draftFields(WIZ.kind);
+  const f = fields[WIZ.buildIdx];
+  if(!f) return;
+  const stored = (d.heads[f[0]] && d.heads[f[0]].text) || "";
+  if(stored.trim()){ wizShowCurrent(f, stored); return; }
+  wizBuildNext();
+}
+function compBindFocus(){
+  const dt = $("comp-draft-toggle");
+  if(dt) dt.addEventListener("click", () => {
+    const sec = $("view-companion");
+    const open = sec.classList.toggle("draft-open");
+    dt.textContent = open ? "📝 Hide full draft ▴" : "📝 See full draft ▾";
+    if(open) $("comp-draft").scrollIntoView({ block:"start" });
+  });
+  const it = $("comp-intake-toggle");
+  if(it) it.addEventListener("click", () => {
+    const card = $("comp-intake-card");
+    const open = card.style.display !== "block";
+    card.style.display = open ? "block" : "none";
+    it.textContent = open ? "💬 Hide single-question form ▴" : "💬 Ask a single question instead ▸";
+  });
+  const sum = $("comp-summary");
+  if(sum) sum.addEventListener("click", (e) => {
+    if(e.target && e.target.id === "comp-summary-edit"){
+      WIZ.building = false;
+      $("wiz-build").style.display = "none";
+      compSetFocus("off");
+      wizShow(1);
+      $("comp-wizard").scrollIntoView({ block:"start" });
+    }
+  });
+}
+compBindFocus();
 function persistWD(){
   if(!ME || !WD) return;
   WD.updatedAt = nowISO();
@@ -4738,6 +4859,7 @@ function openCompanion(deptId){
   COMP_STATE.dept = sel ? sel.value : "auto";
   compSuggestHint();
   renderCompDraft();
+  if(WIZ.building) compSetFocus("build");
   showView("view-companion");
 }
 /* ---- Staged builder: heading stepper in Write & Export ---- */

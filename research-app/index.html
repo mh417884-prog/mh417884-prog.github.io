@@ -1113,7 +1113,77 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <section class="view" id="view-companion">
   <div class="topbar"><button class="tbtn" id="companion-back">‹ Back</button><div class="ttl">Research Companion</div><span style="width:44px"></span></div>
   <p class="lead">💬 Ask anything about your research. The companion answers from this app's real sources only — every link below can be opened and checked. Your draft builds in the panel below, heading by heading — nothing moves to Write &amp; Export until you tap “Send full draft” once.</p>
-  <div class="notice"><b>Honest limits, stated plainly:</b> every source shown is a real entry from this app — open each link and check it yourself. You remain the author: the companion gives outlines, sources and notes; you write in your own voice. No result here is guaranteed to pass or fail any AI-detector — detectors are unreliable, and your own writing with real references is the honest protection.</div>
+  <div class="notice"><b>Honest limits, stated plainly:</b> every source shown is a real entry from this app — open each link and check it yourself. You remain the author: read every heading, rephrase it in your own voice, add or cut as needed, and only then tap Final — the draft becomes yours through that review. No result here is guaranteed to pass or fail any AI-detector — detectors are unreliable, and your own writing with real references is the honest protection.</div>
+<div class="card accent" id="comp-wizard">
+  <h3>🧭 Guided wizard — no prompts needed</h3>
+  <p class="small" style="margin-top:0">Answer a few questions and the Companion builds your draft itself, heading by heading — you read each heading, rephrase it in your own voice, add or cut as needed, then approve it. You never need a prompt from outside.</p>
+  <p class="small" id="wiz-progress"><b>Step 1 of 6</b> — Topic</p>
+  <div class="wiz-step" data-wiz-step="1">
+    <label for="wiz-topic">Your topic <span class="req">*</span></label>
+    <input id="wiz-topic" type="text" placeholder="e.g. Project-based learning in Pakistani madrasahs">
+    <label for="wiz-field">Or, if your topic is not fixed yet — the field or idea in your mind (optional)</label>
+    <input id="wiz-field" type="text" placeholder="e.g. AI tools for thesis writing, or Islamic finance">
+    <p class="small">Give a topic, or at least a field — the wizard starts from whichever you give.</p>
+    <button class="btn goldb" data-wiz-next style="width:100%">Next →</button>
+  </div>
+  <div class="wiz-step" data-wiz-step="2" style="display:none">
+    <label>What are you writing?</label>
+    <div class="seg" id="wiz-kind-seg">
+      <button data-kind="article">📄 Research Article</button>
+      <button data-kind="synopsis" class="on">📝 Synopsis / Proposal</button>
+      <button data-kind="thesis">🎓 Thesis / Dissertation</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" data-wiz-back style="flex:1">‹ Back</button><button class="btn goldb" data-wiz-next style="flex:2">Next →</button></div>
+  </div>
+  <div class="wiz-step" data-wiz-step="3" style="display:none">
+    <label>Reference style</label>
+    <div class="seg" id="wiz-style-seg">
+      <button data-style="APA" class="on">APA</button>
+      <button data-style="MLA">MLA</button>
+      <button data-style="Chicago">Chicago</button>
+      <button data-style="manual">University manual</button>
+    </div>
+    <div id="wiz-manual-wrap" style="display:none;margin-top:10px">
+      <label for="wiz-uni">Your university's name <span class="req">*</span></label>
+      <input id="wiz-uni" type="text" placeholder="e.g. International Islamic University Malaysia">
+      <label>Standard style to format with (your university manual is never guessed — this standard style is used for formatting, and the university name is recorded on your draft)</label>
+      <div class="seg" id="wiz-fallback-seg">
+        <button data-style="APA" class="on">APA</button>
+        <button data-style="MLA">MLA</button>
+        <button data-style="Chicago">Chicago</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" data-wiz-back style="flex:1">‹ Back</button><button class="btn goldb" data-wiz-next style="flex:2">Next →</button></div>
+  </div>
+  <div class="wiz-step" data-wiz-step="4" style="display:none">
+    <label>Language</label>
+    <div class="seg" id="wiz-lang-seg">
+      <button data-lang="en" class="on">English</button>
+      <button data-lang="ur"><span class="ur" style="font-size:15px">اردو</span></button>
+      <button data-lang="ar">العربية</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" data-wiz-back style="flex:1">‹ Back</button><button class="btn goldb" data-wiz-next style="flex:2">Next →</button></div>
+  </div>
+  <div class="wiz-step" data-wiz-step="5" style="display:none">
+    <label>Degree level</label>
+    <div class="seg" id="wiz-degree-seg">
+      <button data-degree="PhD" class="on">PhD</button>
+      <button data-degree="Masters">Master's</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" data-wiz-back style="flex:1">‹ Back</button><button class="btn goldb" data-wiz-next style="flex:2">Next →</button></div>
+  </div>
+  <div class="wiz-step" data-wiz-step="6" style="display:none">
+    <label for="wiz-words">How many words?</label>
+    <input id="wiz-words" type="number" min="100" step="100" placeholder="e.g. 7500">
+    <p class="small" id="wiz-words-suggest"></p>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" data-wiz-back style="flex:1">‹ Back</button><button class="btn goldb" id="wiz-start" style="flex:2">🚀 Start building my draft →</button></div>
+  </div>
+  <div id="wiz-build" style="display:none">
+    <div class="divider"></div>
+    <p class="small" id="wiz-narrate"></p>
+    <div id="wiz-current"></div>
+  </div>
+</div>
   <div class="card accent"><h3>📝 Tell me what you are writing</h3>
     <label for="comp-topic">Topic / question <span class="req">*</span></label>
     <input id="comp-topic" type="text" placeholder="e.g. Project-based learning in Pakistani madrasahs">
@@ -3980,43 +4050,50 @@ function compHeadingOf(q, kind){
   return null;
 }
 function compLinkLines(ctx){
-  const lines = [];
-  ctx.tk.forEach(it => lines.push(it.name + " — " + it.url));
-  ctx.jn.forEach(it => lines.push(it.name + " — " + it.url));
-  ctx.isl.forEach(it => lines.push(it.name + " — " + it.url));
-  ctx.tools.forEach(it => lines.push(it.name + " — " + it.url));
+  const lines = [], seen = {};
+  [ctx.tk, ctx.jn, ctx.isl, ctx.tools].forEach(list => (list || []).forEach(it => {
+    if(!it.url || seen[it.url]) return;
+    seen[it.url] = true;
+    lines.push(it.name + " — " + it.url);
+  }));
   return lines;
 }
 function compDraftText(heading, ctx){
+  if(ctx.lang === "ur") return compDraftTextUR(heading, ctx);
+  if(ctx.lang === "ar") return compDraftTextAR(heading, ctx);
+  return compDraftTextEN(heading, ctx);
+}
+function compDraftTextEN(heading, ctx){
   const T = ctx.topic;
+  const D = ctx.deptName || "its field";
   const linkLines = compLinkLines(ctx);
   const links = linkLines.length ? linkLines.join("\n") : "";
   const styleNote = "Format what you actually use in " + ctx.style + " style (Zotero does this). Only entries you have actually read belong here.";
   switch(heading){
     case "title": return T;
     case "introduction":
-      return "Background\nThis study examines " + T + ".\n\nResearch problem\n[Write the gap in one sentence: what is unknown, contested, or missing about " + T + "?]\n\nSignificance\n[Write one sentence: who benefits from this study, and how?]\n\nNote: replace the bracketed lines with your own sentences — this is a scaffold to edit, not a finished section.";
+      return "The study of " + T + " occupies an important place in " + D + ". How " + T + " is understood matters both to scholarly discussion and to practical decisions in the field.\n\nDespite its importance, " + T + " has not yet been examined in a systematic way. Much of the existing discussion treats it in general terms, leaving open the more precise questions of how it operates in a particular setting, what factors shape it, and what should follow from a clearer understanding of it.\n\nThe present study addresses this gap by examining " + T + " in a defined setting, analysing the factors that shape it, and drawing out the practical implications of the findings. Rather than rehearsing general claims, it builds its argument from identifiable sources and a clearly stated method.\n\nIn doing so, the study aims to contribute both to scholarship and to practice: to scholarship, by offering a clearer and better-organised account of " + T + "; and to practice, by setting out recommendations that follow directly from the evidence gathered.";
     case "questions":
-      return "1. How is " + T + " understood and practised in the chosen setting?\n2. What factors shape " + T + " among the chosen group?\n3. What should change — in practice or policy — in light of the findings on " + T + "?\n\nNote: narrow each question to one group, one place and one period before you finalise.";
+      return "1. How is " + T + " understood and practised in the chosen setting, and what does that understanding reveal?\n2. What factors most strongly shape " + T + " among the chosen group?\n3. What changes in practice or policy follow from a clearer understanding of " + T + "?\n\nEach question is deliberately narrow: it names one setting, one group, and one kind of answer, so that the study can answer it rather than merely discuss it.";
     case "objectives":
-      return "1. To examine " + T + " in the chosen setting.\n2. To analyse the factors that shape " + T + ".\n3. To propose practical recommendations arising from the study of " + T + ".\n\nEach objective matches one research question, in the same order.";
+      return "1. Objective 1 (answers Question 1): To examine " + T + " in the chosen setting and to describe how it is understood and practised there.\n2. Objective 2 (answers Question 2): To analyse the factors that most strongly shape " + T + " among the chosen group.\n3. Objective 3 (answers Question 3): To propose practical recommendations, grounded in the findings, for practice and policy concerning " + T + ".\n\nEach objective answers one research question, in the same order.";
     case "literature":
-      return links ? ("Sources to read and cite — open each link and check it:\n" + links + "\n\n" + styleNote)
+      return links ? ("The literature relevant to " + T + " falls into three groups. The first provides the general background against which the study is set. The second comprises the studies closest to the present inquiry, whose findings and methods the study will engage with directly. The third consists of the sources against which the study's own argument will be tested. The entries below are real sources drawn from this app; each link can be opened and checked, and only sources actually read should appear in the final list.\n\n" + links + "\n\nRead in this order: general background first, then the closest studies, then the sources you will argue against.\n\n" + styleNote)
         : ("No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the Research hub Toolkit.");
     case "methodology": {
       const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
-      return "Research design\n[Choose one: qualitative, quantitative, or mixed-methods — and say why it fits " + T + ".]\n\nData sources\n" + (data || "[List the books, journals, documents or field sources you will actually use.]") + "\n\nAnalysis\n[Say how you will analyse the data — thematically, statistically, or comparatively — in two or three sentences.]";
+      return "The design of this study follows directly from its research questions. Questions that ask how something is understood and practised call for a qualitative design; questions that ask how widespread a pattern is call for a quantitative design; and where both kinds of question are asked, a mixed-methods design is appropriate. The researcher should state the chosen design and the reason for choosing it in one paragraph.\n\nData sources\n" + (data ? ("The study will draw on the following sources, each of which can be opened and checked:\n" + data + "\nPrimary and secondary sources should be listed separately.") : "Primary and secondary sources should be listed separately, with each source named and its relevance to the study stated in one line.") + "\n\nAnalysis\nThe analysis will be organised around the research questions: each finding will be reported against the question it answers, compared with the literature reviewed, and its limits stated plainly.";
     }
-    case "outline": return ctx.shape.split(" → ").join("\n");
+    case "outline": return "The study is organised as follows, so that each chapter answers the question before it and prepares the one after it:\n" + ctx.shape.split(" → ").join("\n");
     case "references":
-      return links ? ("References (" + ctx.style + " style) — real sources only:\n" + links + "\n\n" + styleNote)
+      return links ? ("The references below are real sources drawn from this app, arranged alphabetically by author surname in " + ctx.style + " style. Only sources actually read and cited in the study should remain in the final list.\n\n" + links + "\n\n" + styleNote)
         : ("No matching source was found in the app for this question — and no reference has been invented for it. Add entries here only for sources you have actually read, in " + ctx.style + " style.");
     case "abstract":
-      return "This study examines " + T + ". [One sentence on the gap.] [One sentence on the method.] [One sentence on the expected contribution.]\n\nNote: write the abstract last, after the other sections are drafted.";
+      return "This study examines " + T + " in a defined setting. It is motivated by the observation that, despite the importance of " + T + ", its operation in practice remains insufficiently examined. Drawing on the literature reviewed in this proposal, the study investigates how " + T + " is understood and practised, what factors shape it, and what practical consequences follow from a clearer understanding of it. Its contribution lies in offering a better-organised account of " + T + " together with recommendations grounded in the evidence gathered.\n\nNote: write the abstract last, after the other sections are drafted.";
     case "discussion":
-      return "1. What do the findings say about " + T + "?\n2. How do they compare with the literature reviewed?\n3. What are the limits of this study?\n\nNote: write this section only after your analysis — do not draft it first.";
+      return "This section returns to the research questions and answers each one from the findings, in order. First, it states what the findings say about " + T + ". Second, it compares those findings with the literature reviewed, noting where they agree and where they differ. Third, it states the limits of the study plainly, so that no claim is made beyond what the evidence supports.";
     case "conclusion":
-      return "This study set out to examine " + T + ". [Summarise the main finding in one sentence.] [State the contribution and one recommendation.]";
+      return "This study set out to examine " + T + " in a defined setting, to analyse the factors that shape it, and to draw out practical recommendations. Its contribution is a clearer, better-organised account of " + T + ", grounded in identifiable sources and a stated method. It closes by recommending the practical steps that follow from its findings, and by noting the questions that remain for further research.";
     case "keywords": {
       const toks = compTokens(T).slice(0, 6);
       return toks.length ? toks.join(", ") : T;
@@ -4024,6 +4101,83 @@ function compDraftText(heading, ctx){
     default: return "";
   }
 }
+function compDraftTextUR(heading, ctx){
+  const T = ctx.topic;
+  const D = ctx.deptName || "اپنے شعبے";
+  const linkLines = compLinkLines(ctx);
+  const links = linkLines.length ? linkLines.join("\n") : "";
+  const styleNote = "صرف وہی حوالے درج کریں جو آپ نے واقعی پڑھے ہوں، " + ctx.style + " انداز میں (Zotero یہ ترتیب دیتا ہے)۔";
+  switch(heading){
+    case "title": return T;
+    case "introduction":
+      return "" + T + " کا مطالعہ " + D + " میں ایک اہم مقام رکھتا ہے، کیونکہ " + T + " کو جس طرح سمجھا جاتا ہے اس سے علمی بحث اور عملی فیصلے دونوں متاثر ہوتے ہیں۔\n\nاپنی اس اہمیت کے باوجود " + T + " کا اب تک منظم انداز میں جائزہ نہیں لیا گیا ہے۔ موجودہ بحث کا بیشتر حصہ عمومی باتوں تک محدود ہے، اور یہ واضح نہیں کرتا کہ کسی خاص ماحول میں " + T + " کیسے عمل میں آتا ہے، اس پر کون سے عوامل اثر انداز ہوتے ہیں، اور اس کی بہتر تفہیم سے کیا نتائج نکلنے چاہئیں۔\n\nیہ تحقیق اسی خلا کو پر کرتی ہے: وہ کسی متعین ماحول میں " + T + " کا جائزہ لیتی ہے، اس پر اثر انداز ہونے والے عوامل کا تجزیہ کرتی ہے، اور نتائج سے عملی نتائج اخذ کرتی ہے۔ وہ عمومی دعووں کو دہرانے کے بجائے اپنی دلیل قابل شناخت ذرائع اور واضح طریقہ تحقیق پر استوار کرتی ہے۔\n\nاس طرح یہ تحقیق علم اور عمل دونوں کے لیے مفید ہے: علم کے لیے اس لیے کہ وہ " + T + " کی واضح اور بہتر منظم وضاحت پیش کرتی ہے، اور عمل کے لیے اس لیے کہ وہ شواہد سے براہ راست نکلنے والی سفارشات سامنے لاتی ہے۔";
+    case "questions":
+      return "1۔ کسی متعین ماحول میں " + T + " کو کیسے سمجھا جاتا ہے اور اس پر کیسے عمل ہوتا ہے، اور اس تفہیم سے کیا ظاہر ہوتا ہے؟\n2۔ کسی متعین گروہ میں " + T + " پر کون سے عوامل سب سے زیادہ اثر انداز ہوتے ہیں؟\n3۔ " + T + " کی بہتر تفہیم سے عمل یا پالیسی میں کیا تبدیلیاں ہونی چاہئیں؟\n\nہر سوال دانستہ طور پر محدود ہے: وہ ایک ماحول، ایک گروہ اور ایک طرح کے جواب کا نام لیتا ہے، تاکہ تحقیق اس کا جواب دے سکے نہ کہ صرف اس پر بحث کرے۔";
+    case "objectives":
+      return "1۔ مقصد 1 (سوال 1 کا جواب): کسی متعین ماحول میں " + T + " کا جائزہ لینا اور یہ بیان کرنا کہ اسے کیسے سمجھا جاتا ہے اور اس پر کیسے عمل ہوتا ہے۔\n2۔ مقصد 2 (سوال 2 کا جواب): کسی متعین گروہ میں " + T + " پر سب سے زیادہ اثر انداز ہونے والے عوامل کا تجزیہ کرنا۔\n3۔ مقصد 3 (سوال 3 کا جواب): نتائج کی روشنی میں " + T + " سے متعلق عمل اور پالیسی کے لیے عملی سفارشات پیش کرنا۔\n\nہر مقصد اسی ترتیب سے ایک تحقیقی سوال کا جواب دیتا ہے۔";
+    case "literature":
+      return links ? ("" + T + " سے متعلق ادب تین گروہوں میں تقسیم ہوتا ہے۔ پہلا گروہ وہ عمومی پس منظر فراہم کرتا ہے جس میں یہ تحقیق رکھی گئی ہے۔ دوسرا گروہ اس تحقیق سے قریب ترین تحقیقات پر مشتمل ہے، جن کے نتائج اور طریقوں سے یہ تحقیق براہ راست معاملہ کرے گی۔ تیسرا گروہ ان ذرائع پر مشتمل ہے جن سے اس تحقیق کی اپنی دلیل کو پرکھا جائے گا۔ نیچے دیے گئے اندراجات اس ایپ کے حقیقی ذرائع ہیں؛ ہر لنک کھول کر جانچا جا سکتا ہے، اور حتمی فہرست میں صرف وہی ذرائع رہنے چاہئیں جو واقعی پڑھے گئے ہوں۔\n\n" + links + "\n\nاس ترتیب سے پڑھیں: پہلے عمومی پس منظر، پھر قریب ترین تحقیقات، پھر وہ ذرائع جن کا آپ مقابلہ کریں گے۔\n\n" + styleNote)
+        : ("ایپ میں اس سوال سے مطابقت رکھنے والا کوئی ذریعہ نہیں ملا — اور کوئی حوالہ گھڑا نہیں گیا ہے۔ وسیع الفاظ آزمائیں (مثلاً شعبے کا نام اور موضوع)، یا ریسرچ ہب کے ٹول کٹ سے شروع کریں۔");
+    case "methodology": {
+      const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
+      return "اس تحقیق کا ڈیزائن اس کے تحقیقی سوالات سے براہ راست نکلتا ہے۔ جو سوالات یہ پوچھتے ہیں کہ کسی چیز کو کیسے سمجھا جاتا ہے اور اس پر کیسے عمل ہوتا ہے، ان کے لیے کیفی ڈیزائن موزوں ہے؛ جو سوالات کسی رجحان کے پھیلاؤ کے بارے میں ہیں، ان کے لیے مقداری ڈیزائن موزوں ہے؛ اور جہاں دونوں طرح کے سوالات ہوں، وہاں مخلوط ڈیزائن موزوں ہے۔ محقق کو اپنا منتخب ڈیزائن اور اس کے انتخاب کی وجہ ایک پیراگراف میں بیان کرنی چاہیے۔\n\nذرائع ڈیٹا\n" + (data ? ("یہ تحقیق درج ذیل ذرائع سے استفادہ کرے گی، جن میں سے ہر ایک کھول کر جانچا جا سکتا ہے:\n" + data + "\nبنیادی اور ثانوی ذرائع الگ الگ درج کرنے چاہئیں۔") : "بنیادی اور ثانوی ذرائع الگ الگ درج کریں، ہر ذریعے کا نام اور تحقیق سے اس کی مناسبت ایک سطر میں بیان کریں۔") + "\n\nتجزیہ\nتجزیہ تحقیقی سوالات کے گرد منظم ہوگا: ہر نتیجہ اس سوال کے مقابل بیان ہوگا جس کا وہ جواب دیتا ہے، اس کا ادب کے جائزے سے موازنہ ہوگا، اور اس کی حدود صاف بیان کی جائیں گی۔";
+    }
+    case "outline": return "یہ تحقیق اس ترتیب سے منظم ہے، تاکہ ہر باب اس سے پہلے والے سوال کا جواب دے اور اگلے کی تیاری کرے:\n" + (ctx.kind ? draftFields(ctx.kind).map(f => WIZ_LABELS_UR[f[0]] || f[1]).join("\n") : ctx.shape.split(" → ").join("\n"));
+    case "references":
+      return links ? ("نیچے دیے گئے حوالہ جات " + T + " سے متعلق اس ایپ کے حقیقی ذرائع ہیں، جو مصنف کے نام کی حروف تہجی کی ترتیب سے " + ctx.style + " انداز میں لکھے گئے ہیں۔ حتمی فہرست میں صرف وہی ذرائع رہنے چاہئیں جو واقعی پڑھے اور حوالہ دیے گئے ہوں۔\n\n" + links + "\n\n" + styleNote)
+        : ("ایپ میں اس سوال سے مطابقت رکھنے والا کوئی ذریعہ نہیں ملا — اور کوئی حوالہ گھڑا نہیں گیا ہے۔ یہاں صرف وہ حوالے درج کریں جو آپ نے واقعی پڑھے ہوں، " + ctx.style + " انداز میں۔");
+    case "abstract":
+      return "یہ تحقیق کسی متعین ماحول میں " + T + " کا جائزہ لیتی ہے۔ یہ اس مشاہدے سے متاثر ہے کہ " + T + " کی اہمیت کے باوجود عمل میں اس کی کارکردگی کا ناکافی جائزہ لیا گیا ہے۔ اس تجویز میں شامل ادب کی روشنی میں یہ تحقیق دیکھتی ہے کہ " + T + " کو کیسے سمجھا جاتا ہے اور اس پر کیسے عمل ہوتا ہے، اس پر کون سے عوامل اثر انداز ہوتے ہیں، اور اس کی بہتر تفہیم سے کیا عملی نتائج نکلتے ہیں۔ اس کی اہمیت " + T + " کی بہتر منظم وضاحت اور شواہد پر مبنی سفارشات میں ہے۔\n\nنوٹ: خلاصہ سب سے آخر میں لکھیں، جب باقی حصے تیار ہوں۔";
+    case "discussion":
+      return "یہ حصہ تحقیقی سوالات کی طرف واپس جاتا ہے اور ہر سوال کا جواب نتائج کی روشنی میں ترتیب سے دیتا ہے۔ پہلے وہ بیان کرتا ہے کہ نتائج " + T + " کے بارے میں کیا کہتے ہیں۔ پھر وہ ان نتائج کا ادب کے جائزے سے موازنہ کرتا ہے، جہاں اتفاق اور اختلاف دونوں واضح کرتا ہے۔ آخر میں وہ تحقیق کی حدود صاف بیان کرتا ہے، تاکہ کوئی دعویٰ شواہد سے آگے نہ بڑھے۔";
+    case "conclusion":
+      return "اس تحقیق کا مقصد کسی متعین ماحول میں " + T + " کا جائزہ لینا، اس پر اثر انداز ہونے والے عوامل کا تجزیہ کرنا، اور عملی سفارشات اخذ کرنا تھا۔ اس کی اہمیت " + T + " کی واضح اور بہتر منظم وضاحت میں ہے، جو قابل شناخت ذرائع اور واضح طریقہ تحقیق پر مبنی ہے۔ آخر میں وہ ان عملی اقدامات کی سفارش کرتی ہے جو اس کے نتائج سے نکلتے ہیں، اور ان سوالات کی نشان دہی کرتی ہے جو مزید تحقیق کے لیے باقی ہیں۔";
+    case "keywords": {
+      const toks = compTokens(T).slice(0, 6);
+      return toks.length ? toks.join(", ") : T;
+    }
+    default: return "";
+  }
+}
+function compDraftTextAR(heading, ctx){
+  const T = ctx.topic;
+  const D = ctx.deptName || "ميدانها";
+  const linkLines = compLinkLines(ctx);
+  const links = linkLines.length ? linkLines.join("\n") : "";
+  const styleNote = "أدرج فقط المراجع التي قرأتها فعلاً، بأسلوب " + ctx.style + " (يضبط Zotero هذا التنسيق).";
+  switch(heading){
+    case "title": return T;
+    case "introduction":
+      return "تحتل دراسة " + T + " مكانة مهمة في " + D + "، لأن الطريقة التي يُفهم بها " + T + " تؤثر في النقاش العلمي وفي القرارات العملية في الميدان معاً.\n\nعلى الرغم من هذه الأهمية، لم تُدرس " + T + " بعد دراسة منهجية وافية. فكثير من النقاش الحالي يتناولها بعبارات عامة، ويترك دون جواب الأسئلة الأدق: كيف تعمل في سياق معين، وما العوامل التي تشكلها، وما الذي ينبغي أن يترتب على فهم أوضح لها.\n\nتعالج هذه الدراسة هذه الفجوة بدراسة " + T + " في سياق محدد، وتحليل العوامل التي تشكلها، واستخلاص الآثار العملية لنتائجها. وبدلاً من تكرار الدعاوى العامة، تبني حجتها على مصادر محددة ومنهجية معلنة بوضوح.\n\nوبذلك تسعى الدراسة إلى الإسهام في العلم والممارسة معاً: في العلم، بتقديم عرض أوضح وأحسن تنظيماً لـ " + T + "؛ وفي الممارسة، بعرض توصيات تنبع مباشرة من الأدلة المجمعة.";
+    case "questions":
+      return "1. كيف يُفهم " + T + " ويُمارَس في سياق محدد، وماذا يكشف هذا الفهم؟\n2. ما العوامل التي تؤثر أكثر من غيرها في " + T + " لدى فئة محددة؟\n3. ما التغييرات المطلوبة في الممارسة أو السياسة نتيجة لفهم أوضح لـ " + T + "؟\n\nكل سؤال ضيّق عمداً: يسمي سياقاً واحداً وفئة واحدة ونوعاً واحداً من الجواب، حتى تجيب الدراسة عنه بدلاً من أن تناقشه فحسب.";
+    case "objectives":
+      return "1. الهدف 1 (يجيب عن السؤال 1): دراسة " + T + " في سياق محدد ووصف كيفية فهمها وممارستها فيه.\n2. الهدف 2 (يجيب عن السؤال 2): تحليل العوامل التي تؤثر أكثر من غيرها في " + T + " لدى فئة محددة.\n3. الهدف 3 (يجيب عن السؤال 3): اقتراح توصيات عملية، مستمدة من النتائج، للممارسة والسياسة المتعلقة بـ " + T + ".\n\nكل هدف يجيب عن سؤال بحثي واحد، بالترتيب نفسه.";
+    case "literature":
+      return links ? ("تنقسم الأدبيات المتعلقة بـ " + T + " إلى ثلاث مجموعات. تقدم الأولى الخلفية العامة التي توضع الدراسة في إطارها. وتضم الثانية الدراسات الأقرب إلى هذا البحث، التي ستتعامل الدراسة مع نتائجها ومنهجياتها مباشرة. وتتكون الثالثة من المصادر التي سيُختبر بها حجة الدراسة نفسها. والمدخلات أدناه مصادر حقيقية مأخوذة من هذا التطبيق؛ ويمكن فتح كل رابط والتحقق منه، ولا ينبغي أن تبقى في القائمة النهائية إلا المصادر المقروءة فعلاً.\n\n" + links + "\n\nاقرأ بهذا الترتيب: الخلفية العامة أولاً، ثم أقرب الدراسات، ثم المصادر التي ستناقشها.\n\n" + styleNote)
+        : ("لم يُعثر في التطبيق على مصدر مطابق لهذا السؤال — ولم يُخترع أي مرجع. جرّب كلمات أوسع (مثل اسم التخصص مع الموضوع)، أو ابدأ من مجموعة أدوات مركز البحث.");
+    case "methodology": {
+      const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
+      return "ينبع تصميم هذه الدراسة مباشرة من أسئلتها البحثية: فالأسئلة التي تسأل عن كيفية فهم شيء ما وممارسته يناسبها التصميم الكيفي؛ والأسئلة التي تسأل عن مدى انتشار ظاهرة يناسبها التصميم الكمي؛ وحيث تُطرح الأسئلة بنوعيها، يناسبها التصميم المختلط. وينبغي للباحث أن يذكر التصميم المختار وسبب اختياره في فقرة واحدة.\n\nمصادر البيانات\n" + (data ? ("ستستفيد هذه الدراسة من المصادر التالية، ويمكن فتح كل منها والتحقق منه:\n" + data + "\nوينبغي إدراج المصادر الأولية والثانوية كل على حدة.") : "أدرج المصادر الأولية والثانوية كل على حدة، مع ذكر اسم كل مصدر وصلته بالدراسة في سطر واحد.") + "\n\nالتحليل\nسيُنظم التحليل حول أسئلة البحث: تُعرض كل نتيجة مقابل السؤال الذي تجيب عنه، وتُقارن بالأدبيات المراجعة، وتُذكر حدودها بصراحة.";
+    }
+    case "outline": return "تُنظم هذه الدراسة على النحو التالي، بحيث يجيب كل فصل عن السؤال الذي قبله ويُعدّ للذي بعده:\n" + (ctx.kind ? draftFields(ctx.kind).map(f => WIZ_LABELS_AR[f[0]] || f[1]).join("\n") : ctx.shape.split(" → ").join("\n"));
+    case "references":
+      return links ? ("المراجع أدناه مصادر حقيقية مأخوذة من هذا التطبيق، مرتبة هجائياً باسم المؤلف، بأسلوب " + ctx.style + ". ولا ينبغي أن يبقى في القائمة النهائية إلا ما قُرئ واستُشهد به فعلاً في الدراسة.\n\n" + links + "\n\n" + styleNote)
+        : ("لم يُعثر في التطبيق على مصدر مطابق لهذا السؤال — ولم يُخترع أي مرجع. أدرج هنا فقط ما قرأته فعلاً، بأسلوب " + ctx.style + ".");
+    case "abstract":
+      return "تدرس هذه الدراسة " + T + " في سياق محدد. وتنبع من ملاحظة أنه على الرغم من أهمية " + T + "، فإن أداءها في الممارسة لم يُدرس دراسة وافية. وفي ضوء الأدبيات المراجعة في هذا المقترح، تبحث الدراسة في كيفية فهم " + T + " وممارسته، والعوامل التي تشكله، والنتائج العملية المترتبة على فهم أوضح له. وتكمن أهميتها في عرض أحسن تنظيماً لـ " + T + " مع توصيات مستمدة من الأدلة.\n\nملاحظة: اكتب الملخص أخيراً، بعد إعداد الأقسام الأخرى.";
+    case "discussion":
+      return "يعود هذا القسم إلى أسئلة البحث ويجيب عن كل سؤال منها من النتائج، بالترتيب. أولاً، يذكر ما تقوله النتائج عن " + T + ". ثانياً، يقارن تلك النتائج بالأدبيات المراجعة، مبيناً مواضع الاتفاق والاختلاف. ثالثاً، يذكر حدود الدراسة بصراحة، حتى لا يتجاوز أي ادعاء ما تدعمه الأدلة.";
+    case "conclusion":
+      return "هدفت هذه الدراسة إلى دراسة " + T + " في سياق محدد، وتحليل العوامل التي تشكلها، واستخلاص توصيات عملية. وتكمن أهميتها في عرض أوضح وأحسن تنظيماً لـ " + T + "، مستند إلى مصادر محددة ومنهجية معلنة. وتختم بتوصية الخطوات العملية المترتبة على نتائجها، وبيان الأسئلة التي تبقى للبحث اللاحق.";
+    case "keywords": {
+      const toks = compTokens(T).slice(0, 6);
+      return toks.length ? toks.join(", ") : T;
+    }
+    default: return "";
+  }
+}
+
 function renderCompDraft(){
   const box = $("comp-draft");
   if(!box) return;
@@ -4033,7 +4187,7 @@ function renderCompDraft(){
   const fields = draftFields(kind);
   const filled = fields.filter(f => (d.heads[f[0]].text || "").trim()).length;
   let html = '<div class="card accent"><h3>📝 Your draft — ' + esc(kindLabel) + '</h3>';
-  html += '<p class="small" style="margin-top:0">' + (d.topic ? 'Topic: <b>' + esc(d.topic) + '</b> · ' : '') + filled + ' of ' + fields.length + ' headings drafted. This draft lives here first — nothing moves to Write &amp; Export until you tap “Send full draft” below.</p>';
+  html += '<p class="small" style="margin-top:0">' + (d.topic ? 'Topic: <b>' + esc(d.topic) + '</b> · ' : '') + (d.uni ? 'University format: <b>' + esc(d.uni) + '</b> · ' : '') + (d.degree ? esc(d.degree) + ' · ' : '') + (d.words ? esc(d.words) + ' words · ' : '') + filled + ' of ' + fields.length + ' headings drafted. This draft lives here first — nothing moves to Write &amp; Export until you tap “Send full draft” below.</p>';
   fields.forEach(f => {
     const h = d.heads[f[0]];
     const hasText = (h.text || "").trim() !== "";
@@ -4069,7 +4223,7 @@ function compAsk(followQ){
   const kind = st.kind;
   const shape = COMP_SHAPES[kind] || COMP_SHAPES.article;
   const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
-  const ctx = { topic: topic || q, words: words, style: st.style, shape: shape, tk: tk, jn: jn, isl: isl, tools: tools };
+  const ctx = { topic: topic || q, words: words, style: st.style, shape: shape, tk: tk, jn: jn, isl: isl, tools: tools, lang: st.lang, kind: kind };
   COMP_LAST_SOURCES = compLinkLines(ctx).join("\n");
   const d = compDraftFor(kind);
   d.topic = topic || q;
@@ -4144,6 +4298,205 @@ function compPutDraft(heading, fromSources){
   $("comp-draft").scrollIntoView({ block:"start" });
   toast("Marked ready in your draft.");
 }
+/* ---- v40: guided wizard (main path in the Companion) ---- */
+let WIZ = { step:1, total:6, topic:"", field:"", kind:"synopsis", style:"APA", manual:false, uni:"", fallback:"APA", lang:"en", degree:"PhD", words:null, wordsTouched:false, buildIdx:0, building:false, ctx:null };
+const WIZ_STEPS = ["Topic","Document kind","Reference style","Language","Degree level","Word count"];
+function wizSeg(id, attr, cb){
+  document.querySelectorAll("#" + id + " button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("#" + id + " button").forEach(x => x.classList.toggle("on", x === b));
+    if(cb) cb(b.dataset[attr]);
+  }));
+}
+function wizShow(step){
+  WIZ.step = step;
+  document.querySelectorAll("#comp-wizard .wiz-step").forEach(s => { s.style.display = (parseInt(s.dataset.wizStep, 10) === step) ? "block" : "none"; });
+  const p = $("wiz-progress");
+  if(p) p.innerHTML = "<b>Step " + step + " of " + WIZ.total + "</b> — " + WIZ_STEPS[step - 1];
+  if(step === 6) wizWordsSuggest();
+}
+function wizWordsSuggest(){
+  const s = $("wiz-words-suggest"), inp = $("wiz-words");
+  if(!s || !inp) return;
+  if(WIZ.degree === "PhD"){
+    s.textContent = "Suggested for a PhD proposal (about 25–30 pages): around 7,500 words — approximate only; change it to whatever your university asks.";
+    if(!WIZ.wordsTouched) inp.value = 7500;
+  } else {
+    s.textContent = "Suggested for a Master's proposal (shorter than a PhD proposal): around 4,000 words — approximate only; change it freely.";
+    if(!WIZ.wordsTouched) inp.value = 4000;
+  }
+}
+function wizNext(){
+  if(WIZ.step === 1){
+    const t = ($("wiz-topic").value || "").trim(), fl = ($("wiz-field").value || "").trim();
+    if(!t && !fl){ toast("Write your topic, or at least the field or idea in your mind."); return; }
+    WIZ.topic = t; WIZ.field = fl;
+  }
+  if(WIZ.step === 3 && WIZ.manual){
+    const u = ($("wiz-uni").value || "").trim();
+    if(!u){ toast("Write your university's name."); return; }
+    WIZ.uni = u;
+  }
+  if(WIZ.step < WIZ.total) wizShow(WIZ.step + 1);
+}
+function wizBack(){
+  if(WIZ.step > 1) wizShow(WIZ.step - 1);
+}
+function wizSyncSeg(id, attr, val){
+  document.querySelectorAll("#" + id + " button").forEach(b => b.classList.toggle("on", b.dataset[attr] === val));
+}
+function wizBuildCtx(topic, words){
+  const sug = compSuggestDept(topic);
+  const deptId = sug ? sug.id : null;
+  const deptObj = deptId ? DISCIPLINES.find(d => d.id === deptId) : null;
+  const deptName = deptObj ? deptObj.name : null;
+  const toks = compTokens(topic);
+  const type = compQType(topic.toLowerCase());
+  const tk = compToolkit(deptId, toks, 4);
+  const jn = compJournals(deptName, toks, 4);
+  const isl = (deptId === "islamic" || compScoreEntry(topic, ["quran", "hadith", "fiqh", "shariah", "seerah", "islamic"]) > 0)
+    ? ISLAMIC_SOURCES.map(it => ({ name: it[0], desc: it[1], url: it[2] })) : [];
+  const tools = compTools(type, toks, 3);
+  const shape = COMP_SHAPES[WIZ.kind] || COMP_SHAPES.article;
+  return { topic: topic, words: words, style: COMP_STATE.style, shape: shape, tk: tk, jn: jn, isl: isl, tools: tools, deptObj: deptObj, deptName: deptName, lang: COMP_STATE.lang, kind: WIZ.kind };
+}
+function wizStart(){
+  const topic = ($("wiz-topic").value || "").trim();
+  const field = ($("wiz-field").value || "").trim();
+  const finalTopic = topic || field;
+  if(!finalTopic){ toast("Write your topic, or at least the field or idea in your mind."); wizShow(1); return; }
+  if(WIZ.manual){
+    const u = ($("wiz-uni").value || "").trim();
+    if(!u){ toast("Write your university's name."); wizShow(3); return; }
+    WIZ.uni = u;
+  }
+  WIZ.topic = finalTopic; WIZ.field = field;
+  const words = parseInt(($("wiz-words").value || ""), 10) || null;
+  WIZ.words = words;
+  $("comp-topic").value = finalTopic;
+  $("comp-words").value = words || "";
+  COMP_STATE.kind = WIZ.kind;
+  COMP_STATE.style = WIZ.manual ? WIZ.fallback : WIZ.style;
+  COMP_STATE.lang = WIZ.lang;
+  wizSyncSeg("comp-kind-seg", "kind", WIZ.kind);
+  wizSyncSeg("comp-style-seg", "style", COMP_STATE.style);
+  wizSyncSeg("comp-lang-seg", "lang", WIZ.lang);
+  $("comp-dept").value = "auto"; COMP_STATE.dept = "auto"; compSuggestHint();
+  const d = compDraftFor(WIZ.kind);
+  d.topic = finalTopic; d.uni = WIZ.manual ? WIZ.uni : ""; d.degree = WIZ.degree; d.words = words;
+  draftFields(WIZ.kind).forEach(f => { d.heads[f[0]] = { text:"", status:"empty" }; });
+  WIZ.ctx = wizBuildCtx(finalTopic, words);
+  WIZ.buildIdx = 0; WIZ.building = true;
+  document.querySelectorAll("#comp-wizard .wiz-step").forEach(s => { s.style.display = "none"; });
+  const p = $("wiz-progress");
+  if(p) p.innerHTML = "<b>Building your draft</b> — approve each heading as it appears.";
+  $("wiz-build").style.display = "block";
+  renderCompDraft();
+  wizBuildNext();
+  $("wiz-build").scrollIntoView({ block:"start" });
+}
+const WIZ_LABELS_UR = { title:"عنوان", introduction:"تعارف", questions:"تحقیقی سوالات", objectives:"مقاصد", literature:"ادب کا جائزہ", methodology:"طریقہ تحقیق", outline:"ابواب کا خاکہ", references:"حوالہ جات", abstract:"خلاصہ", keywords:"کلیدی الفاظ", discussion:"تجزیہ و بحث", conclusion:"نتیجہ" };
+const WIZ_LABELS_AR = { title:"العنوان", introduction:"المقدمة", questions:"أسئلة البحث", objectives:"أهداف البحث", literature:"مراجعة الأدبيات", methodology:"المنهجية", outline:"مخطط الفصول", references:"المراجع", abstract:"الملخص", keywords:"الكلمات المفتاحية", discussion:"المناقشة والتحليل", conclusion:"الخاتمة" };
+function wizLabel(f){ if(WIZ.lang === "ur") return WIZ_LABELS_UR[f[0]] || f[1]; if(WIZ.lang === "ar") return WIZ_LABELS_AR[f[0]] || f[1]; return f[1]; }
+const WIZ_T = {
+  en: { approve:"Is this OK, or anything missing or extra?", approveSub:"Tell me below and I'll fix only this heading — or tap Final and I'll move on to the next heading myself.", changePre:"What should change in ", changePost:"? (optional)", revisePh:"e.g. Make it shorter, or: add the Punjab context", draftSuffix:" — your draft", finalBtn:"✓ Final — next heading", reviseBtn:"💬 Revise this heading", complete:"Your draft is complete — ", completeSub:"Every heading is final. One click below sends the full draft to Write & Export — the same single transfer as before: every matching box is filled, and boxes holding your own writing are left untouched.", sendBtn:"📤 Send full draft to Write & Export", restartBtn:"↺ Start a new guided wizard" },
+  ur: { approve:"کیا یہ ٹھیک ہے، یا اس میں کوئی کمی یا بیشی ہے؟", approveSub:"نیچے بتائیں تو میں صرف اس ہیڈنگ کو درست کروں گا — یا Final دبائیں تو میں خود اگلی ہیڈنگ پر چلا جاؤں گا۔", changePre:"", changePost:" میں کیا بدلنا چاہیے؟ (اختیاری)", revisePh:"مثلاً: مختصر کریں، یا: پنجاب کا تناظر شامل کریں", draftSuffix:" — آپ کا مسودہ", finalBtn:"✓ حتمی — اگلی ہیڈنگ", reviseBtn:"💬 اس ہیڈنگ پر نظرثانی", complete:"آپ کا مسودہ مکمل ہے — ", completeSub:"ہر ہیڈنگ حتمی ہے۔ نیچے ایک کلک سے پورا مسودہ Write & Export میں چلا جائے گا — وہی ایک منتقلی: ہر متعلقہ ڈبہ بھرے گا، اور آپ کا اپنا لکھا ہوا مواد محفوظ رہے گا۔", sendBtn:"📤 پورا مسودہ Write & Export میں بھیجیں", restartBtn:"↺ نیا گائیڈڈ وزرڈ شروع کریں" },
+  ar: { approve:"هل هذا جيد، أم ينقصه شيء أو يزيد عنه شيء؟", approveSub:"أخبرني أدناه وسأصلح هذا القسم فقط — أو اضغط «نهائي» وسأنتقل بنفسي إلى القسم التالي.", changePre:"ما الذي يجب تغييره في ", changePost:"؟ (اختياري)", revisePh:"مثلاً: اجعله أقصر، أو: أضف سياق البنجاب", draftSuffix:" — مسودتك", finalBtn:"✓ نهائي — القسم التالي", reviseBtn:"💬 راجع هذا القسم", complete:"مسودتك مكتملة — ", completeSub:"كل الأقسام نهائية. بنقرة واحدة أدناه تُرسل المسودة كاملة إلى Write & Export — النقل الواحد نفسه: يُملأ كل مربع مطابق، ويُترك ما كتبته بنفسك دون مساس.", sendBtn:"📤 أرسل المسودة كاملة إلى Write & Export", restartBtn:"↺ ابدأ معالجاً موجهاً جديداً" }
+};
+function wizT(){ return WIZ_T[WIZ.lang] || WIZ_T.en; }
+function wizNarrate(heading){
+  const c = WIZ.ctx; const n = $("wiz-narrate"); if(!n || !c) return;
+  const L = WIZ.lang;
+  if(heading === "literature" || heading === "references"){
+    const parts = [];
+    if(c.tk.length) parts.push(c.tk.length + " " + (L === "ur" ? "ٹول کٹ لنکس" : (L === "ar" ? "روابط من مجموعة الأدوات" : "toolkit links")) + (c.deptName ? " " + (L === "ur" ? "برائے " : (L === "ar" ? "لتخصص " : "for ")) + c.deptName : ""));
+    if(c.jn.length) parts.push(c.jn.length + " " + (L === "ur" ? "جرائد" : (L === "ar" ? "دوريات" : "journals")));
+    if(c.isl.length) parts.push(c.isl.length + " " + (L === "ur" ? "اسلامی مصادر" : (L === "ar" ? "مصادر إسلامية" : "Islamic sources")));
+    if(L === "ur") n.textContent = parts.length ? ("🔎 اس ہیڈنگ کے لیے حقیقی ذرائع تلاش کر رہا ہوں — " + parts.join("، ") + "۔ اپنے ڈرافٹ میں ہر لنک کھول کر خود جانچیں۔") : "🔎 اس ہیڈنگ کے لیے حقیقی ذرائع تلاش کر رہا ہوں — ایپ میں کوئی مطابقت رکھنے والا ذریعہ نہیں ملا، اس لیے کچھ گھڑا نہیں گیا۔";
+    else if(L === "ar") n.textContent = parts.length ? ("🔎 أبحث عن مصادر حقيقية لهذا القسم — " + parts.join("، ") + "۔ افتح كل رابط في مسودتك وتحقق منه بنفسك.") : "🔎 أبحث عن مصادر حقيقية لهذا القسم — لم يُعثر على مصدر مطابق في التطبيق، لذا لم يُخترع شيء.";
+    else n.textContent = parts.length ? ("🔎 Fetching real sources for this heading — " + parts.join(", ") + ". Open each link in your draft and check it.") : "🔎 Fetching real sources for this heading — no matching source found in the app, so nothing is invented.";
+  } else if(heading === "methodology"){
+    if(L === "ur") n.textContent = "🧭 آپ کے موضوع اور " + (c.deptName ? c.deptName + " ٹول کٹ" : "ریسرچ ٹول کٹ") + " سے طریقہ تحقیق بنا رہا ہوں — نیچے پڑھیں اور بتائیں کیا بدلنا ہے۔";
+    else if(L === "ar") n.textContent = "🧭 أصوغ المنهجية من موضوعك ومن " + (c.deptName ? "مجموعة أدوات " + c.deptName : "مجموعة أدوات البحث") + " — اقرأها أدناه وأخبرني ما الذي تريد تغييره.";
+    else n.textContent = "🧭 Shaping the methodology from your topic and the " + (c.deptName ? c.deptName + " toolkit" : "research toolkit") + " — read it below and tell me what to change.";
+  } else if(heading === "title"){
+    if(L === "ur") n.textContent = "✏️ آپ کے موضوع سے عنوان طے کر رہا ہوں — نیچے والا مسودہ آپ کی ترمیم کے لیے ہے۔";
+    else if(L === "ar") n.textContent = "✏️ أحدد العنوان من موضوعك — المسودة أدناه قابلة للتحرير.";
+    else n.textContent = "✏️ Setting your title from your topic — the draft below is yours to edit.";
+  } else {
+    const lbl = wizLabel([heading, fieldLabel(WIZ.kind, heading)]);
+    if(L === "ur") n.textContent = "✍️ آپ کے موضوع کے لیے " + lbl + " کا مسودہ بنا رہا ہوں — نیچے پڑھیں، پھر منظور کریں یا تبدیلی مانگیں۔";
+    else if(L === "ar") n.textContent = "✍️ أصوغ مسودة " + lbl + " لموضوعك — اقرأها أدناه، ثم أقرّها أو اطلب تعديلاً.";
+    else n.textContent = "✍️ Drafting " + lbl + " for your topic — read it below, then approve or ask for a change.";
+  }
+}
+function wizRestart(){
+  WIZ.buildIdx = 0; WIZ.building = false; WIZ.ctx = null;
+  $("wiz-build").style.display = "none";
+  $("wiz-current").innerHTML = "";
+  wizShow(1);
+}
+
+function wizShowCurrent(f, text){
+  wizNarrate(f[0]);
+  const box = $("wiz-current");
+  const label = wizLabel(f);
+  const t = wizT();
+  box.innerHTML = '<div class="card accent"><h3>✍️ ' + esc(label) + t.draftSuffix + '</h3><div class="draft-text">' + esc(text) + '</div>'
+    + '<p class="small"><b>' + esc(t.approve) + '</b> ' + esc(t.approveSub) + '</p>'
+    + '<label for="wiz-revise-in">' + esc(t.changePre) + esc(label) + esc(t.changePost) + '</label>'
+    + '<input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">'
+    + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + esc(t.finalBtn) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div></div>';
+  $("wiz-final-btn").addEventListener("click", wizFinal);
+  $("wiz-revise-btn").addEventListener("click", wizRevise);
+  box.scrollIntoView({ block:"start" });
+}
+function wizBuildNext(){
+  const d = compDraftFor(WIZ.kind);
+  const fields = draftFields(WIZ.kind);
+  if(WIZ.buildIdx >= fields.length){ wizFinish(); return; }
+  const f = fields[WIZ.buildIdx];
+  const text = compDraftText(f[0], WIZ.ctx);
+  d.heads[f[0]] = { text: text, status: "drafted" };
+  renderCompDraft();
+  wizShowCurrent(f, text);
+}
+function wizFinal(){
+  const d = compDraftFor(WIZ.kind);
+  const fields = draftFields(WIZ.kind);
+  const f = fields[WIZ.buildIdx];
+  if(f) d.heads[f[0]].status = "ready";
+  renderCompDraft();
+  WIZ.buildIdx++;
+  if(WIZ.buildIdx >= fields.length) wizFinish();
+  else wizBuildNext();
+}
+function wizRevise(){
+  const note = ($("wiz-revise-in").value || "").trim();
+  if(!note){ toast("Write what should change, then tap Revise."); return; }
+  const d = compDraftFor(WIZ.kind);
+  const fields = draftFields(WIZ.kind);
+  const f = fields[WIZ.buildIdx];
+  if(!f) return;
+  const old = d.heads[f[0]].text || "";
+  d.heads[f[0]] = { text: "✏️ Revision note: " + note + "\n" + old, status: "drafted" };
+  renderCompDraft();
+  wizShowCurrent(f, d.heads[f[0]].text);
+  toast("Only this heading was updated — the rest of your draft is untouched.");
+}
+function wizFinish(){
+  WIZ.building = false;
+  const box = $("wiz-current");
+  const kindLabel = (WRITE_KINDS[WIZ.kind] && WRITE_KINDS[WIZ.kind].label) || WIZ.kind;
+  const t = wizT();
+  box.innerHTML = '<div class="card accent"><h3>🎉 ' + esc(t.complete) + esc(kindLabel) + '</h3>'
+    + '<p class="small" style="margin-bottom:0">' + esc(t.completeSub) + '</p>'
+    + '<button class="btn goldb" id="wiz-send-btn" style="width:100%;margin-top:12px">' + esc(t.sendBtn) + '</button>'
+    + '<button class="btn ghost" id="wiz-restart-btn" style="width:100%;margin-top:8px">' + esc(t.restartBtn) + '</button></div>';
+  $("wiz-send-btn").addEventListener("click", ()=> compSendDraft());
+  $("wiz-restart-btn").addEventListener("click", wizRestart);
+  box.scrollIntoView({ block:"start" });
+}
+
 function persistWD(){
   if(!ME || !WD) return;
   WD.updatedAt = nowISO();
@@ -4902,6 +5255,16 @@ function wire(){
     $("help-guide-toggle").setAttribute("aria-expanded", open ? "true" : "false");
   });
   compSeg("comp-kind-seg", "kind"); compSeg("comp-style-seg", "style"); compSeg("comp-lang-seg", "lang");
+  /* ---- v40 wizard wiring ---- */
+  wizSeg("wiz-kind-seg", "kind", v => { WIZ.kind = v; });
+  wizSeg("wiz-style-seg", "style", v => { WIZ.style = v; WIZ.manual = (v === "manual"); const w = $("wiz-manual-wrap"); if(w) w.style.display = WIZ.manual ? "block" : "none"; });
+  wizSeg("wiz-fallback-seg", "style", v => { WIZ.fallback = v; });
+  wizSeg("wiz-lang-seg", "lang", v => { WIZ.lang = v; });
+  wizSeg("wiz-degree-seg", "degree", v => { WIZ.degree = v; WIZ.wordsTouched = false; });
+  $("wiz-words").addEventListener("input", ()=>{ WIZ.wordsTouched = true; });
+  document.querySelectorAll("[data-wiz-next]").forEach(b => b.addEventListener("click", wizNext));
+  document.querySelectorAll("[data-wiz-back]").forEach(b => b.addEventListener("click", wizBack));
+  $("wiz-start").addEventListener("click", wizStart);
   $("comp-dept").addEventListener("change", ()=>{ COMP_STATE.dept = $("comp-dept").value; compSuggestHint(); });
   $("comp-topic").addEventListener("input", compSuggestHint);
   $("comp-ask").addEventListener("click", ()=> compAsk(null));

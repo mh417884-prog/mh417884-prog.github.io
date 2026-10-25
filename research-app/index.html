@@ -643,6 +643,188 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 .stepchip.on{background:var(--navy);color:#fff;font-weight:600}
 .stepchip.done{border-color:var(--gold);background:var(--gold-xl)}
 </style>
+<style id="v41-design">
+/* ================= v41 design system — tokens ================= */
+:root{
+  --navy:#0A2A4D; --navy-d:#061F3A; --navy-l:#17497C;
+  --navy-hover:#16456F; --chrome:#0A2A4D; --navy-text:#0A2A4D;
+  --gold:#C9A227; --gold-d:#9A7B14; --gold-l:#E7CE7A;
+  --gold-hover:#D8B93E; --gold-text:#7A5E08; --on-gold:#2E2303;
+  --bg:#FAF8F2; --paper-warm:#FDFBF5; --card:#FFFFFF;
+  --ink:#1D2A36; --ink-soft:#33475C; --mut:#5C6B78;
+  --line:#E3DDCE; --line-n:#C4BCA9; --track:#EDE9DB;
+  --navy-xl:#E9EEF4; --gold-xl:#FBF3D9; --info-bg:#E9EEF4;
+  --ok:#14663C; --ok-bg:#E9F7EE; --ok-line:#9ED3AE;
+  --ok-bg-soft:#E2EFDA; --ok-text:#2E5A1E;
+  --err:#9C2B1B; --err-bg:#FDF1EE; --err-line:#E3B7AE;
+  --warn-text:#7A5C00; --warn-bg-soft:#FFF3C4;
+  --tag-green-bg:#E7F2E4; --tag-green:#2C5B21;
+  --tag-purple-bg:#F0EAF7; --tag-purple:#4A2E73;
+  --badge-red:#B3261E;
+  --r-sm:8px; --r-md:12px; --r-lg:14px; --r-xl:20px; --r-pill:999px;
+  --shadow-sm:0 1px 3px rgba(6,31,58,.08);
+  --shadow-md:0 4px 12px rgba(6,31,58,.10);
+  --shadow-lg:0 8px 20px rgba(6,31,58,.12);
+  --dur:200ms; --ease:ease;
+  --font-head:Georgia,'Jameel Noori Nastaleeq','Times New Roman',serif;
+  --font-body:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-nastaliq:'Jameel Noori Nastaleeq',serif;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:20px; --sp-6:24px; --sp-8:32px;
+}
+body{background:#E6E2D5}
+#app{box-shadow:0 0 24px rgba(6,31,58,.14)}
+/* ================= type ================= */
+#app h1,#app h2,#app h3{font-family:var(--font-head);color:var(--navy-text)}
+#app .lead{color:var(--ink-soft)}
+#app .small{line-height:1.6}
+/* Urdu / Nastaliq guards: never letter-spaced, generous line-height */
+#app .ur,#app .urn,#app textarea.ur-in{letter-spacing:0}
+#app .ur{line-height:2.0}
+#app .urn{line-height:1.9}
+#app .ur .arr,#app .ur .chev{display:inline-block;transform:scaleX(-1)}
+/* ================= chrome: solid navy, no gradients ================= */
+#app .topbar,#app .home-head,#app .hero,#app .consult-bar,#app .brk-wrap{background:var(--chrome)}
+#app .pbar{background:var(--track)}
+#app .pbar i{background:var(--gold)}
+/* ================= buttons ================= */
+#app .btn{transition:background-color var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+#app .btn:hover{background:var(--navy-hover)}
+#app .btn.goldb:hover{background:var(--gold-hover);border-color:var(--gold-d)}
+#app .btn.ghost{background:var(--card);color:var(--navy-text);border-color:var(--line-n)}
+#app .btn.ghost:hover{background:var(--navy-xl);border-color:var(--navy-text)}
+#app .btn.danger{background:var(--card);color:var(--err);border-color:var(--err-line)}
+#app .btn.danger:hover{background:var(--err-bg)}
+#app .btn-google{background:var(--card);color:var(--navy-text);border-color:var(--line-n)}
+#app .btn-google:hover{border-color:var(--navy-text)}
+/* ================= focus ================= */
+#app :focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
+#app .topbar :focus-visible,#app .home-head :focus-visible,#app .hero :focus-visible,#app .brk-wrap :focus-visible,#app .consult-bar :focus-visible,#app .idcard :focus-visible{outline-color:#F7E08B}
+/* ================= forms ================= */
+#app input,#app select,#app textarea{background:var(--card);border-color:var(--line-n);transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+#app input:focus,#app select:focus,#app textarea:focus{outline:2px solid var(--gold-text);border-color:var(--gold)}
+#app label{color:var(--navy-text)}
+#app .field-err{color:var(--err)}
+/* ================= cards: token backgrounds + whisper shadow ================= */
+#app .opp-card,#app .notif-item,#app .member-row,#app .doc-item,#app .adm-work-row,#app .lb-row,#app .spec-box,#app .hub-row,#app .tile,#app .info-panel,#app .empty,#app .stat-chip,#app .perf-chip,#app .seg button:not(.on),#app .tab:not(.on),#app .stepchip:not(.on):not(.done),#app .save-btn:not(.saved),#app #comp-draft .draft-head,#app #view-companion select{background:var(--card)}
+#app .lb-row.you{background:var(--paper-warm)}
+#app .filebox{background:var(--paper-warm)}
+#app .card,#app .opp-card,#app .notif-item,#app .member-row,#app .doc-item,#app .adm-work-row,#app .lb-row,#app .spec-box,#app .hub-card,#app .tile,#app .info-panel{box-shadow:var(--shadow-sm)}
+/* ================= radii: one scale ================= */
+#app .topbar .tbtn{border-radius:10px}
+#app .brk-tag{border-radius:var(--r-sm)}
+#app .brk-new{border-radius:var(--r-sm);font-size:11px}
+#app .brk-arrow{border-radius:var(--r-sm)}
+#app .tag{border-radius:var(--r-md)}
+#app .tab{border-radius:var(--r-md)}
+#app .res-item .open{border-radius:10px}
+#app .status-pill{border-radius:var(--r-md)}
+#app .certprev img{border-radius:var(--r-md)}
+#app .save-btn{border-radius:10px}
+#app .open-link{border-radius:10px}
+#app .pill{border-radius:var(--r-pill)}
+#app .pbar,#app .pbar i{border-radius:var(--r-sm)}
+#app .hub-card{border-radius:var(--r-lg)}
+/* ================= gold text: AA-safe dark gold ================= */
+#app .gold{color:var(--gold-text)}
+#app .group-label{color:var(--gold-text)}
+#app .perf-head{color:var(--gold-text)}
+#app .rec-why{color:var(--gold-text)}
+#app .lb-score .lv{color:var(--gold-text)}
+#app .hub-row .arr{color:var(--gold-text)}
+#app .level-pill{color:var(--gold-text)}
+#app .status-pill.pending{color:var(--gold-text)}
+#app .tag.scholarship{color:var(--gold-text)}
+#app .save-btn.saved{color:var(--gold-text)}
+#app .or-divider{color:var(--mut)}
+/* ================= navy text -> navy-text token (dark-mode safe) ================= */
+#app label,#app .tile b,#app .hub-row .tx b,#app .spec-box b,#app .res-item .nm,#app .notif-item .nt,#app .member-row .nm,#app .doc-item .nm,#app .acct-main .nm,#app .kv b,#app .maq-row .ph,#app .perf-chip .pn,#app .lb-rank,#app .lb-score b,#app .score-big,#app .guide-step .gt b,#app .seg button:not(.on),#app .tab:not(.on),#app .save-btn:not(.saved),#app .open-link,#app .stepchip:not(.on),#app .adm-work-row .nm,#app .lb-inf .nm,#app .mysec-h,#app .opp-meta b{color:var(--navy-text)}
+#app .spec-box .sub{color:var(--mut)}
+#app .draft-text{color:var(--ink)}
+/* ================= tags / pills / statuses ================= */
+#app .tag.job{background:var(--info-bg);color:var(--navy-text)}
+#app .tag.scholarship{background:var(--gold-xl);color:var(--gold-text)}
+#app .tag.conference{background:var(--tag-green-bg);color:var(--tag-green)}
+#app .tag.news{background:var(--tag-purple-bg);color:var(--tag-purple)}
+#app .tag.source{background:var(--card);border-color:var(--line-n);color:var(--mut)}
+#app .status-pill.approved{background:var(--ok-bg);color:var(--ok)}
+#app .status-pill.rejected{background:var(--err-bg);color:var(--err)}
+#app .status-pill.responded{background:var(--ok-bg);color:var(--ok)}
+#app .status-pill.unverified,#app .status-pill.open{background:var(--info-bg);color:var(--navy-text)}
+#app .pill.empty{background:var(--navy-xl);color:var(--mut)}
+#app .pill.drafted{background:var(--warn-bg-soft);color:var(--warn-text)}
+#app .pill.ready{background:var(--ok-bg-soft);color:var(--ok-text)}
+#app .msg.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-line)}
+#app .msg.err{background:var(--err-bg);color:var(--err);border-color:var(--err-line)}
+#app .nbadge{background:var(--badge-red)}
+#app .level-pill{background:var(--gold-xl);border-color:var(--gold);color:var(--gold-text)}
+/* ================= hover + transitions ================= */
+#app .hub-row,#app .tile,#app .hub-card,#app .spec-box,#app .perf-chip,#app .tab,#app .seg button,#app .stepchip,#app .save-btn,#app .open-link,#app .topbar .tbtn,#app .iconbtn,#app .home-head .hbtn,#app .refresh-btn,#app .brk-arrow,#app .consult-bar{transition:background-color var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+#app .hub-row:hover,#app .tile:hover,#app .hub-card:hover,#app .spec-box:hover,#app .perf-chip:hover{background:var(--paper-warm)}
+#app .tile:hover,#app .hub-card:hover,#app .spec-box:hover{border-color:var(--gold)}
+#app .hub-card:hover{box-shadow:var(--shadow-md)}
+#app .tab:hover:not(.on),#app .seg button:hover:not(.on){background:var(--navy-xl)}
+#app .stepchip:hover:not(.on){border-color:var(--gold)}
+#app .topbar .tbtn:hover,#app .iconbtn:hover,#app .home-head .hbtn:hover,#app .refresh-btn:hover{background:rgba(255,255,255,.20)}
+#app .brk-arrow:hover{background:rgba(255,255,255,.22)}
+#app .open-link:hover{background:var(--navy-xl)}
+#app .save-btn:hover:not(.saved){border-color:var(--gold)}
+#app .consult-bar:hover{background:var(--navy-hover)}
+#app a.res-item:hover{background:var(--paper-warm)}
+/* ================= touch targets: 44px ================= */
+#app .home-head .hbtn,#app .home-head .iconbtn,#app .home-head .avatar-dot{width:44px;height:44px;min-width:44px;min-height:44px}
+#app .brk-arrow{min-width:44px;min-height:44px}
+#app .stepchip{min-height:44px;padding:11px 14px}
+#app .pass-eye{padding:12px}
+/* ================= tiny-label readability ================= */
+#app .perf-chip .pu{font-size:11.5px}
+/* ================= softened shadows ================= */
+#preview-banner{box-shadow:0 1px 4px rgba(0,0,0,.15)}
+#app .hero-logo{box-shadow:0 4px 12px rgba(3,17,33,.25)}
+#app .idcard{box-shadow:0 6px 16px rgba(6,31,58,.28)}
+#app #toast{box-shadow:var(--shadow-md) !important;border:1px solid rgba(201,162,39,.5) !important}
+/* ================= dark mode (prefers-color-scheme ONLY, no toggle) ================= */
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0F1A26; --paper-warm:#1B2A3A; --card:#16222F;
+    --ink:#E9EEF2; --ink-soft:#C7D5E2; --mut:#A9B6C2;
+    --line:#2B3D51; --line-n:#3A4E64; --track:#243447;
+    --navy-xl:#1D3148; --gold-xl:#2B2410; --gold-text:#E7CE7A;
+    --navy-text:#C7D5E6; --chrome:#1E3A5C; --info-bg:#1D3148;
+    --ok:#9ED3AE; --ok-bg:#12291C; --ok-line:#2E5A3E;
+    --ok-bg-soft:#162E1E; --ok-text:#9ED3AE;
+    --err:#FF9D8A; --err-bg:#2E1712; --err-line:#7A3A2E;
+    --warn-text:#E7CE7A; --warn-bg-soft:#2B2410;
+    --tag-green-bg:#14291A; --tag-green:#B7D8AC;
+    --tag-purple-bg:#241A33; --tag-purple:#CDBFE0;
+  }
+  body{background:#0A121C}
+  #app{box-shadow:none}
+  #app .btn:not(.goldb):not(.danger){border-color:rgba(255,255,255,.16)}
+  #app .seg button.on,#app .tab.on,#app .stepchip.on{border-color:rgba(255,255,255,.16)}
+  #app .nbadge{border-color:var(--chrome)}
+  #app .gate-step.done .n{color:#0F2A1A}
+  #app .checkrow input,#app .radio-line input,#app .acct-main input{accent-color:var(--gold)}
+  #app #toast{background:#243A56 !important}
+}
+/* ================= reduced motion ================= */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+<style id="v41b-header">
+/* v41b: recover title width for 44px header buttons (see patch26.py). */
+#app .home-head{padding:12px 4px 10px;gap:2px}
+#app .home-head img.logo{width:28px;height:28px}
+@media (max-width:430.98px){
+  #app .home-head .ttl .appname{font-size:12px}
+}
+@media (min-width:431px) and (max-width:1023.98px){
+  #app .home-head .ttl .appname{font-size:14.5px}
+}
+</style>
+
+
 </head>
 <body>
 <div id="app">

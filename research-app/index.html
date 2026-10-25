@@ -630,6 +630,13 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 }
 /* Research Companion + staged builder (v36) */
 #view-companion select{width:100%;min-height:44px;font-size:18px;padding:9px 10px;border:1px solid var(--line-n);border-radius:10px;background:#fff;color:var(--navy)}
+#comp-draft .draft-head{border:1px solid var(--line-n);border-radius:10px;padding:10px;margin:10px 0;background:#fff}
+.draft-text{white-space:pre-wrap;word-break:break-word;font-size:15.5px;line-height:1.55;color:#222;margin-top:6px}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12.5px;font-weight:700}
+.pill.empty{background:#f1f1f1;color:var(--mut)}
+.pill.drafted{background:#fff3c4;color:#7a5c00}
+.pill.ready{background:#e2efda;color:#2e5a1e}
+.comp-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .comp-actions{margin:6px 0 16px;display:flex;gap:8px;flex-wrap:wrap}
 .stepbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 .stepchip{background:#fff;border:1px solid var(--line-n);border-radius:999px;padding:7px 12px;font-size:14px;color:var(--navy);cursor:pointer}
@@ -1105,7 +1112,7 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
 <!-- ================= RESEARCH COMPANION ================= -->
 <section class="view" id="view-companion">
   <div class="topbar"><button class="tbtn" id="companion-back">‹ Back</button><div class="ttl">Research Companion</div><span style="width:44px"></span></div>
-  <p class="lead">💬 Ask anything about your research. The companion answers from this app's real sources only — every link below can be opened and checked — and sends nothing to Write &amp; Export until you mark a block final.</p>
+  <p class="lead">💬 Ask anything about your research. The companion answers from this app's real sources only — every link below can be opened and checked. Your draft builds in the panel below, heading by heading — nothing moves to Write &amp; Export until you tap “Send full draft” once.</p>
   <div class="notice"><b>Honest limits, stated plainly:</b> every source shown is a real entry from this app — open each link and check it yourself. You remain the author: the companion gives outlines, sources and notes; you write in your own voice. No result here is guaranteed to pass or fail any AI-detector — detectors are unreliable, and your own writing with real references is the honest protection.</div>
   <div class="card accent"><h3>📝 Tell me what you are writing</h3>
     <label for="comp-topic">Topic / question <span class="req">*</span></label>
@@ -1153,14 +1160,15 @@ textarea.ur-in{font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-ali
     </select>
     <div class="small" id="comp-dept-hint"></div>
     <button class="btn goldb" id="comp-ask" style="width:100%;margin-top:12px">💬 Get guidance &amp; sources</button>
-    <p class="small" style="margin-bottom:0">Nothing is sent to Write &amp; Export until you tap “This is final” on a block — that tap is the agreement between you and the companion.</p>
+    <p class="small" style="margin-bottom:0">Your draft builds in the panel below. Nothing moves to Write &amp; Export until you tap “Send full draft” — one click, all headings. Boxes that already hold your own writing are left untouched.</p>
   </div>
+  <div id="comp-draft"></div>
   <div id="comp-mentor"></div>
   <div id="comp-results"></div>
   <div id="comp-sent-note"></div>
   <div class="card"><h3>💬 Ask a follow-up</h3>
-    <p class="small" style="margin-top:0">Discuss or revise before you finalise — a follow-up proposes a fresh answer from the same real sources.</p>
-    <input id="comp-follow" type="text" placeholder="e.g. Make the outline shorter, or: more sources on methodology">
+    <p class="small" style="margin-top:0">Ask for one heading at a time — for example “Introduction for my topic”, “Research questions”, “Methodology” — each answer appears in your draft panel above, with its full text.</p>
+    <input id="comp-follow" type="text" placeholder="e.g. Introduction for my topic, or: Research questions">
     <button class="btn" id="comp-follow-btn" style="width:100%">Ask follow-up →</button>
   </div>
 </section>
@@ -3804,7 +3812,8 @@ function renderHelp(){
    promise about AI-detector results. Nothing reaches Write & Export until the student
    taps "This is final" on a block — that tap is the mutual agreement. */
 let COMP_STATE = { kind:"article", style:"APA", lang:"en", dept:"auto" };
-let COMP_LAST = null;
+let COMP_DRAFTS = {};
+let COMP_LAST_SOURCES = "";
 const COMP_STOP = new Set("a an the of in on for to and or with from by about into is are was were what how why when where which who does do did can could should would i my me we you your our their his her its this that these those as at be been being have has had will shall may might must not no yes if then than so such".split(" "));
 const COMP_DEPT_KW = {
   engineering:["engineering","mechanical","electrical","civil","structural","robotics","signal processing","circuit","thermal","fluid mechanics","mechatronics"],
@@ -3929,8 +3938,114 @@ function compMentor(topic, words, kind, style){
       : "Keep every entry in " + style + " style, and build the list in Zotero as you read — never from memory at the end. Zotero handles " + style + " and keeps the formatting consistent." });
   return cards;
 }
-function compActions(key, label){
-  return '<div class="comp-actions"><button class="btn ghost sm" data-comp-revise="' + key + '">💬 Revise ' + label + '</button><button class="btn goldb sm" data-comp-final="' + key + '">✓ ' + label + ' final — send to Write &amp; Export</button></div>';
+/* ---- v39: visible draft panel + single transfer (replaces the scattered
+   per-block "final — send" model) ---- */
+const COMP_SHAPES = {
+  article:"Title → Abstract → Introduction → Literature Review → Methodology → Analysis / Discussion → Conclusion → References",
+  synopsis:"Title → Introduction → Research Questions → Objectives → Literature Review → Methodology → Chapter Outline → References",
+  thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Analysis / Discussion → Conclusion → References"
+};
+function draftFields(kind){
+  return (WRITE_KINDS[kind] ? WRITE_KINDS[kind].fields : []).filter(f => f[0] !== "author" && f[0] !== "affiliation");
+}
+function compDraftFor(kind){
+  if(!COMP_DRAFTS[kind]){
+    const heads = {};
+    draftFields(kind).forEach(f => { heads[f[0]] = { text:"", status:"empty" }; });
+    COMP_DRAFTS[kind] = { kind:kind, topic:"", heads:heads };
+  }
+  return COMP_DRAFTS[kind];
+}
+function compHeadingOf(q, kind){
+  const t = (q || "").toLowerCase();
+  const fields = draftFields(kind).map(f => f[0]);
+  const has = k => fields.indexOf(k) >= 0;
+  const pick = k => has(k) ? k : null;
+  if(t.indexOf("research question") >= 0) return pick("questions");
+  if(t.indexOf("objective") >= 0) return pick("objectives");
+  if(t.indexOf("literature") >= 0) return pick("literature");
+  if(t.indexOf("reference") >= 0 || t.indexOf("bibliography") >= 0) return pick("references");
+  if(t.indexOf("methodology") >= 0 || t.indexOf("method") >= 0) return pick("methodology");
+  if(t.indexOf("chapter outline") >= 0 || t.indexOf("outline") >= 0){
+    if(has("outline")) return "outline";
+    if(kind === "article") return "introduction";
+  }
+  if(t.indexOf("introduction") >= 0 || t.indexOf("intro") >= 0) return pick("introduction");
+  if(t.indexOf("abstract") >= 0) return pick("abstract");
+  if(t.indexOf("conclusion") >= 0) return pick("conclusion");
+  if(t.indexOf("discussion") >= 0 || t.indexOf("analysis") >= 0) return pick("discussion");
+  if(t.indexOf("keyword") >= 0) return pick("keywords");
+  if(t.indexOf("title") >= 0) return pick("title");
+  if(t.indexOf("source") >= 0) return pick("literature");
+  return null;
+}
+function compLinkLines(ctx){
+  const lines = [];
+  ctx.tk.forEach(it => lines.push(it.name + " — " + it.url));
+  ctx.jn.forEach(it => lines.push(it.name + " — " + it.url));
+  ctx.isl.forEach(it => lines.push(it.name + " — " + it.url));
+  ctx.tools.forEach(it => lines.push(it.name + " — " + it.url));
+  return lines;
+}
+function compDraftText(heading, ctx){
+  const T = ctx.topic;
+  const linkLines = compLinkLines(ctx);
+  const links = linkLines.length ? linkLines.join("\n") : "";
+  const styleNote = "Format what you actually use in " + ctx.style + " style (Zotero does this). Only entries you have actually read belong here.";
+  switch(heading){
+    case "title": return T;
+    case "introduction":
+      return "Background\nThis study examines " + T + ".\n\nResearch problem\n[Write the gap in one sentence: what is unknown, contested, or missing about " + T + "?]\n\nSignificance\n[Write one sentence: who benefits from this study, and how?]\n\nNote: replace the bracketed lines with your own sentences — this is a scaffold to edit, not a finished section.";
+    case "questions":
+      return "1. How is " + T + " understood and practised in the chosen setting?\n2. What factors shape " + T + " among the chosen group?\n3. What should change — in practice or policy — in light of the findings on " + T + "?\n\nNote: narrow each question to one group, one place and one period before you finalise.";
+    case "objectives":
+      return "1. To examine " + T + " in the chosen setting.\n2. To analyse the factors that shape " + T + ".\n3. To propose practical recommendations arising from the study of " + T + ".\n\nEach objective matches one research question, in the same order.";
+    case "literature":
+      return links ? ("Sources to read and cite — open each link and check it:\n" + links + "\n\n" + styleNote)
+        : ("No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the Research hub Toolkit.");
+    case "methodology": {
+      const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
+      return "Research design\n[Choose one: qualitative, quantitative, or mixed-methods — and say why it fits " + T + ".]\n\nData sources\n" + (data || "[List the books, journals, documents or field sources you will actually use.]") + "\n\nAnalysis\n[Say how you will analyse the data — thematically, statistically, or comparatively — in two or three sentences.]";
+    }
+    case "outline": return ctx.shape.split(" → ").join("\n");
+    case "references":
+      return links ? ("References (" + ctx.style + " style) — real sources only:\n" + links + "\n\n" + styleNote)
+        : ("No matching source was found in the app for this question — and no reference has been invented for it. Add entries here only for sources you have actually read, in " + ctx.style + " style.");
+    case "abstract":
+      return "This study examines " + T + ". [One sentence on the gap.] [One sentence on the method.] [One sentence on the expected contribution.]\n\nNote: write the abstract last, after the other sections are drafted.";
+    case "discussion":
+      return "1. What do the findings say about " + T + "?\n2. How do they compare with the literature reviewed?\n3. What are the limits of this study?\n\nNote: write this section only after your analysis — do not draft it first.";
+    case "conclusion":
+      return "This study set out to examine " + T + ". [Summarise the main finding in one sentence.] [State the contribution and one recommendation.]";
+    case "keywords": {
+      const toks = compTokens(T).slice(0, 6);
+      return toks.length ? toks.join(", ") : T;
+    }
+    default: return "";
+  }
+}
+function renderCompDraft(){
+  const box = $("comp-draft");
+  if(!box) return;
+  const kind = COMP_STATE.kind;
+  const d = compDraftFor(kind);
+  const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
+  const fields = draftFields(kind);
+  const filled = fields.filter(f => (d.heads[f[0]].text || "").trim()).length;
+  let html = '<div class="card accent"><h3>📝 Your draft — ' + esc(kindLabel) + '</h3>';
+  html += '<p class="small" style="margin-top:0">' + (d.topic ? 'Topic: <b>' + esc(d.topic) + '</b> · ' : '') + filled + ' of ' + fields.length + ' headings drafted. This draft lives here first — nothing moves to Write &amp; Export until you tap “Send full draft” below.</p>';
+  fields.forEach(f => {
+    const h = d.heads[f[0]];
+    const hasText = (h.text || "").trim() !== "";
+    const pill = h.status === "ready" ? '<span class="pill ready">✓ ready</span>' : (hasText ? '<span class="pill drafted">drafted</span>' : '<span class="pill empty">empty</span>');
+    html += '<div class="draft-head" data-draft-head="' + f[0] + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="color:var(--navy)">' + esc(f[1]) + '</b>' + pill + '</div>';
+    if(hasText) html += '<div class="draft-text">' + esc(h.text) + '</div><div style="margin-top:8px"><button class="btn ghost sm" data-comp-revise="' + f[0] + '">💬 Revise ' + esc(f[1]) + '</button></div>';
+    else html += '<p class="small" style="margin-bottom:0">Empty yet — ask for this heading in the follow-up box below.</p>';
+    html += '</div>';
+  });
+  html += '<button class="btn goldb" data-comp-send-draft style="width:100%;margin-top:6px">📤 Send full draft to Write &amp; Export</button>';
+  html += '<p class="small" style="margin-bottom:0">One click fills every matching Write &amp; Export box for ' + esc(kindLabel) + '. Boxes that already hold your own writing are left untouched — the notice after sending lists exactly what was filled and what was skipped.</p></div>';
+  box.innerHTML = html;
 }
 function compAsk(followQ){
   const topic = ($("comp-topic").value || "").trim();
@@ -3951,104 +4066,133 @@ function compAsk(followQ){
     ? ISLAMIC_SOURCES.map(it => ({ name: it[0], desc: it[1], url: it[2] })) : [];
   const tools = compTools(type, toks, 3);
   const steps = compGuideSteps(type);
-  const shapes = {
-    article:"Title → Abstract → Introduction → Literature Review → Methodology → Analysis / Discussion → Conclusion → References",
-    synopsis:"Title → Introduction → Research Questions → Objectives → Literature Review → Methodology → Chapter Outline → References",
-    thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Analysis / Discussion → Conclusion → References"
-  };
-  const shape = shapes[st.kind] || shapes.article;
-  const kindLabel = (WRITE_KINDS[st.kind] && WRITE_KINDS[st.kind].label) || st.kind;
-  const outlineText = "Outline (" + kindLabel + "):\n" + shape.split(" → ").join("\n");
-  const srcLines = [];
-  tk.forEach(it => srcLines.push(it.name + " — " + it.url));
-  jn.forEach(it => srcLines.push(it.name + " — " + it.url));
-  isl.forEach(it => srcLines.push(it.name + " — " + it.url));
-  tools.forEach(it => srcLines.push(it.name + " — " + it.url));
-  const sourcesText = srcLines.join("\n");
-  const notesText = mentor.map(m => m.t + "\n" + m.b).join("\n\n") + "\n\nGuide steps:\n" + steps.map((g, i) => (i + 1) + ". " + g[0] + " — " + g[1]).join("\n");
-  COMP_LAST = { topic: topic || q, kind: st.kind, lang: st.lang, style: st.style, blocks: { outline: outlineText, sources: sourcesText, notes: notesText }, sent: {} };
+  const kind = st.kind;
+  const shape = COMP_SHAPES[kind] || COMP_SHAPES.article;
+  const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
+  const ctx = { topic: topic || q, words: words, style: st.style, shape: shape, tk: tk, jn: jn, isl: isl, tools: tools };
+  COMP_LAST_SOURCES = compLinkLines(ctx).join("\n");
+  const d = compDraftFor(kind);
+  d.topic = topic || q;
   let mHtml = "";
   if(deptObj) mHtml += '<p class="small">Department: <b>' + esc(deptObj.name) + '</b>' + (st.dept === "auto" ? ' (suggested from your words — change it above if it is wrong)' : '') + ' · Kind: <b>' + esc(kindLabel) + '</b> · Style: <b>' + esc(st.style) + '</b>' + (words ? ' · Words: <b>' + words + '</b>' : '') + '</p>';
   else mHtml += '<p class="small">No department detected from your words — sources below come from all departments. Pick a department above to narrow them.</p>';
   mHtml += mentor.map(m => '<div class="card"><h3>' + esc(m.t) + '</h3><p class="small" style="margin-bottom:0">' + esc(m.b) + '</p></div>').join("");
-  mHtml += '<p class="small">These notes travel with the guide steps when you finalise Notes below.</p>';
+  mHtml += '<p class="small">These notes travel with the guide steps when you work through them.</p>';
   $("comp-mentor").innerHTML = mHtml;
-  let rHtml = "";
-  rHtml += '<div class="card accent"><h3>📋 Outline — ' + esc(kindLabel) + '</h3><p class="small" style="margin-bottom:0">' + esc(shape).split(" → ").join("<br>→ ") + '</p></div>' + compActions("outline", "Outline");
+  const heading = compHeadingOf(q, kind);
   const linkItems = [];
   tk.forEach(it => linkItems.push([it.name, it.desc, it.url]));
   jn.forEach(it => linkItems.push([it.name, it.desc, it.url]));
   isl.forEach(it => linkItems.push([it.name, it.desc, it.url]));
   tools.forEach(it => linkItems.push([it.name, it.desc, it.url]));
-  if(linkItems.length){
-    rHtml += resBlock("🔗 Real sources — open each link and check it", linkItems);
-    rHtml += '<p class="small">These are places to find and cite from — not a ready bibliography. Format what you actually use in ' + esc(st.style) + ' style (Zotero does this).</p>';
-    rHtml += compActions("sources", "Sources");
-  } else {
-    rHtml += '<div class="notice">No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the guide below.</div>';
-    if(deptObj){
-      const near = (deptObj.data || []).slice(0, 3).map(it => [it[0], it[1], it[2]]);
-      if(near.length) rHtml += resBlock("🧭 Nearest starting points in " + deptObj.name + " (not matched to your words)", near);
+  let rHtml = "";
+  if(heading){
+    let text = compDraftText(heading, ctx);
+    if(heading === "introduction" && kind === "article" && q.toLowerCase().indexOf("outline") >= 0){ text = "Outline:\n" + shape.split(" → ").join("\n"); }
+    d.heads[heading] = { text: text, status: "drafted" };
+    renderCompDraft();
+    const label = fieldLabel(kind, heading);
+    rHtml += '<div class="card accent"><h3>✍️ ' + esc(label) + ' — in your draft</h3><div class="draft-text">' + esc(text) + '</div>';
+    rHtml += '<p class="small" style="margin-bottom:0">This text is already in your draft panel above — read it there, or tap “Put in draft” to mark this heading ready. It moves to Write &amp; Export only when you tap “Send full draft”.</p></div>';
+    if(heading === "literature" || heading === "references"){
+      if(linkItems.length) rHtml += resBlock("🔗 Real sources — open each link and check it", linkItems);
+      else rHtml += '<div class="notice">No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the guide below.</div>';
     }
-    rHtml += '<p class="small">You can also browse the full Toolkit from the Research hub.</p>';
+    rHtml += '<div class="comp-actions"><button class="btn ghost sm" data-comp-revise="' + heading + '">💬 Revise ' + esc(label) + '</button><button class="btn goldb sm" data-comp-put="' + heading + '">✓ Put in draft</button></div>';
+  } else {
+    const outlineFilled = !!d.heads["outline"];
+    d.heads["title"] = { text: d.topic, status: "drafted" };
+    if(outlineFilled) d.heads["outline"] = { text: shape.split(" → ").join("\n"), status: "drafted" };
+    renderCompDraft();
+    rHtml += '<div class="card accent"><h3>📝 Your draft is started</h3><p class="small" style="margin-bottom:0">Title is set from your topic' + (outlineFilled ? ' and the ' + esc(kindLabel) + ' shape is in the Chapter Outline draft.' : '.') + ' Now ask for one heading at a time in the follow-up box below — Introduction, Research Questions, Objectives, and so on — and each answer will appear in your draft panel above.</p></div>';
+    if(linkItems.length){
+      rHtml += resBlock("🔗 Real sources — open each link and check it", linkItems);
+      rHtml += '<p class="small">These are places to find and cite from — not a ready bibliography. Format what you actually use in ' + esc(st.style) + ' style (Zotero does this).</p>';
+      rHtml += '<div class="comp-actions"><button class="btn goldb sm" data-comp-put="literature" data-comp-put-src="1">✓ Put these sources in the Literature Review draft</button></div>';
+    } else {
+      rHtml += '<div class="notice">No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the guide below.</div>';
+      if(deptObj){
+        const near = (deptObj.data || []).slice(0, 3).map(it => [it[0], it[1], it[2]]);
+        if(near.length) rHtml += resBlock("🧭 Nearest starting points in " + deptObj.name + " (not matched to your words)", near);
+      }
+      rHtml += '<p class="small">You can also browse the full Toolkit from the Research hub.</p>';
+    }
+    rHtml += '<div class="card"><h3>🧭 Guide steps for this question</h3>' + steps.map((g, i) => '<div class="guide-step"><div class="gn">' + (i + 1) + '</div><div class="gt"><b>' + esc(g[0]) + '.</b> ' + esc(g[1]) + '<div class="ur" style="font-size:15px;margin-top:2px">' + g[2] + '</div></div></div>').join("") + '</div>';
   }
-  rHtml += '<div class="card"><h3>🧭 Guide steps for this question</h3>' + steps.map((g, i) => '<div class="guide-step"><div class="gn">' + (i + 1) + '</div><div class="gt"><b>' + esc(g[0]) + '.</b> ' + esc(g[1]) + '<div class="ur" style="font-size:15px;margin-top:2px">' + g[2] + '</div></div></div>').join("") + '</div>' + compActions("notes", "Notes");
   $("comp-results").innerHTML = rHtml;
-  $("comp-sent-note").innerHTML = "";
   $("comp-results").scrollIntoView({ block:"start" });
 }
 function fieldLabel(kind, key){
   const f = (WRITE_KINDS[kind] && WRITE_KINDS[kind].fields.find(x => x[0] === key));
   return f ? f[1] : key;
 }
-function compFinal(key){
-  if(!ME){ toast("Please log in first — the demo student works too."); return; }
-  const last = COMP_LAST;
-  if(!last || !last.blocks[key]) return;
-  if(last.sent[key]){ toast("Already sent — open Write & Export to edit it."); return; }
-  const lang = last.lang === "en" ? "en" : "ur";
-  let keptKind = false;
-  if(!WD) WD = newWD(last.kind, lang);
-  else if(!wdHasContent()){ WD.kind = last.kind; WD.lang = lang; }
-  else if(WD.kind !== last.kind) keptKind = true;
-  if(!WD.fields.title) WD.fields.title = last.topic;
-  let field = "introduction", prefix = "";
-  if(key === "outline") field = (WD.kind === "synopsis" || WD.kind === "thesis") ? "outline" : "introduction";
-  if(key === "sources") field = "references";
-  if(key === "notes"){ field = "introduction"; prefix = "Working notes — remove before submission:\n"; }
-  if(key === "outline" && WD.kind === "article") prefix = "Outline:\n";
-  const cur = (WD.fields[field] || "").trim();
-  WD.fields[field] = cur ? cur + "\n\n" + prefix + last.blocks[key] : prefix + last.blocks[key];
-  WD.step = field;
-  if(!WD.id){ WD.id = uid(); WD.updatedAt = nowISO(); ME.documents = ME.documents || []; ME.documents.unshift(WD); }
+function compRevise(key){
+  const label = fieldLabel(COMP_STATE.kind, key) || key;
+  const f = $("comp-follow");
+  f.value = "Revise the " + label + ": ";
+  f.focus();
+  f.scrollIntoView({ block:"center" });
+  toast("Write what to change, then tap Ask — a fresh draft for that heading will be proposed.");
+}
+function compPutDraft(heading, fromSources){
+  const d = compDraftFor(COMP_STATE.kind);
+  if(!d.heads[heading]) return;
+  if(fromSources && COMP_LAST_SOURCES) d.heads[heading] = { text: COMP_LAST_SOURCES, status: "ready" };
+  else if((d.heads[heading].text || "").trim()) d.heads[heading].status = "ready";
+  else { toast("That heading is empty yet — ask for it first."); return; }
+  renderCompDraft();
+  $("comp-draft").scrollIntoView({ block:"start" });
+  toast("Marked ready in your draft.");
+}
+function persistWD(){
+  if(!ME || !WD) return;
+  WD.updatedAt = nowISO();
+  if(!WD.id){ WD.id = uid(); ME.documents = ME.documents || []; ME.documents.unshift(WD); }
   else {
-    const ix = (ME.documents || []).findIndex(d => d.id === WD.id);
+    const ix = (ME.documents || []).findIndex(x => x.id === WD.id);
     if(ix >= 0) ME.documents[ix] = WD; else ME.documents.unshift(WD);
   }
   persist(); if(FB) FB.saveUser(ME);
-  last.sent[key] = true;
-  const btn = document.querySelector('[data-comp-final="' + key + '"]');
-  if(btn){ btn.textContent = "✓ Sent to " + WRITE_KINDS[WD.kind].label + " → " + fieldLabel(WD.kind, field); btn.disabled = true; }
-  const secs = WRITE_KINDS[WD.kind].fields.filter(f => f[2] === "ta");
-  const ix = secs.findIndex(f => f[0] === field);
-  const next = (ix >= 0 && ix + 1 < secs.length) ? secs[ix + 1][1] : null;
-  const note = $("comp-sent-note");
-  note.innerHTML = '<div class="notice">✓ <b>Final — sent.</b> This block is now in Write &amp; Export → ' + esc(WRITE_KINDS[WD.kind].label) + ' → ' + esc(fieldLabel(WD.kind, field)) + '.' + (keptKind ? ' Your open draft was kept — the new kind applies to your next document.' : '') + ' ' + (next ? 'When you finish that heading, tap “Heading complete” there and the builder moves you to <b>' + esc(next) + '</b> automatically.' : 'That was the last heading — download your document when ready.') + '<div style="margin-top:10px"><button class="btn goldb" id="comp-open-write">✍️ Open Write &amp; Export →</button></div></div>';
-  $("comp-open-write").addEventListener("click", ()=>{ WRITE_BACK = "view-companion"; showView("view-write"); });
-  toast("Final — sent to Write & Export.");
 }
-function compRevise(key){
-  const labels = { outline:"outline", sources:"sources list", notes:"notes" };
-  const f = $("comp-follow");
-  f.value = "Revise the " + (labels[key] || key) + ": ";
-  f.focus();
-  f.scrollIntoView({ block:"center" });
-  toast("Write what to change, then tap Ask — a fresh answer will be proposed.");
+function compSendDraft(){
+  if(!ME){ toast("Please log in first — the demo student works too."); return; }
+  const kind = COMP_STATE.kind;
+  const lang = COMP_STATE.lang === "en" ? "en" : "ur";
+  const d = compDraftFor(kind);
+  const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
+  const fields = draftFields(kind);
+  const nonEmpty = fields.filter(f => (d.heads[f[0]].text || "").trim());
+  if(!nonEmpty.length){ toast("Your draft is empty yet — ask for a heading first."); return; }
+  if(!WD) WD = newWD(kind, lang);
+  else if(WD.kind !== kind){
+    if(wdHasContent()) saveWD();
+    WD = newWD(kind, lang);
+  }
+  if(!WD.compFields) WD.compFields = {};
+  const filled = [], skipped = [];
+  nonEmpty.forEach(f => {
+    const key = f[0];
+    const draftText = (d.heads[key].text || "").trim();
+    const cur = (WD.fields[key] || "").trim();
+    if(!cur || WD.compFields[key] === cur){ WD.fields[key] = draftText; WD.compFields[key] = draftText; filled.push(f[1]); }
+    else skipped.push(f[1]);
+  });
+  const secs = writeSections();
+  if(secs.length) WD.step = secs[0][0];
+  persistWD();
+  const note = $("comp-sent-note");
+  note.innerHTML = '<div class="notice">✓ <b>Full draft sent.</b> Your draft is now in Write &amp; Export → ' + esc(kindLabel) + '.'
+    + (filled.length ? ' Filled: <b>' + esc(filled.join(", ")) + '</b>.' : '')
+    + (skipped.length ? ' Skipped (your own writing kept untouched): <b>' + esc(skipped.join(", ")) + '</b>.' : '')
+    + ' Open it below and work heading by heading — tap “Heading complete” to move on automatically.'
+    + '<div style="margin-top:10px"><button class="btn goldb" data-comp-open-write>✍️ Open Write &amp; Export →</button></div></div>';
+  toast("Full draft sent to Write & Export.");
 }
 function compSeg(id, key){
   document.querySelectorAll("#" + id + " button").forEach(b => b.addEventListener("click", () => {
     document.querySelectorAll("#" + id + " button").forEach(x => x.classList.toggle("on", x === b));
     COMP_STATE[key] = b.dataset[key];
+    if(key === "kind"){ $("comp-mentor").innerHTML = ""; $("comp-results").innerHTML = ""; renderCompDraft(); }
   }));
 }
 function openCompanion(deptId){
@@ -4058,6 +4202,7 @@ function openCompanion(deptId){
   if(sel){ sel.value = (id && DISCIPLINES.some(d => d.id === id)) ? id : "auto"; }
   COMP_STATE.dept = sel ? sel.value : "auto";
   compSuggestHint();
+  renderCompDraft();
   showView("view-companion");
 }
 /* ---- Staged builder: heading stepper in Write & Export ---- */
@@ -4764,8 +4909,12 @@ function wire(){
   $("view-companion").addEventListener("click", (e)=>{
     const rv = e.target.closest("[data-comp-revise]");
     if(rv){ compRevise(rv.dataset.compRevise); return; }
-    const fn = e.target.closest("[data-comp-final]");
-    if(fn){ compFinal(fn.dataset.compFinal); }
+    const put = e.target.closest("[data-comp-put]");
+    if(put){ compPutDraft(put.dataset.compPut, put.dataset.compPutSrc === "1"); return; }
+    const sd = e.target.closest("[data-comp-send-draft]");
+    if(sd){ compSendDraft(); return; }
+    const ow = e.target.closest("[data-comp-open-write]");
+    if(ow){ WRITE_BACK = "view-companion"; showView("view-write"); }
   });
   $("consult-form").addEventListener("submit", e => {
     e.preventDefault(); submitRequest({ topic:$("consult-topic").value.trim(), type:"Consultation",

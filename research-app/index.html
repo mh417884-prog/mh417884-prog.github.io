@@ -4719,7 +4719,9 @@ function renderCompDraft(){
     html += '<div class="draft-head" data-draft-head="' + f[0] + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="color:var(--navy)">' + esc(f[1]) + '</b>' + pill + '</div>';
     if(hasText) html += '<div class="draft-text">' + deepRenderDraftHtml(fullText) + '</div>' + ((d.tables && d.tables[f[0]]) ? wizTableHtml(f[0], d.tables[f[0]]) : '') + '<div style="margin-top:8px"><button class="btn ghost sm" data-comp-revise="' + f[0] + '">💬 Revise ' + esc(f[1]) + '</button></div>';
     else html += '<p class="small" style="margin-bottom:0">Empty yet — ask for this heading in the follow-up box below.</p>';
-    html += '<div style="margin-top:8px"><button class="btn ghost sm" data-handoff-toggle="' + f[0] + '">📓 Get data from a notebook</button></div>';
+    const hoReadyD = compHandoffReady(kind, f[0]);
+    html += '<div style="margin-top:8px"><button class="btn ghost sm" data-handoff-toggle="' + f[0] + '"' + (hoReadyD ? '' : ' disabled') + '>📓 Get data from a notebook</button></div>';
+    if(!hoReadyD) html += '<p class="small ho-gate-note" style="margin-bottom:0">' + esc(compHandoffGateNote(COMP_STATE.lang)) + '</p>';
     html += '<div data-ho-wrap="' + f[0] + '"></div>';
     html += '</div>';
   });
@@ -5273,7 +5275,8 @@ function wizLRShow(){
   h += '<label for="wiz-revise-in">' + esc(t.changePre) + 'Pair ' + (lr.idx + 1) + esc(t.changePost) + '</label><input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">';
   if(lr.idx > 0) h += '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous pair</button></div>';
   else h += '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>';
-  h += '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + (lr.idx + 1 >= Y ? '✓ Final — finish literature review' : esc(t.finalBtn)) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div><div style="margin-top:10px"><button class="btn ghost sm" data-handoff-toggle="literature">📓 Get data from a notebook</button></div><div id="wiz-handoff-wrap"></div></div>';
+  const hoReadyL = compHandoffReady(WIZ.kind, "literature");
+  h += '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + (lr.idx + 1 >= Y ? '✓ Final — finish literature review' : esc(t.finalBtn)) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div><div style="margin-top:10px"><button class="btn ghost sm" data-handoff-toggle="literature"' + (hoReadyL ? '' : ' disabled') + '>📓 Get data from a notebook</button></div>' + (hoReadyL ? '' : '<p class="small ho-gate-note" style="margin-bottom:0">' + esc(compHandoffGateNote(WIZ.lang)) + '</p>') + '<div id="wiz-handoff-wrap"></div></div>';
   box.innerHTML = h;
   $("wiz-final-btn").addEventListener("click", wizFinal);
   $("wiz-revise-btn").addEventListener("click", wizRevise);
@@ -5429,28 +5432,31 @@ function compHandoffLangName(){
   if(l === "ar") return "Arabic (العربية)";
   return "English";
 }
-function compHandoffPlatforms(){
-  const links = []; const seen = {};
-  ISLAMIC_SOURCES.forEach(it => { if(it[0] && it[2] && !seen[it[2]]){ seen[it[2]] = true; links.push({ name: it[0], url: it[2] }); } });
-  return links;
-}
-function compHandoffExtraLinks(d){
-  const links = []; const seen = {};
-  const push = (name, url) => { if(name && url && !seen[url]){ seen[url] = true; links.push({ name: name, url: url }); } };
+/* v45: the student's OWN field tools only — top 3 toolkit entries for their
+   department, never the whole list, never keyword soup. */
+function compHandoffFieldTools(d){
   try{
-    let tk = [], jn = [];
-    if(typeof WIZ !== "undefined" && WIZ.ctx){ tk = WIZ.ctx.tk || []; jn = WIZ.ctx.jn || []; }
-    else {
-      const t = (d && d.topic) || "";
-      if(t){
-        const sug = compSuggestDept(t);
-        if(sug){ tk = compToolkit(sug.id, compTokens(t), 3); jn = compJournals(sug.name, compTokens(t), 3); }
-      }
-    }
-    tk.forEach(it => push(it.name, it.url));
-    jn.forEach(it => push(it.name, it.url));
-  }catch(err){}
-  return links;
+    if(typeof WIZ !== "undefined" && WIZ.ctx && WIZ.ctx.tk) return { dept: (WIZ.ctx.deptName || ""), tools: (WIZ.ctx.tk || []).slice(0, 3) };
+    const t = (d && d.topic) || compHandoffTopic(d) || "";
+    if(!t) return { dept: "", tools: [] };
+    const sug = compSuggestDept(t);
+    if(!sug) return { dept: "", tools: [] };
+    return { dept: sug.name, tools: compToolkit(sug.id, compTokens(t), 3) };
+  }catch(err){ return { dept: "", tools: [] }; }
+}
+/* v45: draft first, tools second. The handoff button stays disabled until
+   this heading holds the app's own draft content. */
+function compHandoffReady(kind, key){
+  const d = compDraftFor(kind);
+  if(typeof WIZ !== "undefined" && WIZ.building && key === "literature" && wizInLR()){
+    return !!(d.lr && d.lr.pairTexts && d.lr.pairTexts[d.lr.idx] && d.lr.pairTexts[d.lr.idx].review);
+  }
+  return !!((d.heads[key] && d.heads[key].text || "").trim());
+}
+function compHandoffGateNote(lang){
+  return lang === "ur" ? "پہلے اس ہیڈنگ کا اپنا مسودہ اوپر پڑھیں — ایپ کا مسودہ پہلے، باہر کا ڈیٹا بعد میں۔"
+    : lang === "ar" ? "اقرأ مسودة التطبيق لهذا العنوان أولاً — مسودة التطبيق أولاً، ثم البيانات الخارجية."
+    : "The app's own draft for this heading comes first — read it above, then fetch outside data.";
 }
 function compHandoffPrompt(kind, key){
   const d = compDraftFor(kind);
@@ -5464,39 +5470,44 @@ function compHandoffPrompt(kind, key){
   const structure = (bank && bank.structure) ? bank.structure.join("; ") : "";
   const must = (bank && bank.must) ? bank.must.join("; ") : "";
   const lines = [];
-  lines.push("You are helping me write one heading of my " + kindLabel.toLowerCase() + ".");
+  const styleLine = /chicago/i.test(style)
+    ? "References must be in Chicago style: give a full note (note form) for each source used, plus a bibliography entry for each ORIGINAL book or article — author, title, volume and page. Cite the original work itself, never the notebook or platform."
+    : "References must be in " + style + " style: a full reference for each ORIGINAL book or article used — author, title, volume and page. Cite the original work itself, never the notebook or platform.";
+  lines.push("You are helping me write one heading of my " + kindLabel.toLowerCase() + ", in formal, precise, detailed academic prose — a professional scholarly tone, not a summary.");
   lines.push("Topic: " + topic + ".");
   if(dept) lines.push("Field / department: " + dept + ".");
   lines.push("Heading to complete: " + label + ".");
   lines.push("Reference style: " + style + ".");
   lines.push("Answer in " + lang + ".");
-  if(structure) lines.push("Structure this heading as follows: " + structure + ".");
+  if(structure) lines.push("Organise the material under this heading as follows: " + structure + ".");
   if(must) lines.push("This heading must cover: " + must + ".");
   lines.push("Use ONLY material from the sources in this notebook or platform. Do NOT invent any reference, book, author, volume, page number, or quotation.");
-  lines.push("Give EXACT quotations with the full source details: book name, author, volume and page number. Where a detail is not found in the source, write 'not found' — never guess.");
-  lines.push("Return: (1) organised material for this heading, (2) the exact quotations with full source details, (3) a list of the ORIGINAL books or articles used, each with author, title, volume and page.");
+  lines.push("Give the exact quotations in quotation form, with the full source details: book name, author, volume and page number. Where a detail is not found in the source, write 'not found' — never guess.");
+  lines.push(styleLine);
+  lines.push("Return: (1) organised material for this heading, (2) the exact quotations with full source details, (3) the list of the ORIGINAL books or articles used, each with author, title, volume and page.");
+  lines.push("IMPORTANT — return plain paragraphs only: no asterisks, no hash headings, no markdown formatting of any kind, no bullet symbols for headings. Plain text paragraphs, nothing else.");
   return lines.join("\n");
 }
 function compHandoffCardHtml(kind, key){
   const d = compDraftFor(kind);
   const label = fieldLabel(kind, key);
-  const platforms = compHandoffPlatforms();
-  const extra = compHandoffExtraLinks(d);
   const prompt = compHandoffPrompt(kind, key);
   const lang = (typeof WIZ !== "undefined" && WIZ.building) ? WIZ.lang : COMP_STATE.lang;
   const note = lang === "ur" ? "ایپ کی تصدیق شدہ نہیں: یہاں جو کچھ آپ پیسٹ کریں گے وہ ایپ سے باہر سے آپ کا اپنا مواد ہے۔ ایپ کبھی یہ دعویٰ نہیں کرتی کہ اس نے نوٹ بک کا صفحہ پڑھا ہے — جمع کرانے سے پہلے ہر اقتباس اور حوالہ خود جانچیں۔"
     : lang === "ar" ? "غير موثقة من التطبيق: ما تلصقه هنا مادة من خارج التطبيق. التطبيق لا يدعي أبداً أنه قرأ صفحة دفتر — تحقق من كل اقتباس ومرجع بنفسك قبل التقديم."
     : "Not verified by the app: anything you paste here is YOUR material from outside the app. The app never claims to have read a notebook page — check every quotation and reference yourself before submission. References from your pasted text join References marked student-provided / unverified.";
+  const topic = compHandoffTopic(d);
+  const q = encodeURIComponent(topic || "");
+  const ft = compHandoffFieldTools(d);
   let opts = '<option value="">Platform you used…</option>';
-  platforms.forEach(p => { opts += '<option value="' + esc(p.name) + '"' + (HO_DRAFT.platform === p.name ? ' selected' : '') + '>' + esc(p.name) + '</option>'; });
-  ["ChatGPT", "Gemini", "Another AI"].forEach(n => { opts += '<option value="' + n + '"' + (HO_DRAFT.platform === n ? ' selected' : '') + '>' + n + '</option>'; });
+  ISLAMIC_SOURCES.forEach(it => { opts += '<option value="' + esc(it[0]) + '"' + (HO_DRAFT.platform === it[0] ? ' selected' : '') + '>' + esc(it[0]) + '</option>'; });
+  ["ChatGPT", "Gemini", "Claude", "Another AI"].forEach(n => { opts += '<option value="' + n + '"' + (HO_DRAFT.platform === n ? ' selected' : '') + '>' + n + '</option>'; });
   let html = '<div class="ho-card" data-ho-key="' + key + '">';
   html += '<p class="small" style="margin-top:0"><b>📓 Get data for: ' + esc(label) + '</b></p>';
-  html += '<p class="small">Open one of these (real links from this app only):</p>';
-  html += '<p class="small ho-platforms">' + platforms.map(p => '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + '</a>').join(' · ') + '</p>';
-  html += '<p class="small">Inside the Al-Turath NotebookLM Hub, pick the notebook for your field — this app does not hold a separate notebook link per field.</p>';
-  if(extra.length) html += '<p class="small">Also relevant to your topic — open and read: ' + extra.map(p => '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + '</a>').join(' · ') + '</p>';
-  html += '<p class="small">Or open any AI yourself (ChatGPT / Gemini) and paste the prompt there.</p>';
+  html += '<p class="small ho-notebook">📓 Notebook — open: <a href="' + esc(ALTURATH_HUB_URL) + '" target="_blank" rel="noopener">Al-Turath NotebookLM Hub ↗</a> · <a href="https://notebooklm.google.com/" target="_blank" rel="noopener">Create your own notebook ↗</a> <span>(NotebookLM — sign in, then “Create new notebook”; inside the hub, pick the notebook for your field.)</span></p>';
+  html += '<p class="small ho-search">🔎 Search the web: <a href="https://scholar.google.com/scholar?q=' + q + '" target="_blank" rel="noopener">Google Scholar ↗</a> · <a href="https://www.semanticscholar.org/search?q=' + q + '" target="_blank" rel="noopener">Semantic Scholar ↗</a> · <a href="https://core.ac.uk/search?q=' + q + '" target="_blank" rel="noopener">CORE ↗</a></p>';
+  if(ft.tools.length) html += '<p class="small ho-fieldtools">🧰 Your field\'s tools' + (ft.dept ? ' (' + esc(ft.dept) + ')' : '') + ': ' + ft.tools.map(p => '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + '</a>').join(' · ') + '</p>';
+  html += '<p class="small ho-ai">🤖 Or paste the prompt in ChatGPT / Claude yourself.</p>';
   html += '<p class="small"><b>Copy this prompt, paste it there, and bring the answer back:</b></p>';
   html += '<textarea class="ho-prompt" readonly>' + esc(prompt) + '</textarea>';
   html += '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn goldb" data-handoff-copy="' + key + '">📋 Copy prompt</button></div>';
@@ -5515,16 +5526,16 @@ function compStudentBlocksHtml(d, key){
   return blocks.map(b => '<p class="small" style="margin-top:10px;margin-bottom:4px"><b>📥 Provided by the student from ' + esc(b.platform || "a notebook / AI") + ' (not verified by the app — check every quotation and reference before submission):</b></p><div class="draft-text">' + esc(b.text) + '</div>').join("");
 }
 function compHeadingFullText(d, key){
-  const base = (d.heads[key] && d.heads[key].text) || "";
+  const base = mdCleanText((d.heads[key] && d.heads[key].text) || "");
   const blocks = (d.studentBlocks && d.studentBlocks[key]) || [];
   if(!blocks.length) return base;
-  return blocks.reduce((acc, b) => acc + "\n\n📥 Provided by the student from " + (b.platform || "a notebook / AI") + " (not verified by the app — check every quotation and reference before submission):\n" + b.text, base);
+  return blocks.reduce((acc, b) => acc + "\n\n📥 Provided by the student from " + (b.platform || "a notebook / AI") + " (not verified by the app — check every quotation and reference before submission):\n" + mdCleanText(b.text), base);
 }
 function compStudentRefsSection(userSources, lang){
   const stud = (userSources || []).filter(u => u.studentProvided);
   if(!stud.length) return "";
   const head = lang === "ur" ? "طالب علم کی فراہم کردہ حوالہ جات (غیر تصدیق شدہ — جمع کرانے سے پہلے ہر اقتباس اور حوالہ جانچیں):" : lang === "ar" ? "مراجع قدمها الطالب (غير موثقة — تحقق من كل اقتباس ومرجع قبل التقديم):" : "References provided by the student (unverified — check every quotation and reference before submission):";
-  return head + "\n" + stud.map((u, i) => (i + 1) + ". " + u.title + (u.author ? " by " + u.author : "") + (u.year ? " (" + u.year + ")" : "") + (u.url ? " " + u.url : "") + " (Provided by the student — unverified)").join("\n");
+  return head + "\n" + stud.map((u, i) => (i + 1) + ". " + u.title + (u.author ? " by " + u.author : "") + (u.year && u.title.indexOf(u.year) < 0 ? " (" + u.year + ")" : "") + (u.url ? " " + u.url : "") + " (Provided by the student — unverified)").join("\n");
 }
 function compParsePastedRefs(pasted){
   const lines = String(pasted || "").split("\n");
@@ -5542,7 +5553,7 @@ function compParsePastedRefs(pasted){
     if(!cand) return;
     const urlM = cand.match(/https?:\/\/[^\s\)\],;]+/);
     const url = urlM ? urlM[0].replace(/[.,;]+$/, "") : "";
-    let title = cand.replace(/https?:\/\/[^\s\)\],;]+/g, "").replace(/\s{2,}/g, " ").trim().replace(/^[•\-\*]\s*/, "");
+    let title = cand.replace(/https?:\/\/[^\s\)\],;]+/g, "").replace(/\s{2,}/g, " ").trim().replace(/^[•\-\*]\s*/, "").replace(/^\d+[.)]\s+/, "");
     if(title.length > 200) title = title.slice(0, 200);
     if(!title && !url) return;
     const key = (url || title).toLowerCase();
@@ -5571,6 +5582,12 @@ function compRefreshReferences(d, kind){
   d.heads.references = { text: cur, status: (old && old.status === "ready") ? "ready" : "drafted" };
 }
 function compHandoffToggle(key){
+  const kind = compHandoffKind();
+  if(HO_OPEN_KEY !== key && !compHandoffReady(kind, key)){
+    const lang = (typeof WIZ !== "undefined" && WIZ.building) ? WIZ.lang : COMP_STATE.lang;
+    toast(compHandoffGateNote(lang));
+    return;
+  }
   HO_OPEN_KEY = (HO_OPEN_KEY === key) ? null : key;
   HO_DRAFT.note = "";
   compHandoffRefresh();
@@ -5618,13 +5635,13 @@ function compHandoffAdd(btn){
   const d = compDraftFor(kind);
   const pasteEl = card.querySelector(".ho-paste");
   const platEl = card.querySelector(".ho-platform");
-  const paste = pasteEl ? pasteEl.value.trim() : "";
+  const paste = mdCleanText(pasteEl ? pasteEl.value.trim() : "");
   const platform = platEl ? platEl.value : "";
   if(!paste){ toast("Paste the data first."); return; }
+  const refs = compParsePastedRefs(paste);
   d.studentBlocks = d.studentBlocks || {};
   d.studentBlocks[key] = d.studentBlocks[key] || [];
-  d.studentBlocks[key].push({ platform: platform || "a notebook / AI", text: paste });
-  const refs = compParsePastedRefs(paste);
+  d.studentBlocks[key].push({ platform: platform || "a notebook / AI", text: paste, refs: refs });
   let added = 0;
   refs.forEach(r => {
     const dup = (d.userSources || []).some(u => (r.url && u.url === r.url) || (u.title && u.title.toLowerCase() === r.title.toLowerCase()));
@@ -5683,7 +5700,9 @@ function wizShowCurrent(f, text){
     + '<input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">'
     + (WIZ.buildIdx > 0 ? '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>' : '')
     + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + esc(t.finalBtn) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div>'
-    + '<div style="margin-top:10px"><button class="btn ghost sm" data-handoff-toggle="' + key + '">📓 Get data from a notebook</button></div><div id="wiz-handoff-wrap"></div>'
+    + '<div style="margin-top:10px"><button class="btn ghost sm" data-handoff-toggle="' + key + '"' + (compHandoffReady(WIZ.kind, key) ? '' : ' disabled') + '>📓 Get data from a notebook</button></div>'
+    + (compHandoffReady(WIZ.kind, key) ? '' : '<p class="small ho-gate-note" style="margin-bottom:0">' + esc(compHandoffGateNote(WIZ.lang)) + '</p>')
+    + '<div id="wiz-handoff-wrap"></div>'
     + fb + '</div>';
   $("wiz-final-btn").addEventListener("click", wizFinal);
   $("wiz-revise-btn").addEventListener("click", wizRevise);
@@ -6152,22 +6171,60 @@ function dxRun(text, o){
 }
 function dxPara(runs, o){
   o = o || {};
-  return '<w:p><w:pPr>' + (DX_RTL ? '<w:bidi/>' : '')
+  return '<w:p><w:pPr>'
+    + (o.style ? '<w:pStyle w:val="' + o.style + '"/>' : '')
+    + (o.ilvl != null ? '<w:numPr><w:ilvl w:val="' + o.ilvl + '"/><w:numId w:val="1"/></w:numPr>' : '')
+    + (DX_RTL ? '<w:bidi/>' : '')
     + '<w:spacing w:line="' + (o.line || 360) + '" w:lineRule="auto" w:after="' + (o.after == null ? 120 : o.after) + '"/>'
     + '<w:jc w:val="' + (o.jc || 'both') + '"/></w:pPr>' + runs + '</w:p>';
+}
+
+/* ---- v45: markdown sanitizer (paste-back arrives full of * and #) ---- */
+function mdCleanText(text){
+  let t = String(text == null ? "" : text);
+  t = t.replace(/```[\s\S]*?```/g, function(m){ return m.replace(/```/g, ""); });
+  t = t.replace(/`([^`]*)`/g, "$1");
+  t = t.replace(/\*\*([^*]+)\*\*/g, "$1");
+  t = t.replace(/__([^_]+)__/g, "$1");
+  t = t.replace(/(^|[^A-Za-z0-9])\*([^ *\n][^*\n]*)\*/g, "$1$2");
+  t = t.replace(/(^|[^A-Za-z0-9_])_([^_\n]+)_/g, "$1$2");
+  const lines = t.split("\n").map(function(ln){
+    let l = ln.replace(/^\s{0,3}#{1,6}\s+/, "");
+    l = l.replace(/^\s*[-*]\s+/, "• ");
+    if(/^\s*(\*\*\*|---|___)\s*$/.test(l)) return "";
+    return l.replace(/\s+$/, "");
+  });
+  t = lines.join("\n").replace(/\*/g, "").replace(/`/g, "");
+  t = t.replace(/\n{3,}/g, "\n\n");
+  return t.trim();
+}
+/* A short plain line inside a pasted block, followed by body text, is a
+   subheading the sanitizer stripped of its hashes (e.g. "## Data collection"
+   -> "Data collection"). Only applied inside student blocks, never to app
+   prose, so a short app sentence is never misclassified. */
+function dxIsSubhead(line, nextLine, inBlock){
+  if(!inBlock) return false;
+  if(!line || line.length > 70 || line.length < 2) return false;
+  if(/[.!?;:,]$/.test(line)) return false;
+  if(line.indexOf("• ") === 0) return false;
+  if(line.indexOf("QUOTE: ") === 0) return false;
+  if(!nextLine) return false;
+  return true;
 }
 
 /* ---- v43: docx footnotes / block quotes / native tables ---- */
 function dxParseFootnotes(refsVal){
   const lines = String(refsVal || "").split("\n");
   const heads = ["Works cited:", "حوالہ جات — اصل مآخذ:", "المراجع — المصادر الأصلية:"];
+  const studHeads = ["References provided by the student", "طالب علم کی فراہم کردہ حوالہ جات", "مراجع قدمها الطالب"];
   const collHeads = ["Collections and tools consulted", "مشاورتی مجموعے", "المجموعات المستشارة"];
-  let inWorks = false; const out = [];
+  let mode = ""; const out = [];
   lines.forEach(ln => {
     const t = ln.trim();
-    if(heads.indexOf(t) >= 0){ inWorks = true; return; }
-    if(collHeads.some(h => t.indexOf(h) === 0)){ inWorks = false; return; }
-    if(inWorks){
+    if(heads.indexOf(t) >= 0){ mode = "works"; return; }
+    if(studHeads.some(h => t.indexOf(h) === 0)){ mode = "student"; return; }
+    if(collHeads.some(h => t.indexOf(h) === 0)){ mode = ""; return; }
+    if(mode){
       const m = t.match(/^(\d+)\.\s+(.*)$/);
       if(m) out.push(m[2]);
     }
@@ -6220,20 +6277,58 @@ function dxTableXml(tbl){
     });
     return r + '</w:tr>';
   };
-  x += rowXml(headers, true);
-  rows.forEach(r => { x += rowXml(headers.map((h, i) => r[i] || ""), false); });
+  x += rowXml(headers.map(function(h){ return mdCleanText(h); }), true);
+  rows.forEach(r => { x += rowXml(headers.map((h, i) => mdCleanText(r[i] || "")), false); });
   return x + '</w:tbl>';
 }
 function buildWriteDocx(doc){
   const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
   DX_FONT = doc.lang === "ur" ? "Jameel Noori Nastaleeq" : "Times New Roman";
   DX_RTL = doc.lang === "ur";
-  const f = doc.fields || {};
-  const footnoteEntries = dxParseFootnotes(f.references || "");
+  const rawF = doc.fields || {};
+  const f = {};
+  Object.keys(rawF).forEach(k => { f[k] = mdCleanText(rawF[k] == null ? "" : String(rawF[k])); });
+  /* Footnote pre-pass (v45 fix): previously footnotes.xml existed but only
+     [N] markers inside the app's own LR pair text ever referenced it, so a
+     draft built from pasted notebook material showed NO footnotes on its
+     early pages. Now every citation found in a heading — app [N] markers
+     plus every reference parsed out of pasted material — becomes a real
+     footnote, and each such heading ends with a "Sources cited above"
+     line carrying those footnote markers. */
+  let footnoteEntries = dxParseFootnotes(f.references || "");
+  const entryKey = e => String(e || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const normUrl = u => String(u || "").toLowerCase().replace(/[.,;]+$/, "");
+  const urlIndex = new Map(); const titleIndex = new Map();
+  footnoteEntries.forEach((e, i) => {
+    const m = String(e).match(/https?:\/\/[^\s]+/);
+    if(m) urlIndex.set(normUrl(m[0]), i + 1);
+    const k = entryKey(e); if(k && !titleIndex.has(k)) titleIndex.set(k, i + 1);
+  });
+  const headingSources = {};
+  WRITE_KINDS[doc.kind].fields.forEach(fd => {
+    const key = fd[0];
+    if(key === 'title' || key === 'author' || key === 'affiliation' || key === 'references' || key === 'keywords') return;
+    const val = (f[key] || '').trim();
+    if(!val) return;
+    const nums = [];
+    compParsePastedRefs(val).forEach(r => {
+      let n = 0;
+      if(r.url) n = urlIndex.get(normUrl(r.url)) || 0;
+      if(!n && r.title) n = titleIndex.get(entryKey(r.title)) || 0;
+      if(!n){
+        footnoteEntries.push(r.title + (r.url ? " " + r.url : "") + " (Provided by the student — unverified)");
+        n = footnoteEntries.length;
+        if(r.url) urlIndex.set(normUrl(r.url), n);
+        if(r.title) titleIndex.set(entryKey(r.title), n);
+      }
+      if(nums.indexOf(n) < 0) nums.push(n);
+    });
+    if(nums.length) headingSources[key] = nums;
+  });
   const footnotesXml = dxFootnotesXml(footnoteEntries);
   let body = '';
   body += dxPara(dxRun(APP_NAME.toUpperCase(), { sz:20, color:'9A7B14' }), { jc:'center', after:60 });
-  body += dxPara(dxRun(f.title || 'Untitled', { b:1, sz:32, color:'0A2A4D' }), { jc:'center', line:300 });
+  body += dxPara(dxRun(f.title || 'Untitled', { b:1, sz:32, color:'0A2A4D' }), { jc:'center', line:300, style:'Title' });
   if((f.author || '').trim()) body += dxPara(dxRun(f.author, { sz:24 }), { jc:'center' });
   if((f.affiliation || '').trim()) body += dxPara(dxRun(f.affiliation, { sz:24 }), { jc:'center' });
   body += dxPara(dxRun(fmtDate(nowISO()), { sz:24, color:'5C6B78' }), { jc:'center' });
@@ -6245,13 +6340,22 @@ function buildWriteDocx(doc){
     const val = (f[key] || '').trim();
     if(!val) return;
     if(key === 'keywords'){ body += dxPara(dxRun('Keywords: ', { b:1, sz:24 }) + dxRun(val, { sz:24 }), { jc:'both' }); return; }
-    body += dxPara(dxRun(fd[1], { b:1, sz:28, color:'0A2A4D' }), { jc:'left', after:60 });
-    val.split('\n').map(s => s.trim()).filter(Boolean).forEach(line => {
+    body += dxPara(dxRun(fd[1], { b:1, sz:28, color:'0A2A4D' }), { jc:'left', after:60, style:'Heading1', ilvl:0 });
+    const lines = val.split('\n').map(s => s.trim()).filter(Boolean);
+    let inBlock = false;
+    lines.forEach((line, li) => {
+      if(line.indexOf('📥 Provided by the student from ') === 0){
+        inBlock = true;
+        body += dxPara(dxRun(line, { sz:24, i:1, color:'5C6B78' }), { jc:'both' });
+        return;
+      }
       if(line.indexOf('QUOTE: ') === 0) body += dxQuotePara(line.slice(7));
-      else if(DEEP_SECTION_TITLES[line]) body += dxPara(dxRun(line, { b:1, sz:24 }), { jc:'left', after:60 });
-      else if(key === 'references' || key === 'keywords') body += dxPara(dxRun(line, { sz:24 }), { jc:'both' });
+      else if(DEEP_SECTION_TITLES[line]) body += dxPara(dxRun(line, { b:1, sz:26, color:'0A2A4D' }), { jc:'left', after:60, style:'Heading2', ilvl:1 });
+      else if(dxIsSubhead(line, lines[li + 1], inBlock)) body += dxPara(dxRun(line, { b:1, sz:26, color:'0A2A4D' }), { jc:'left', after:60, style:'Heading2', ilvl:1 });
+      else if(key === 'references') body += dxPara(dxRun(line, { sz:24 }), { jc:'both' });
       else body += dxPara(dxLineRuns(line, footnoteEntries), { jc:'both' });
     });
+    if(headingSources[key]) body += dxPara(dxLineRuns('Sources cited in the student-provided material above: ' + headingSources[key].map(n => '[' + n + ']').join(' '), footnoteEntries), { jc:'both' });
     if(doc.tables && doc.tables[key]) body += dxTableXml(doc.tables[key]);
   });
   body += dxPara(dxRun('— Prepared with ' + APP_NAME + ' · ' + APP_BRAND, { sz:18, color:'5C6B78' }), { jc:'center' });
@@ -6264,8 +6368,17 @@ function buildWriteDocx(doc){
     + '<w:rFonts w:ascii="' + DX_FONT + '" w:hAnsi="' + DX_FONT + '" w:cs="' + DX_FONT + '" w:eastAsia="' + DX_FONT + '"/><w:sz w:val="24"/><w:szCs w:val="24"/>' + (DX_RTL ? '<w:rtl/>' : '')
     + '</w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:line="360" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'
     + '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>'
+    + '<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:line="300" w:lineRule="auto" w:after="120"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="' + DX_FONT + '" w:hAnsi="' + DX_FONT + '" w:cs="' + DX_FONT + '"/><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/><w:color w:val="0A2A4D"/></w:rPr></w:pPr></w:style>'
+    + '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:spacing w:line="360" w:lineRule="auto" w:before="240" w:after="120"/><w:jc w:val="left"/><w:rPr><w:rFonts w:ascii="' + DX_FONT + '" w:hAnsi="' + DX_FONT + '" w:cs="' + DX_FONT + '"/><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/><w:color w:val="0A2A4D"/></w:rPr></w:pPr></w:style>'
+    + '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:numPr><w:ilvl w:val="1"/><w:numId w:val="1"/></w:numPr><w:spacing w:line="360" w:lineRule="auto" w:before="200" w:after="100"/><w:jc w:val="left"/><w:rPr><w:rFonts w:ascii="' + DX_FONT + '" w:hAnsi="' + DX_FONT + '" w:cs="' + DX_FONT + '"/><w:b/><w:sz w:val="26"/><w:szCs w:val="26"/><w:color w:val="0A2A4D"/></w:rPr></w:pPr></w:style>'
     + '<w:style w:type="character" w:styleId="FootnoteReference"><w:name w:val="footnote reference"/><w:semiHidden/><w:unhideWhenUsed/><w:rPr><w:vertAlign w:val="superscript"/></w:rPr></w:style>'
-    + '<w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:style></w:styles>';
+    + '<w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:line="240" w:lineRule="auto" w:after="0"/></w:pPr><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:style></w:styles>';
+  const numberingXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+    + '<w:numbering xmlns:w="' + W + '"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="multilevel"/>'
+    + '<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl>'
+    + '<w:lvl w:ilvl="1"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1.%2."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="1440" w:hanging="360"/></w:pPr></w:lvl>'
+    + '<w:lvl w:ilvl="2"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1.%2.%3."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="2160" w:hanging="360"/></w:pPr></w:lvl>'
+    + '</w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>';
   const frp = '<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>';
   const footerXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
     + '<w:ftr xmlns:w="' + W + '" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
@@ -6282,6 +6395,7 @@ function buildWriteDocx(doc){
     + '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles.xml"/>'
     + '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>'
     + '<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>'
+    + '<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>'
     + '</Types>';
   const rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
     + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
@@ -6291,6 +6405,7 @@ function buildWriteDocx(doc){
     + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
     + '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>'
     + '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>'
+    + '<Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>'
     + '</Relationships>';
   return makeZipBlob([
     { name:'[Content_Types].xml', data:contentTypes },
@@ -6299,6 +6414,7 @@ function buildWriteDocx(doc){
     { name:'word/styles.xml', data:stylesXml },
     { name:'word/footer1.xml', data:footerXml },
     { name:'word/footnotes.xml', data:footnotesXml },
+    { name:'word/numbering.xml', data:numberingXml },
     { name:'word/_rels/document.xml.rels', data:docRels }
   ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }

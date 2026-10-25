@@ -4145,7 +4145,7 @@ function compToolkit(deptId, toks, cap){
     ["data", "tools", "publish"].forEach(sec => {
       (d[sec] || []).forEach(it => {
         const sc = compScoreEntry(it[0] + " " + it[1], toks);
-        if(sc > 0) out.push({ name: deptId ? it[0] : it[0] + " (" + d.name + ")", desc: it[1], url: it[2], sc: sc });
+        if(sc > 0) out.push({ name: deptId ? it[0] : it[0] + " (" + d.name + ")", desc: it[1], url: it[2], sc: sc, sec: sec });
       });
     });
   });
@@ -4160,7 +4160,7 @@ function compJournals(deptName, toks, cap){
     ["international", "pakistani"].forEach(sec => {
       (j[sec] || []).forEach(it => {
         const sc = compScoreEntry(it.name + " " + (it.note || "") + " " + (it.publisher || ""), toks);
-        if(sc > 0) out.push({ name: deptName ? it.name : it.name + " (" + dn + ")", desc: (it.note || "") + (it.free === true ? " — Free / open access." : ""), url: it.url, sc: sc });
+        if(sc > 0) out.push({ name: deptName ? it.name : it.name + " (" + dn + ")", desc: (it.note || "") + (it.free === true ? " — Free / open access." : ""), url: it.url, sc: sc, publisher: it.publisher || "" });
       });
     });
   });
@@ -4223,7 +4223,7 @@ function compDraftFor(kind){
   if(!COMP_DRAFTS[kind]){
     const heads = {};
     draftFields(kind).forEach(f => { heads[f[0]] = { text:"", status:"empty" }; });
-    COMP_DRAFTS[kind] = { kind:kind, topic:"", heads:heads };
+    COMP_DRAFTS[kind] = { kind:kind, topic:"", heads:heads, trail:[], userSources:[], tables:{}, lr:null, lrDone:false };
   }
   return COMP_DRAFTS[kind];
 }
@@ -4258,6 +4258,313 @@ function compLinkLines(ctx){
     lines.push(it.name + " — " + it.url);
   }));
   return lines;
+}
+
+/* ---- v43: deep academic engine — per-heading deep prompt bank ----
+   Every heading (synopsis + thesis + article shapes) has a saved prompt:
+   what academic writing under that heading MUST contain, how deep the
+   discussion must go, its structure, its share of the word budget, its
+   source requirements and its quotation requirements. The wizard builds
+   from the heading's saved prompt, never from a generic template.
+   Shares are percentages of the prose word budget and sum to 100 per kind
+   (title/keywords carry no prose budget). */
+const DEEP_PROMPTS = {
+  synopsis: {
+    title: { share: 0, structure: ["A precise, researchable title"], must: ["Names the group, the place and the period studied; no vague nouns; one study, not a field"], sources: "none", quotes: false },
+    introduction: { share: 20, structure: ["Context and importance", "Problem statement", "Research gap", "Purpose and significance", "Scope and delimitations"], must: ["Opens with why the topic matters in its field", "States one precise problem, who it affects, and what vagueness costs", "Names the exact gap: setting, group and period not yet examined together", "States purpose and twofold contribution (scholarship + practice)", "Delimits setting, group and period as strengths"], sources: "toolkit", quotes: false },
+    questions: { share: 8, structure: ["Three narrow questions", "Criteria paragraph"], must: ["Each question names one setting, one group, one kind of answer", "Ordered describe -> explain -> consequences", "No question answerable by a yes/no alone"], sources: "none", quotes: false },
+    objectives: { share: 8, structure: ["Three objectives mirroring the questions", "How achievement will be judged"], must: ["Objective N answers Question N, same order", "Each objective stated so its achievement can be judged"], sources: "none", quotes: false },
+    literature: { share: 30, structure: ["Pair reviews", "Gap per pair", "Synthesis"], must: ["Sources reviewed TWO at a time, never one-go", "Each pair ends with its own gap", "Quotations in block-quote form where available", "Only real sources; containers are not cited as works"], sources: "journals+toolkit+islamic", quotes: true },
+    methodology: { share: 20, structure: ["Design and rationale", "Data sources", "Procedure", "Analysis", "Ethics and limitations"], must: ["Design justified from the questions, not asserted", "Data sources named with one line of relevance each", "Analysis organised around the questions", "Limits stated plainly"], sources: "toolkit", quotes: false },
+    outline: { share: 8, structure: ["Section plan with a purpose per section"], must: ["Every section states what it answers and what it prepares", "Order follows the logic of the inquiry"], sources: "none", quotes: false },
+    references: { share: 6, structure: ["Works cited (numbered)", "Collections consulted (not works)"], must: ["Works cited are original titles with publisher and link", "Containers (NotebookLM, Shamila, databases) are NEVER cited as works", "Incomplete metadata marked [verify details: author/year]; nothing invented"], sources: "journals+user", quotes: false }
+  },
+  thesis: {
+    title: { share: 0, structure: ["A precise, researchable title"], must: ["Names the group, the place and the period studied; no vague nouns"], sources: "none", quotes: false },
+    abstract: { share: 5, structure: ["Purpose", "Questions", "Method", "Expected contribution"], must: ["Stands alone: a stranger grasps the whole study", "No claims the body does not support"], sources: "none", quotes: false },
+    keywords: { share: 0, structure: ["Keyword list"], must: ["Terms a database search would actually use"], sources: "none", quotes: false },
+    introduction: { share: 15, structure: ["Context and importance", "Problem statement", "Research gap", "Purpose and significance", "Scope and delimitations"], must: ["Opens with why the topic matters in its field", "States one precise problem, who it affects, and what vagueness costs", "Names the exact gap: setting, group and period not yet examined together", "States purpose and twofold contribution (scholarship + practice)", "Delimits setting, group and period as strengths"], sources: "toolkit", quotes: false },
+    literature: { share: 25, structure: ["Pair reviews", "Gap per pair", "Synthesis"], must: ["Sources reviewed TWO at a time, never one-go", "Each pair ends with its own gap", "Quotations in block-quote form where available", "Only real sources; containers are not cited as works"], sources: "journals+toolkit+islamic", quotes: true },
+    methodology: { share: 20, structure: ["Design and rationale", "Data sources", "Procedure", "Analysis", "Ethics and limitations"], must: ["Design justified from the questions, not asserted", "Data sources named with one line of relevance each", "Analysis organised around the questions", "Limits stated plainly"], sources: "toolkit", quotes: false },
+    outline: { share: 10, structure: ["Chapter-by-chapter plan"], must: ["Every chapter states its focus, the questions it answers, and its sources", "Chapters build on each other in order; no chapter repeats another"], sources: "none", quotes: false },
+    discussion: { share: 15, structure: ["Answers in order", "Comparison with the literature", "Limits", "Implications"], must: ["Answers each question from the findings, in order", "Compares with the literature: agreements AND disagreements", "States limits so no claim exceeds the evidence"], sources: "none", quotes: false },
+    conclusion: { share: 5, structure: ["Summary", "Contribution", "Recommendations", "Further research"], must: ["Repeats no new evidence", "Recommendations follow from findings, not wishes"], sources: "none", quotes: false },
+    references: { share: 5, structure: ["Works cited (numbered)", "Collections consulted (not works)"], must: ["Works cited are original titles with publisher and link", "Containers (NotebookLM, Shamila, databases) are NEVER cited as works", "Incomplete metadata marked [verify details: author/year]; nothing invented"], sources: "journals+user", quotes: false }
+  },
+  article: {
+    title: { share: 0, structure: ["A precise, researchable title"], must: ["Names the group, the place and the period studied; no vague nouns"], sources: "none", quotes: false },
+    abstract: { share: 5, structure: ["Purpose", "Questions", "Method", "Expected contribution"], must: ["Stands alone: a stranger grasps the whole study", "No claims the body does not support"], sources: "none", quotes: false },
+    keywords: { share: 0, structure: ["Keyword list"], must: ["Terms a database search would actually use"], sources: "none", quotes: false },
+    introduction: { share: 15, structure: ["Context and importance", "Problem statement", "Research gap", "Purpose and significance", "Scope and delimitations"], must: ["Opens with why the topic matters in its field", "States one precise problem, who it affects, and what vagueness costs", "Names the exact gap: setting, group and period not yet examined together", "States purpose and twofold contribution (scholarship + practice)", "Delimits setting, group and period as strengths"], sources: "toolkit", quotes: false },
+    literature: { share: 25, structure: ["Pair reviews", "Gap per pair", "Synthesis"], must: ["Sources reviewed TWO at a time, never one-go", "Each pair ends with its own gap", "Quotations in block-quote form where available", "Only real sources; containers are not cited as works"], sources: "journals+toolkit+islamic", quotes: true },
+    methodology: { share: 20, structure: ["Design and rationale", "Data sources", "Procedure", "Analysis", "Ethics and limitations"], must: ["Design justified from the questions, not asserted", "Data sources named with one line of relevance each", "Analysis organised around the questions", "Limits stated plainly"], sources: "toolkit", quotes: false },
+    discussion: { share: 20, structure: ["Answers in order", "Comparison with the literature", "Limits", "Implications"], must: ["Answers each question from the findings, in order", "Compares with the literature: agreements AND disagreements", "States limits so no claim exceeds the evidence"], sources: "none", quotes: false },
+    conclusion: { share: 10, structure: ["Summary", "Contribution", "Recommendations", "Further research"], must: ["Repeats no new evidence", "Recommendations follow from findings, not wishes"], sources: "none", quotes: false },
+    references: { share: 5, structure: ["Works cited (numbered)", "Collections consulted (not works)"], must: ["Works cited are original titles with publisher and link", "Containers (NotebookLM, Shamila, databases) are NEVER cited as works", "Incomplete metadata marked [verify details: author/year]; nothing invented"], sources: "journals+user", quotes: false }
+  }
+};
+const DEEP_SECTION_TITLES = (() => {
+  const set = {};
+  Object.keys(DEEP_PROMPTS).forEach(k => Object.keys(DEEP_PROMPTS[k]).forEach(h => (DEEP_PROMPTS[k][h].structure || []).forEach(t => { set[t] = true; })));
+  return set;
+})();
+function deepBank(kind, heading){
+  return (DEEP_PROMPTS[kind] && DEEP_PROMPTS[kind][heading]) || null;
+}
+function deepPromptLine(kind, heading){
+  const b = deepBank(kind, heading);
+  if(!b) return "";
+  return "Deep prompt — " + b.structure.join(" · ") + ". " + b.must.join(" ");
+}
+function countWords(text){
+  if(!text) return 0;
+  return String(text).split(/\s+/).filter(w => /[A-Za-z0-9\u0600-\u06FF\u0750-\u077F]/.test(w)).length;
+}
+function deepBudgets(kind, target){
+  const bank = DEEP_PROMPTS[kind] || {};
+  const out = {};
+  Object.keys(bank).forEach(h => { out[h] = target ? Math.round((bank[h].share || 0) * target / 100) : null; });
+  return out;
+}
+function deepDraftCounts(d, kind){
+  const per = {}; let total = 0;
+  draftFields(kind).forEach(f => {
+    const w = countWords((d.heads[f[0]] && d.heads[f[0]].text) || "");
+    per[f[0]] = w; total += w;
+  });
+  return { total: total, per: per };
+}
+function deepMeterText(d, kind, currentKey){
+  const target = d.words || null;
+  const c = deepDraftCounts(d, kind);
+  const budgets = deepBudgets(kind, target);
+  let s = "Words: " + c.total + (target ? " / " + target + " target (" + Math.round(c.total / target * 100) + "%)" : " (no target set)");
+  if(currentKey && budgets[currentKey] != null) s += " · This heading: " + (c.per[currentKey] || 0) + " / " + budgets[currentKey] + " budget";
+  return s;
+}
+/* Containers are access routes, never cited works. */
+const DEEP_CONTAINERS = ["Al-Turath NotebookLM Hub", "Maktaba Shamila", "Sunnah.com", "Quranic Arabic Corpus", "Brill — Index Islamicus", "NotebookLM"];
+function deepIsContainer(it){
+  if(!it) return false;
+  if(DEEP_CONTAINERS.indexOf(it.name) >= 0) return true;
+  if(it.url === "https://shamela.ws") return true;
+  try{ if(typeof ALTURATH_HUB_URL !== "undefined" && it.url === ALTURATH_HUB_URL) return true; }catch(e){}
+  return false;
+}
+function deepCiteLists(ctx, userSources){
+  const works = [], consulted = [], seen = {};
+  (ctx.jn || []).forEach(it => {
+    if(it.url && !seen[it.url]){ seen[it.url] = true; works.push({ name: it.name, desc: it.desc || "", publisher: it.publisher || "", url: it.url, from: "journal" }); }
+  });
+  (userSources || []).forEach(us => {
+    if(us.url && !seen[us.url]){ seen[us.url] = true; works.push({ name: us.title, desc: "", publisher: "", url: us.url, author: us.author || "", year: us.year || "", from: "user" }); }
+  });
+  (ctx.tk || []).forEach(it => {
+    if(it.url && !seen[it.url] && it.sec === "data"){ seen[it.url] = true; consulted.push({ name: it.name, desc: it.desc || "", url: it.url }); }
+  });
+  (ctx.isl || []).forEach(it => {
+    if(it.url && !seen[it.url]){ seen[it.url] = true; consulted.push({ name: it.name, desc: it.desc || "", url: it.url }); }
+  });
+  works.sort((x, y) => x.name.toLowerCase() < y.name.toLowerCase() ? -1 : (x.name.toLowerCase() > y.name.toLowerCase() ? 1 : 0));
+  return { works: works, consulted: consulted };
+}
+function deepWorkEntry(w, i){
+  let s = i + ". " + w.name + ".";
+  if(w.desc) s += " " + w.desc;
+  if(w.publisher) s += " " + w.publisher + ".";
+  s += " " + w.url;
+  if(!(w.author && w.year)) s += " [verify details: author/year]";
+  return s;
+}
+function deepBuildReferences(ctx, userSources, style, lang){
+  const lists = deepCiteLists(ctx, userSources);
+  const headW = lang === "ur" ? "حوالہ جات — اصل مآخذ:" : (lang === "ar" ? "المراجع — المصادر الأصلية:" : "Works cited:");
+  const headC = lang === "ur" ? "مشاورتی مجموعے (حوالہ نہیں — اصل کتاب یا مقالے کا حوالہ دیں):" : (lang === "ar" ? "المجموعات المستشارة (ليست أعمالاً مستشهداً بها):" : "Collections and tools consulted (not cited works — cite the book or article itself):");
+  const noneW = lang === "ur" ? "ایپ میں اس موضوع کے لیے کوئی اصل مآخذ نہیں ملا — اصل کتاب یا مقالہ 'Add a source yourself' سے شامل کریں، کچھ گھڑا نہیں گیا۔" : (lang === "ar" ? "لم يُعثر على مصدر أصلي في التطبيق لهذا الموضوع — أضف الكتاب أو المقالة نفسها عبر 'Add a source yourself'، ولم يُخترع شيء." : "No work-level source found in the app for this topic — add the book or article itself with 'Add a source yourself'; nothing has been invented.");
+  const lines = [headW];
+  if(lists.works.length) lists.works.forEach((w, i) => lines.push(deepWorkEntry(w, i + 1)));
+  else lines.push(noneW);
+  if(lists.consulted.length){
+    lines.push(headC);
+    lists.consulted.forEach(c => lines.push("- " + c.name + " — " + c.url));
+  }
+  return { text: lines.join("\n"), lists: lists };
+}
+function deepPairLabel(p){
+  return p.kind === "work" ? ("[" + p.idx + "] " + p.name) : p.name;
+}
+function deepPairReviewEN(pair, T){
+  const names = pair.map(deepPairLabel).join(" and ");
+  const offers = pair.map(p => deepPairLabel(p) + " — " + (p.desc || "a source on this theme")).join(" ");
+  return "Pair — " + names + ". " + offers + " Read together for " + T + ", these sources give the study its footing: they show what is already established, which approaches have been tried, and where agreement ends. Their value for the present study lies less in any single finding than in the shape of the discussion they reveal — the questions that recur, the evidence that is treated as settled, and the points on which serious work still disagrees.";
+}
+function deepPairGapEN(pair, T){
+  return "Gap: what these sources do not do is examine " + T + " in the present study's setting, among its chosen group, and over its chosen period — nor do they connect their findings to the practical recommendations this study will propose. That unexamined connection is where the present study positions itself, and the next pair is read against it.";
+}
+function deepPairReviewUR(pair, T){
+  const names = pair.map(deepPairLabel).join(" اور ");
+  return "جوڑا — " + names + "۔ یہ دونوں ذرائع " + T + " کے بارے میں موجود بحث کی شکل دکھاتے ہیں: کیا طے شدہ ہے، کون سے طریقے آزمائے گئے، اور کہاں اختلاف باقی ہے۔ ان کی قیمت کسی ایک نتیجے میں نہیں بلکہ اس نقشے میں ہے جو یہ کھینچتے ہیں۔";
+}
+function deepPairGapUR(pair, T){
+  return "خلا: یہ ذرائع " + T + " کو اس مطالعے کی جگہ، اس کے منتخب گروہ اور اس کی مدت میں نہیں جانچتے، اور نہ اپنے نتائج کو اس مطالعے کی عملی سفارشات سے جوڑتے ہیں۔ یہی وہ خلا ہے جہاں یہ مطالعہ اپنی جگہ بناتا ہے۔";
+}
+function deepPairReviewAR(pair, T){
+  const names = pair.map(deepPairLabel).join(" و ");
+  return "الثنائي — " + names + ". يُظهر هذان المصدران معاً ملامح النقاش حول " + T + ": ما هو المقرر، وما هي المناهج المجرّبة، وأين يبقى الخلاف. قيمتهما للدراسة الحالية ليست في نتيجة واحدة، بل في خريطة النقاش التي يرسمانها.";
+}
+function deepPairGapAR(pair, T){
+  return "الفجوة: لا يفحص هذان المصدران " + T + " في سياق هذه الدراسة ولا لدى مجموعتها المختارة ولا خلال مدتّها، ولا يربطان نتائجهما بالتوصيات العملية التي ستقترحها الدراسة. هذه الفجوة هي موضع هذه الدراسة.";
+}
+function deepPairReview(pair, T, lang){
+  if(lang === "ur") return { review: deepPairReviewUR(pair, T), gap: deepPairGapUR(pair, T) };
+  if(lang === "ar") return { review: deepPairReviewAR(pair, T), gap: deepPairGapAR(pair, T) };
+  return { review: deepPairReviewEN(pair, T), gap: deepPairGapEN(pair, T) };
+}
+function deepPairPool(ctx, userSources){
+  const lists = deepCiteLists(ctx, userSources);
+  const pool = [];
+  lists.works.forEach((w, i) => pool.push({ kind: "work", idx: i + 1, name: w.name, desc: w.desc, url: w.url }));
+  lists.consulted.forEach(c => pool.push({ kind: "consulted", idx: null, name: c.name, desc: c.desc, url: c.url }));
+  return pool;
+}
+function deepChunkPairs(pool){
+  const pairs = [];
+  for(let i = 0; i < pool.length; i += 2) pairs.push(pool.slice(i, i + 2));
+  return pairs;
+}
+
+
+/* Deepening paragraphs: appended by compDeepDraft until a heading reaches
+   its word budget (or the pool runs out). Never repeated within a draft. */
+const DEEP_DEEPEN = {
+  introduction: { en: [
+    "Two terms need fixing before the argument can proceed. The study uses its key terms in fixed senses throughout: wherever it claims something about the topic, it says what was observed, where, and among whom. This discipline about terms is what allows the findings to be checked by another researcher.",
+    "The timing of this study matters. The topic has become more prominent in recent discussion, yet the evidence base has not kept pace with the attention. A study conducted now can therefore do work that a study conducted ten years ago could not: it can test claims that have hardened into assumptions, and it can speak to decisions that are being made at present.",
+    "The remainder of this proposal follows the logic of the inquiry itself. It states the questions the study will answer, the objectives that will show whether they have been answered, the literature against which the study positions itself, the method by which evidence will be gathered and judged, and the shape of the chapters that will report the work.",
+    "Every substantive claim in this proposal is tied to a source the reader can open and check. Where the proposal states what is known, it says where that knowledge comes from; where it states what is not known, it says so plainly. This habit — cite what you use, admit what you lack — is the proposal's main protection against the vagueness it criticises."
+  ], ur: [
+    "اس مطالعے کی ایک اور اہمیت یہ ہے کہ یہ موضوع کو صرف نظری سطح پر نہیں بلکہ عملی میدان میں جانچتا ہے۔ جب کوئی تحقیق اپنے دعووں کو قابلِ مشاہدہ شواہد سے جوڑتی ہے تو اس کے نتائج پر بھروسہ کیا جا سکتا ہے، اور یہی بھروسہ اسے آئندہ تحقیق کی بنیاد بناتا ہے۔"
+  ], ar: [
+    "وتكمن أهمية أخرى لهذه الدراسة في أنها لا تكتفي بمناقشة الموضوع على المستوى النظري، بل تختبره في الميدان العملي. فحين تُربط الدعاوى بأدلة قابلة للملاحظة، تصبح النتائج جديرة بالثقة وأساساً لبحوث لاحقة."
+  ] },
+  methodology: { en: [
+    "The sample is chosen for what it can teach, not for its size alone. A small, well-chosen sample that matches the research questions teaches more than a large, careless one; the study therefore states who or what is included, who or what is excluded, and why each exclusion is justified.",
+    "Every instrument — whether a questionnaire, an interview guide, or a set of categories for reading texts — is described plainly enough for another researcher to reuse it. Where an instrument is borrowed, its source is cited; where it is made for this study, its construction is explained and its pilot test reported.",
+    "Validity is built into the study rather than claimed at the end. Findings are checked against more than one kind of evidence where possible, counter-evidence is reported rather than hidden, and the researcher states plainly where personal expectation might have shaped interpretation."
+  ], ur: [
+    "طریقہ تحقیق کی شفافیت اس مطالعے کی جان ہے۔ اگر کوئی دوسرا محقق انہی ذرائع اور اسی طریقے سے یہ کام دہرائے تو اسے انہی نتائج تک پہنچنا چاہیے؛ یہی دہرائے جانے کی صلاحیت ایک دعوے کو علمی ثبوت بناتی ہے۔"
+  ], ar: [
+    "إن شفافية المنهج روح هذه الدراسة. فإذا أعاد باحث آخر العمل بالمصادر والمنهج نفسه، وجب أن يصل إلى النتائج نفسها؛ وهذه القابلية للإعادة هي ما يجعل الدعوى دليلاً علمياً."
+  ] },
+  discussion: { en: [
+    "Comparison is the heart of discussion. A finding that agrees with earlier work strengthens it; a finding that disagrees does not weaken the study — it refines the field's understanding, provided the disagreement is explained rather than ignored.",
+    "The study's limits are reported as findings in their own right. A limit that is named can be addressed by later work; a limit that is hidden misleads every reader who builds on the study.",
+    "Implications are drawn in two directions: for scholarship, what must now be rethought; and for practice, what should now be done differently. Both are stated as consequences of the findings, not as the researcher's general opinions."
+  ], ur: [
+    "بحث کا کام نتائج کو سجانا نہیں بلکہ ان کا امتحان ہے۔ ہر نتیجے کو پہلے سوال، پھر ادب، پھر حدود کی کسوٹی پر پرکھا جاتا ہے، تاکہ جو کہا جائے وہ ثبوت سے بڑھ کر نہ ہو۔"
+  ], ar: [
+    "إن وظيفة المناقشة ليست تزيين النتائج بل اختبارها. يُعرض كل نتيجة على السؤال، ثم على الأدبيات، ثم على الحدود، حتى لا يتجاوز القول حدود الدليل."
+  ] },
+  conclusion: { en: [
+    "The recommendations that follow from this study are deliberately modest. They do not promise what the evidence cannot support; they name the smallest changes that the findings justify, and they say who should make them. Modest recommendations that are actually adopted are worth more than ambitious ones that are not.",
+    "Further research should begin where this study stops: in a different setting, with a different group, or over a longer period. Each of those directions tests whether the present findings travel, and each would strengthen — or correct — the account offered here."
+  ], ur: [], ar: [] },
+  literature: { en: [], ur: [
+    "ادب کا جائزہ محض پرانی تحریروں کی فہرست نہیں ہے بلکہ ایک تنقیدی مکالمہ ہے: ہر ماخذ سے یہ پوچھا جاتا ہے کہ اس نے کیا ثابت کیا، کس طریقے سے ثابت کیا، اور کیا چھوڑ دیا۔ اسی سوال و جواب سے وہ خلا نکلتا ہے جس پر یہ مطالعہ کھڑا ہے۔"
+  ], ar: [
+    "إن مراجعة الأدبيات ليست قائمة بالدراسات السابقة، بل حوار نقدي: يُسأل كل مصدر عما أثبته، وبأي منهج، وما تركه. ومن هذا السؤال والجواب تظهر الفجوة التي تقوم عليها هذه الدراسة."
+  ] }
+};
+function deepSec(title, body){ return title + "\n" + body; }
+function compDeepTextEN(heading, ctx){
+  const T = ctx.topic;
+  const D = ctx.deptName || "its field";
+  const styleNote = "Format what you actually use in " + ctx.style + " style (Zotero does this). Only entries you have actually read belong here.";
+  switch(heading){
+    case "title": return T;
+    case "introduction":
+      return deepSec("Context and importance", "The study of " + T + " occupies an important place in " + D + ". In recent years, scholars and practitioners alike have paid increasing attention to " + T + ", because the way it is understood shapes decisions that affect real people and institutions. A clear account of " + T + " therefore matters not only as an academic exercise but as a basis for better practice: when the concept is vague, policies built on it are vague as well, and when it is precise, interventions can be designed, tested, and improved.")
+        + "\n\n" + deepSec("Problem statement", "The problem this study addresses is precise. Although " + T + " is widely discussed, that discussion remains general: it describes " + T + " in broad terms but does not show how it operates in a particular setting, among a particular group, and under particular conditions. Practitioners are left without guidance they can act on, and scholars are left without findings they can build on. The cost of this vagueness is real — effort is spent on programmes whose effects cannot be traced, and debates repeat because no study has settled the basic empirical questions.")
+        + "\n\n" + deepSec("Research gap", "Despite its importance, " + T + " has not yet been examined in a systematic way. Much of the existing discussion treats it in general terms, leaving open the more precise questions of how it operates in a particular setting, what factors shape it, and what should follow from a clearer understanding of it. Where studies do exist, they tend to describe " + T + " from a single angle, or in a single place, so that their findings do not travel. No study, to the present writer's knowledge, brings together the setting, the group, and the factors that shape " + T + " in one organised inquiry — and that is the gap this study fills.")
+        + "\n\n" + deepSec("Purpose and significance", "The present study addresses this gap by examining " + T + " in a defined setting, analysing the factors that shape it, and drawing out the practical implications of the findings. Rather than rehearsing general claims, it builds its argument from identifiable sources and a clearly stated method. Its contribution is twofold: it aims to contribute both to scholarship and to practice — to scholarship, a clearer and better-organised account of " + T + "; and to practice, recommendations that follow directly from the evidence gathered, stated plainly enough to be acted on.")
+        + "\n\n" + deepSec("Scope and delimitations", "The study is delimited in three ways, and the delimitations are strengths, not apologies. First, by setting: it examines " + T + " in one defined setting rather than everywhere at once, so that its findings are concrete. Second, by group: it studies one chosen group in depth rather than surveying many superficially. Third, by period: it covers a defined period, so that change over time can be observed rather than assumed. What lies outside these limits is noted as a direction for further research, not silently ignored.");
+    case "questions":
+      return "1. How is " + T + " understood and practised in the chosen setting, and what does that understanding reveal?\n2. What factors most strongly shape " + T + " among the chosen group?\n3. What changes in practice or policy follow from a clearer understanding of " + T + "?\n\nThese questions are deliberately narrow. Each names one setting, one group, and one kind of answer, so that the study can answer it rather than merely discuss it. They are also ordered: the first describes, the second explains, and the third draws consequences — so that the study moves from what is the case, to why it is the case, to what should follow.\n\nEach question is answered in its own place in the study: the first in the descriptive account, the second in the analysis of factors, and the third in the recommendations. A question that cannot be located in the study's structure is not yet a research question but a topic, and the study rewrites any question that fails this test.";
+    case "objectives":
+      return "1. Objective 1 (answers Question 1): To examine " + T + " in the chosen setting and to describe how it is understood and practised there.\n2. Objective 2 (answers Question 2): To analyse the factors that most strongly shape " + T + " among the chosen group.\n3. Objective 3 (answers Question 3): To propose practical recommendations, grounded in the findings, for practice and policy concerning " + T + ".\n\nEach objective answers one research question, in the same order, and each is stated so that its achievement can be judged: the reader will be able to tell, at the end of the study, whether the description was produced, whether the factors were analysed, and whether the recommendations were grounded in the findings.\n\nThe objectives also fix the study's standard of success. If the description is produced but the factors are not analysed, the study has succeeded only in part; if recommendations are offered without findings behind them, they are opinions, not results. The reader is entitled to hold the study to exactly these three standards and no others.";
+    case "literature": {
+      const pool = deepPairPool(ctx, ctx.userSources || []);
+      if(!pool.length) return "No matching source was found in the app for this question — and no reference has been invented for it. Try broader words (for example the department name plus the theme), or start from the Research hub Toolkit.";
+      const pairs = deepChunkPairs(pool);
+      return deepLiteratureText(T, pairs, "en", null) + "\n\n" + styleNote;
+    }
+    case "methodology": {
+      const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
+      return deepSec("Design and rationale", "The design of this study follows directly from its research questions. Questions that ask how something is understood and practised call for a qualitative design; questions that ask how widespread a pattern is call for a quantitative design; and where both kinds of question are asked, a mixed-methods design is appropriate. The researcher should state the chosen design and the reason for choosing it in one paragraph, and should return to that reason whenever a later choice — of sample, of instrument, of analysis — needs justifying.")
+        + "\n\n" + deepSec("Data sources", (data ? ("The study will draw on the following sources, each of which can be opened and checked:\n" + data + "\nPrimary and secondary sources should be listed separately, with each source named and its relevance to the study stated in one line.") : "Primary and secondary sources should be listed separately, with each source named and its relevance to the study stated in one line."))
+        + "\n\n" + deepSec("Procedure", "Data will be gathered in a sequence that protects the study from its own assumptions. First, the sources named above will be collected and catalogued. Second, they will be read against the research questions, not in the abstract: every note taken will record which question it bears on. Third, the material will be organised so that counter-evidence is visible — findings that disagree with the study's expectations will be reported, not filed away.")
+        + "\n\n" + deepSec("Analysis", "The analysis will be organised around the research questions: each finding will be reported against the question it answers, compared with the literature reviewed, and its limits stated plainly. Analysis is not decoration added after the findings; it is the disciplined comparison of what was found with what was expected and with what others have found.")
+        + "\n\n" + deepSec("Ethics and limitations", "Where human participants are involved, consent, confidentiality, and the right to withdraw are observed, and the relevant institutional approval is obtained before data are gathered. Where the study uses texts rather than participants, the same discipline applies in another form: quotations are exact, attributions are complete, and no source is paraphrased into saying what it does not say. The study's limits — of setting, of group, of period, of method — are stated in the conclusion, so that no claim is made beyond what the evidence supports.");
+    }
+    case "outline": {
+      if(ctx.kind === "thesis"){
+        return "The thesis is organised in five chapters, each answering the question before it and preparing the one after it.\n\nChapter 1 — Introduction: states the problem of " + T + ", the research questions, and the significance of the study. It answers: why does this study need to exist, and what will count as an answer?\n\nChapter 2 — Literature Review: reviews the relevant sources two at a time, each pair ending with its gap, and synthesises them into the study's warrant. It answers: what is known, what is contested, and what remains unexamined?\n\nChapter 3 — Methodology: justifies the research design from the questions, names the data sources, and states how the analysis will be organised and how its limits will be handled. It answers: how will the evidence be gathered and judged?\n\nChapter 4 — Analysis and Discussion: reports the findings against the questions in order, compares them with the literature, states the limits plainly, and draws implications for scholarship and practice. It answers: what was found, and what does it change?\n\nChapter 5 — Conclusion: summarises the contribution, states the recommendations that follow from the findings, and notes the questions left for further research. It answers: what now follows, and what remains to be done?";
+      }
+      return "The study is organised as follows, so that each section answers the question before it and prepares the one after it:\n" + ctx.shape.split(" → ").join("\n") + "\n\nEach section states what it answers: the Introduction states the problem, the Questions fix what will be answered, the Objectives state how success will be judged, the Literature Review positions the study, the Methodology states how evidence will be gathered and judged, and the Outline itself shows the order in which the argument will unfold.\n\nThe order of these sections follows the logic of the inquiry itself: the problem is stated before the questions that will answer it; the questions come before the objectives that will show whether they have been answered; the literature is reviewed before the method is chosen, so that the method responds to what is already known; and the outline itself comes last among the proposal's parts because it can only be written once the argument's shape is clear.";
+    }
+    case "discussion":
+      return deepSec("Answers in order", "This section returns to the research questions and answers each one from the findings, in order. First, it states what the findings say about " + T + ". Each answer is given in the same order as the questions were asked, so that the reader can trace every claim back to the question it answers and to the evidence behind it.")
+        + "\n\n" + deepSec("Comparison with the literature", "Second, the findings are compared with the literature reviewed, noting where they agree and where they differ. Agreement strengthens both the study and the earlier work; disagreement is reported as carefully as agreement, because a disagreement that is explained refines the field's understanding, while one that is ignored misleads it.")
+        + "\n\n" + deepSec("Limits", "Third, the limits of the study are stated plainly: of setting, of group, of period, and of method. No claim is made beyond what the evidence supports, and every limit is named as a direction for later work rather than hidden.")
+        + "\n\n" + deepSec("Implications", "Finally, the implications are drawn in two directions: for scholarship, what must now be rethought; and for practice, what should now be done differently. Both are stated as consequences of the findings, not as the researcher's general opinions.");
+    case "conclusion":
+      return "This study set out to examine " + T + " in a defined setting, to analyse the factors that shape it, and to draw out practical recommendations. Its contribution is a clearer, better-organised account of " + T + ", grounded in identifiable sources and a stated method. It closes by recommending the practical steps that follow from its findings, and by noting the questions that remain for further research.";
+    case "abstract":
+      return "This study examines " + T + " in a defined setting. It is motivated by the observation that, despite the importance of " + T + ", its operation in practice remains insufficiently examined. Drawing on the literature reviewed in this proposal, the study investigates how " + T + " is understood and practised, what factors shape it, and what practical consequences follow from a clearer understanding of it. Its contribution lies in offering a better-organised account of " + T + " together with recommendations grounded in the evidence gathered.";
+    case "references": {
+      const rb = deepBuildReferences(ctx, ctx.userSources || [], ctx.style, "en");
+      return rb.text;
+    }
+    case "keywords": {
+      const toks = compTokens(T).slice(0, 6);
+      return toks.length ? toks.join(", ") : T;
+    }
+    default: return "";
+  }
+}
+function compDeepTextUR(heading, ctx){
+  let base = "";
+  try{ base = compDraftTextUR(heading, ctx); }catch(e){ base = ""; }
+  const pool = (DEEP_DEEPEN[heading] || {}).ur || [];
+  if(pool.length && ["introduction", "literature", "methodology", "discussion"].indexOf(heading) >= 0) base += "\n\n" + pool[0];
+  return base;
+}
+function compDeepTextAR(heading, ctx){
+  let base = "";
+  try{ base = compDraftTextAR(heading, ctx); }catch(e){ base = ""; }
+  const pool = (DEEP_DEEPEN[heading] || {}).ar || [];
+  if(pool.length && ["introduction", "literature", "methodology", "discussion"].indexOf(heading) >= 0) base += "\n\n" + pool[0];
+  return base;
+}
+function compDeepDraft(heading, ctx){
+  let text = "";
+  if(ctx.lang === "ur") text = compDeepTextUR(heading, ctx);
+  else if(ctx.lang === "ar") text = compDeepTextAR(heading, ctx);
+  else text = compDeepTextEN(heading, ctx);
+  const langKey = ctx.lang === "ur" ? "ur" : (ctx.lang === "ar" ? "ar" : "en");
+  const pool = (DEEP_DEEPEN[heading] || {})[langKey] || [];
+  if(pool.length){
+    let i = 1;
+    if(langKey === "en"){ text += "\n\n" + pool[0]; }
+    /* UR/AR: pool[0] already appended by compDeepTextUR/AR; never duplicate. */
+    const target = ctx.words || null;
+    if(target){
+      const bank = deepBank(ctx.kind, heading);
+      const budget = bank ? Math.round((bank.share || 0) * target / 100) : null;
+      while(budget && countWords(text) < budget && i < pool.length){ text += "\n\n" + pool[i]; i++; }
+    }
+  }
+  return text;
 }
 function compDraftText(heading, ctx){
   if(ctx.lang === "ur") return compDraftTextUR(heading, ctx);
@@ -4389,18 +4696,24 @@ function renderCompDraft(){
   const filled = fields.filter(f => (d.heads[f[0]].text || "").trim()).length;
   let html = '<div class="card accent"><h3>📝 Your draft — ' + esc(kindLabel) + '</h3>';
   html += '<p class="small" style="margin-top:0">' + (d.topic ? 'Topic: <b>' + esc(d.topic) + '</b> · ' : '') + (d.uni ? 'University format: <b>' + esc(d.uni) + '</b> · ' : '') + (d.degree ? esc(d.degree) + ' · ' : '') + (d.words ? esc(d.words) + ' words · ' : '') + filled + ' of ' + fields.length + ' headings drafted. This draft lives here first — nothing moves to Write &amp; Export until you tap “Send full draft” below.</p>';
+  const dc = deepDraftCounts(d, kind);
+  html += '<p class="small" style="margin-top:0">' + esc(deepMeterText(d, kind, null)) + '</p>';
+  const dcParts = fields.filter(f => (dc.per[f[0]] || 0) > 0).map(f => esc(f[1]) + " " + dc.per[f[0]]);
+  if(dcParts.length) html += '<p class="small" style="margin-top:0">Per heading: ' + dcParts.join(" · ") + '</p>';
   fields.forEach(f => {
     const h = d.heads[f[0]];
     const hasText = (h.text || "").trim() !== "";
     const pill = h.status === "ready" ? '<span class="pill ready">✓ ready</span>' : (hasText ? '<span class="pill drafted">drafted</span>' : '<span class="pill empty">empty</span>');
     html += '<div class="draft-head" data-draft-head="' + f[0] + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="color:var(--navy)">' + esc(f[1]) + '</b>' + pill + '</div>';
-    if(hasText) html += '<div class="draft-text">' + esc(h.text) + '</div><div style="margin-top:8px"><button class="btn ghost sm" data-comp-revise="' + f[0] + '">💬 Revise ' + esc(f[1]) + '</button></div>';
+    if(hasText) html += '<div class="draft-text">' + deepRenderDraftHtml(h.text) + '</div>' + ((d.tables && d.tables[f[0]]) ? wizTableHtml(f[0], d.tables[f[0]]) : '') + '<div style="margin-top:8px"><button class="btn ghost sm" data-comp-revise="' + f[0] + '">💬 Revise ' + esc(f[1]) + '</button></div>';
     else html += '<p class="small" style="margin-bottom:0">Empty yet — ask for this heading in the follow-up box below.</p>';
     html += '</div>';
   });
+  html += wizDraftTrailHtml(kind, d);
   html += '<button class="btn goldb" data-comp-send-draft style="width:100%;margin-top:6px">📤 Send full draft to Write &amp; Export</button>';
   html += '<p class="small" style="margin-bottom:0">One click fills every matching Write &amp; Export box for ' + esc(kindLabel) + '. Boxes that already hold your own writing are left untouched — the notice after sending lists exactly what was filled and what was skipped.</p></div>';
   box.innerHTML = html;
+  wizBindTables();
 }
 function compAsk(followQ){
   const topic = ($("comp-topic").value || "").trim();
@@ -4441,8 +4754,19 @@ function compAsk(followQ){
   isl.forEach(it => linkItems.push([it.name, it.desc, it.url]));
   tools.forEach(it => linkItems.push([it.name, it.desc, it.url]));
   let rHtml = "";
+  const reviseQ = q.replace(/^revise the [^:]+:\s*/i, "");
+  if(heading && d.heads[heading] && (d.heads[heading].text || "").trim() && deepReviseMatch(reviseQ)){
+    const res = deepReviseText(d.heads[heading].text, reviseQ, heading, kind, st.lang);
+    d.heads[heading] = { text: res.text, status: "drafted", revNote: res.note };
+    renderCompDraft();
+    const label = fieldLabel(kind, heading);
+    rHtml += '<div class="card accent"><h3>✍️ ' + esc(label) + ' — revised exactly as asked</h3><div class="draft-text">' + deepRenderDraftHtml(res.text) + '</div><p class="small" style="margin-bottom:0">✓ ' + esc(res.note) + '</p></div>';
+    $("comp-results").innerHTML = rHtml;
+    $("comp-results").scrollIntoView({ block:"start" });
+    return;
+  }
   if(heading){
-    let text = compDraftText(heading, ctx);
+    let text = compDeepDraft(heading, ctx);
     if(heading === "introduction" && kind === "article" && q.toLowerCase().indexOf("outline") >= 0){ text = "Outline:\n" + shape.split(" → ").join("\n"); }
     d.heads[heading] = { text: text, status: "drafted" };
     renderCompDraft();
@@ -4487,7 +4811,7 @@ function compRevise(key){
   f.value = "Revise the " + label + ": ";
   f.focus();
   f.scrollIntoView({ block:"center" });
-  toast("Write what to change, then tap Ask — a fresh draft for that heading will be proposed.");
+  toast("Write exactly what to change, then tap Ask — it will be applied to that heading word for word.");
 }
 function compPutDraft(heading, fromSources){
   const d = compDraftFor(COMP_STATE.kind);
@@ -4558,7 +4882,7 @@ function wizBuildCtx(topic, words){
     ? ISLAMIC_SOURCES.map(it => ({ name: it[0], desc: it[1], url: it[2] })) : [];
   const tools = compTools(type, toks, 3);
   const shape = COMP_SHAPES[WIZ.kind] || COMP_SHAPES.article;
-  return { topic: topic, words: words, style: COMP_STATE.style, shape: shape, tk: tk, jn: jn, isl: isl, tools: tools, deptObj: deptObj, deptName: deptName, lang: COMP_STATE.lang, kind: WIZ.kind };
+  return { topic: topic, words: words, style: COMP_STATE.style, shape: shape, tk: tk, jn: jn, isl: isl, tools: tools, deptObj: deptObj, deptName: deptName, lang: COMP_STATE.lang, kind: WIZ.kind, userSources: (compDraftFor(WIZ.kind).userSources || []) };
 }
 function wizStart(){
   const topic = ($("wiz-topic").value || "").trim();
@@ -4584,6 +4908,7 @@ function wizStart(){
   $("comp-dept").value = "auto"; COMP_STATE.dept = "auto"; compSuggestHint();
   const d = compDraftFor(WIZ.kind);
   d.topic = finalTopic; d.uni = WIZ.manual ? WIZ.uni : ""; d.degree = WIZ.degree; d.words = words;
+  d.trail = []; d.userSources = []; d.tables = {}; d.lr = null; d.lrDone = false; WIZ.lrReview = false;
   draftFields(WIZ.kind).forEach(f => { d.heads[f[0]] = { text:"", status:"empty" }; });
   WIZ.ctx = wizBuildCtx(finalTopic, words);
   WIZ.buildIdx = 0; WIZ.building = true;
@@ -4639,24 +4964,468 @@ function wizRestart(){
   wizShow(1);
 }
 
+
+/* ---- v43: verbatim revise interpreter ----
+   Takes the student's instruction EXACTLY as written (man w 'an) and
+   applies it literally to one heading's draft. Returns {text, note}.
+   Anything it cannot interpret becomes a visible author note on the
+   heading — never silently ignored. */
+function deepReviseText(text, instr, heading, kind, lang){
+  const raw = (instr || "").trim();
+  const low = raw.toLowerCase();
+  const paras = String(text || "").split("\n\n");
+  const langKey = lang === "ur" ? "ur" : (lang === "ar" ? "ar" : "en");
+  const escRe = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const cap = x => x ? (x.charAt(0).toUpperCase() + x.slice(1)) : x;
+  const fail = () => ({ text: (text || "") + "\n\n[Author note: " + raw + "]",
+    note: "Applied exactly: could not interpret as an edit, so your instruction was added verbatim as an author note on this heading." });
+  let m;
+  m = low.match(/^replace\s+(.+?)\s+with\s+(.+)$/);
+  if(m){
+    const a = raw.slice(8, raw.toLowerCase().indexOf(" with ", 8)).trim();
+    const b = raw.slice(raw.toLowerCase().indexOf(" with ", 8) + 6).trim();
+    if(!a || !b) return fail();
+    const re = new RegExp(escRe(a), "gi");
+    const n = (String(text).match(re) || []).length;
+    if(!n) return fail();
+    return { text: String(text).replace(re, b),
+      note: "Applied exactly: replaced \u201c" + a + "\u201d with \u201c" + b + "\u201d (" + n + " occurrence" + (n > 1 ? "s" : "") + ")." };
+  }
+  m = low.match(/^remove\s+the\s+(first|second|third|fourth|fifth|sixth|\d+)(st|nd|rd|th)?\s+paragraph/);
+  if(m){
+    const words = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6 };
+    const n = words[m[1]] || parseInt(m[1], 10);
+    const kept = paras.filter(p => p.trim());
+    if(n < 1 || n > kept.length) return fail();
+    kept.splice(n - 1, 1);
+    return { text: kept.join("\n\n"),
+      note: "Applied exactly: removed paragraph " + n + "." };
+  }
+  m = low.match(/^remove\s+(?:the\s+sentence\s+about\s+|the\s+sentence\s+|the\s+)?(.+)$/);
+  if(m){
+    const x = raw.slice(raw.toLowerCase().indexOf(m[1].toLowerCase())).trim();
+    const sents = String(text).split(/(?<=[.!?])\s+/);
+    const kept = sents.filter(sn => sn.toLowerCase().indexOf(x.toLowerCase()) < 0);
+    if(kept.length < sents.length){
+      const n = sents.length - kept.length;
+      return { text: kept.join(" "),
+        note: "Applied exactly: removed " + n + " sentence" + (n > 1 ? "s" : "") + " about \u201c" + x + "\u201d." };
+    }
+    const keptP = paras.filter(p => p.toLowerCase().indexOf(x.toLowerCase()) < 0);
+    if(keptP.length < paras.length){
+      return { text: keptP.join("\n\n"),
+        note: "Applied exactly: removed the paragraph about \u201c" + x + "\u201d." };
+    }
+    return fail();
+  }
+  m = low.match(/^(add|insert)\s+(.+)$/);
+  if(m){
+    const rest = raw.slice(m[1].length).trim();
+    const isPara = /\bparagraph\b/i.test(rest);
+    let body = rest.replace(/^a\s+sentence\s+about\s+/i, "").replace(/^a\s+paragraph\s+about\s+/i, "").replace(/^a\s+sentence\s+/i, "").replace(/^a\s+paragraph\s+/i, "").replace(/^about\s+/i, "").replace(/^on\s+/i, "").trim();
+    if(!body) return fail();
+    body = cap(body.replace(/[.?!]+$/, "")) + ".";
+    if(isPara) return { text: (text || "") + "\n\n" + body, note: "Applied exactly: added a paragraph — \u201c" + body + "\u201d" };
+    const kept = paras.filter(p => p.trim());
+    if(!kept.length) return { text: body, note: "Applied exactly: added a sentence — \u201c" + body + "\u201d" };
+    kept[kept.length - 1] = kept[kept.length - 1].replace(/[.?!]+$/, "") + " " + body;
+    return { text: kept.join("\n\n"), note: "Applied exactly: added a sentence — \u201c" + body + "\u201d" };
+  }
+  if(/\b(shorter|shorten|condense|concise)\b/.test(low)){
+    const kept = paras.filter(p => p.trim());
+    if(kept.length <= 1) return fail();
+    const keep = Math.max(1, Math.ceil(kept.length * 0.6));
+    return { text: kept.slice(0, keep).join("\n\n"),
+      note: "Applied exactly: shortened from " + kept.length + " paragraphs to " + keep + "." };
+  }
+  if(/\b(expand|longer|elaborate|more detail)\b/.test(low)){
+    const pool = (DEEP_DEEPEN[heading] || {})[langKey] || [];
+    const next = pool.find(p => (text || "").indexOf(p) < 0);
+    if(next) return { text: (text || "") + "\n\n" + next, note: "Applied exactly: expanded with a deepening paragraph." };
+    const bank = deepBank(kind, heading);
+    if(bank && bank.must && bank.must.length){
+      const sent = "This point deserves emphasis: " + bank.must[0] + ".";
+      return { text: (text || "") + "\n\n" + sent, note: "Applied exactly: expanded with a sentence from the saved deep prompt." };
+    }
+    return fail();
+  }
+  if(/\b(rephrase|reword|paraphrase)\b/.test(low)){
+    const swaps = [["important", "significant"], ["shows", "demonstrates"], ["study", "investigation"], ["examines", "explores"], ["discusses", "considers"], ["clear", "precise"], ["many", "numerous"]];
+    let out = String(text), n = 0;
+    swaps.forEach(pr => {
+      const re = new RegExp("\\b" + pr[0] + "\\b", "gi");
+      out = out.replace(re, mt => { n++; return mt.charAt(0) === mt.charAt(0).toUpperCase() ? cap(pr[1]) : pr[1]; });
+    });
+    if(!n) return fail();
+    return { text: out, note: "Applied exactly: rephrased (" + n + " wording change" + (n > 1 ? "s" : "") + ")." };
+  }
+  return fail();
+}
+function deepReviseMatch(q){
+  const t = (q || "").trim();
+  return /^(add|insert|remove|replace)\b/i.test(t)
+    || /\b(shorter|shorten|condense|concise|expand|longer|elaborate|more detail|rephrase|reword|paraphrase)\b/i.test(t);
+}
+/* QUOTE: lines render as indented block quotes in the draft panel and
+   focus card; in the Word file they become indented italic paragraphs. */
+function deepRenderDraftHtml(text){
+  const lines = String(text || "").split("\n");
+  let out = "", inQ = false;
+  lines.forEach((ln, i) => {
+    if(ln.indexOf("QUOTE: ") === 0){
+      if(!inQ){ out += '<blockquote style="margin:8px 0 8px 24px;padding-left:12px;border-left:3px solid var(--gold);font-style:italic">'; inQ = true; }
+      else out += "\n";
+      out += esc(ln.slice(7));
+    } else {
+      if(inQ){ out += "</blockquote>"; inQ = false; }
+      out += esc(ln);
+      if(i < lines.length - 1) out += "\n";
+    }
+  });
+  if(inQ) out += "</blockquote>";
+  return out;
+}
+/* ---- v43: source trail (shown one line at a time, in order) ---- */
+function wizGrowTrail(heading){
+  const d = compDraftFor(WIZ.kind);
+  if(!d.trail) d.trail = [];
+  const seen = {};
+  d.trail.forEach(t => { if(t.url) seen[t.url] = true; });
+  let items = [];
+  if(heading === "methodology") items = (WIZ.ctx.tk || []).slice(0, 3);
+  else if(heading === "literature" || heading === "references") items = deepPairPool(WIZ.ctx, d.userSources || []);
+  items.forEach(it => { if(it.url && !seen[it.url]){ seen[it.url] = true; d.trail.push({ heading: heading, name: it.name, url: it.url, opened: false }); } });
+}
+function wizTrailHtml(heading){
+  const d = compDraftFor(WIZ.kind);
+  const trail = d.trail || [];
+  const lines = trail.filter(t => t.heading === heading);
+  let h = '<div id="wiz-trail" style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px"><p class="small" style="margin-top:0"><b>📂 Sources opened for this heading</b> — tap a link to open the real page. The app presents each real source for you to open; it cannot read inside NotebookLM or Shamila pages, so no passage is quoted from a page it did not read.</p>';
+  if(!lines.length) h += '<p class="small" style="margin-bottom:0">No new source opened for this heading — it is written from the saved deep prompt for this heading.</p>';
+  else lines.forEach(t => {
+    const ix = trail.indexOf(t);
+    h += '<p class="small" style="margin-bottom:4px">' + (trail.filter(x => x.heading === heading).indexOf(t) + 1) + '. <a href="' + esc(t.url) + '" target="_blank" rel="noopener" data-trail-open="' + ix + '">' + esc(t.name) + ' ↗</a> <span data-trail-state="' + ix + '">' + (t.opened ? 'Opened ✓' : 'not opened yet') + '</span></p>';
+  });
+  h += '</div>';
+  return h;
+}
+function wizBindTrail(){
+  document.querySelectorAll("[data-trail-open]").forEach(a => a.addEventListener("click", () => {
+    const d = compDraftFor(WIZ.kind);
+    const ix = parseInt(a.dataset.trailOpen, 10);
+    if(d.trail && d.trail[ix]) d.trail[ix].opened = true;
+    const st = document.querySelector('[data-trail-state="' + ix + '"]');
+    if(st) st.textContent = "Opened ✓";
+  }));
+}
+/* ---- v43: web fallback + add-a-source ---- */
+function wizFallbackHtml(prefix){
+  const q = encodeURIComponent(WIZ.topic || "");
+  return '<div id="wiz-fb-' + prefix + '" style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px"><h3 style="margin-bottom:6px">🔎 No matching source in the app</h3>'
+    + '<p class="small">The app has no source for this heading, so nothing is invented. Search the web yourself, or add a source you found:</p>'
+    + '<p class="small">Search: <a href="https://scholar.google.com/scholar?q=' + q + '" target="_blank" rel="noopener">Google Scholar ↗</a> · <a href="https://www.semanticscholar.org/search?q=' + q + '" target="_blank" rel="noopener">Semantic Scholar ↗</a> · <a href="https://core.ac.uk/search?q=' + q + '" target="_blank" rel="noopener">CORE ↗</a></p>'
+    + '<label>Add a source yourself</label>'
+    + '<input id="wiz-fb-' + prefix + '-title" type="text" placeholder="Title of the book or article">'
+    + '<input id="wiz-fb-' + prefix + '-link" type="text" placeholder="Link (https://…)">'
+    + '<input id="wiz-fb-' + prefix + '-author" type="text" placeholder="Author (optional)">'
+    + '<input id="wiz-fb-' + prefix + '-year" type="text" placeholder="Year (optional)">'
+    + '<button class="btn ghost sm" id="wiz-fb-' + prefix + '-add" style="margin-top:8px">＋ Add this source</button>'
+    + '<p class="small" id="wiz-fb-' + prefix + '-note" style="margin-bottom:0"></p></div>';
+}
+function wizBindFallback(prefix){
+  const btn = $("wiz-fb-" + prefix + "-add");
+  if(btn) btn.addEventListener("click", () => wizAddUserSource(prefix));
+}
+function wizRenumberWorks(){
+  const d = compDraftFor(WIZ.kind);
+  if(!d.lr) return;
+  const pool = deepPairPool(WIZ.ctx, d.userSources || []);
+  const numByUrl = {};
+  pool.forEach(p => { if(p.kind === "work") numByUrl[p.url] = p.idx; });
+  d.lr.pairs.forEach(pair => pair.forEach(p => { if(p.kind === "work" && numByUrl[p.url]) p.idx = numByUrl[p.url]; }));
+  Object.keys(d.lr.pairTexts || {}).forEach(k => { if(parseInt(k, 10) > d.lr.idx) delete d.lr.pairTexts[k]; });
+}
+function wizAddUserSource(prefix){
+  const d = compDraftFor(WIZ.kind);
+  if(!d.userSources) d.userSources = [];
+  const title = ($("wiz-fb-" + prefix + "-title").value || "").trim();
+  const link = ($("wiz-fb-" + prefix + "-link").value || "").trim();
+  const author = ($("wiz-fb-" + prefix + "-author").value || "").trim();
+  const year = ($("wiz-fb-" + prefix + "-year").value || "").trim();
+  const noteEl = $("wiz-fb-" + prefix + "-note");
+  if(!title || !link){ if(noteEl) noteEl.textContent = "Write both a title and a link."; return; }
+  if(d.userSources.some(u => u.url === link)){ if(noteEl) noteEl.textContent = "That link is already added."; return; }
+  d.userSources.push({ title: title, url: link, author: author, year: year });
+  if(WIZ.ctx) WIZ.ctx.userSources = d.userSources;
+  if(wizInLR()){
+    d.lr.pairs.push([{ kind: "work", idx: 0, name: title, desc: "", url: link }]);
+    wizRenumberWorks();
+    if(noteEl) noteEl.textContent = "Added — it will appear as the final pair.";
+    renderCompDraft();
+    return;
+  }
+  const cur = draftFields(WIZ.kind)[WIZ.buildIdx];
+  if(cur && cur[0] === "references"){
+    const rb = deepBuildReferences(WIZ.ctx, d.userSources, COMP_STATE.style, WIZ.lang);
+    d.heads.references = { text: rb.text, status: "drafted" };
+    renderCompDraft();
+    wizShowCurrent(cur, rb.text);
+    return;
+  }
+  if(cur && cur[0] === "literature" && !d.lr){
+    wizLRStart();
+    return;
+  }
+  if(noteEl) noteEl.textContent = "Added — it joins your References.";
+  renderCompDraft();
+}
+/* ---- v43: literature pair assembly (wizard + free path share it) ---- */
+function deepPairSourceLine(pair){
+  return "Sources: " + pair.map(p => p.name + " — " + p.url).join("; ");
+}
+function deepLiteratureText(topic, pairs, lang, getQuote){
+  let out = lang === "ur" ? ("ادب کا جائزہ " + topic + " کے بارے میں دو دو ذرائع کی صورت میں پیش کیا گیا ہے۔ ہر جوڑے کے آخر میں اس کا خلا لکھا گیا ہے، اور یہ خلا مجموعی طور پر اس مطالعے کا جواز ہیں۔")
+    : (lang === "ar" ? ("تُعرض مراجعة الأدبيات حول " + topic + " مصدرين مصدرين. ينتهي كل ثنائي بالفجوة التي يتركها، والفجوات مجتمعةً هي مبرر هذه الدراسة.")
+    : ("The literature relevant to " + topic + " is reviewed two sources at a time below. Each pair ends with the gap it leaves, and the gaps together are this study's warrant."));
+  pairs.forEach((pair, i) => {
+    const r = deepPairReview(pair, topic, lang);
+    out += "\n\n" + r.review + "\n\n" + r.gap;
+    const q = getQuote ? getQuote(i) : "";
+    if(q) out += "\n\nQUOTE: " + q;
+    out += "\n\n" + deepPairSourceLine(pair);
+  });
+  out += lang === "ur" ? "\n\nخلاصہ: اسی ترتیب میں پڑھیں — پہلے عمومی پس منظر، پھر قریبی مطالعات، پھر وہ ذرائع جن سے آپ بحث کریں گے۔ اوپر کے خلا مجموعی طور پر اس مطالعے کا جواز ہیں۔"
+    : (lang === "ar" ? "\n\nخلاصة: اقرأ بهذا الترتيب — الخلفية العامة أولاً، ثم الدراسات الأقرب، ثم المصادر التي ستناقشها. الفجوات أعلاه مجتمعةً هي مبرر هذه الدراسة."
+    : "\n\nSynthesis: Read in this order — general background first, then the closest studies, then the sources you will argue against. The gaps above, taken together, are the study's warrant: each pair leaves the same connection unexamined, and the present study is built to examine it.");
+  return out;
+}
+/* ---- v43: LR pair flow (wizard only) ---- */
+function wizInLR(){
+  const d = compDraftFor(WIZ.kind);
+  return !!(d.lr && !d.lrDone);
+}
+function wizLRStart(){
+  const d = compDraftFor(WIZ.kind);
+  if(!d.userSources) d.userSources = [];
+  const pool = deepPairPool(WIZ.ctx, d.userSources);
+  if(!pool.length){
+    wizNarrate("literature"); wizBuildProgress();
+    const box = $("wiz-current");
+    box.innerHTML = '<div class="card accent"><h3>📚 Literature Review</h3>'
+      + '<p class="small">No matching source was found in the app for this topic — and no reference has been invented. Use the web step below, or continue without literature sources.</p>'
+      + wizFallbackHtml("fb")
+      + '<div style="margin-top:10px"><button class="btn goldb" id="wiz-lr-skip-btn">Continue without literature sources</button></div></div>';
+    wizBindFallback("fb");
+    $("wiz-lr-skip-btn").addEventListener("click", () => {
+      const rb = deepBuildReferences(WIZ.ctx, d.userSources || [], COMP_STATE.style, WIZ.lang);
+      d.heads.literature = { text: "No matching source was found in the app for this topic — and no reference has been invented for it. Add sources with the web step above, or from the Research hub Toolkit, and this heading can be rewritten.", status: "ready" };
+      d.heads.references = { text: rb.text, status: "drafted" };
+      d.lrDone = true; d.lr = null;
+      renderCompDraft();
+      WIZ.buildIdx++;
+      wizBuildNext();
+    });
+    box.scrollIntoView({ block:"start" });
+    return;
+  }
+  d.lr = { pairs: deepChunkPairs(pool), idx: 0, pairTexts: {} };
+  d.lrDone = false;
+  wizGrowTrail("literature");
+  wizLRShow();
+}
+function wizLRShow(){
+  const d = compDraftFor(WIZ.kind);
+  const lr = d.lr;
+  const pair = lr.pairs[lr.idx];
+  if(!lr.pairTexts[lr.idx]){ const r = deepPairReview(pair, WIZ.topic, WIZ.lang); lr.pairTexts[lr.idx] = { review: r.review, gap: r.gap, quote: "" }; }
+  const pt = lr.pairTexts[lr.idx];
+  wizNarrate("literature"); wizBuildProgress();
+  const box = $("wiz-current");
+  const t = wizT();
+  const Y = lr.pairs.length;
+  let h = '<div class="card accent"><h3>📚 Literature Review — Pair ' + (lr.idx + 1) + ' of ' + Y + '</h3>';
+  h += '<p class="small">Sources in this pair — open each link and check it:</p>';
+  pair.forEach(p => {
+    h += '<p class="small" style="margin-bottom:4px">' + esc(deepPairLabel(p)) + ' — <a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.url) + ' ↗</a>' + (p.desc ? '<br><span>' + esc(p.desc) + '</span>' : '') + '</p>';
+  });
+  h += '<div class="draft-text">' + esc(pt.review) + '</div>';
+  h += '<p class="small"><b>Gap:</b></p><div class="draft-text">' + esc(pt.gap) + '</div>';
+  if(pt.note) h += '<p class="small">✓ ' + esc(pt.note) + '</p>';
+  h += '<label for="wiz-lr-quote">Paste a quotation from this pair (optional — it will appear as a block quote in the Word file):</label><input id="wiz-lr-quote" type="text" value="' + esc(pt.quote || "") + '" placeholder="Paste the exact quotation here">';
+  h += wizFallbackHtml("lr");
+  h += '<p class="small"><b>' + esc(t.approve) + '</b></p>';
+  h += '<label for="wiz-revise-in">' + esc(t.changePre) + 'Pair ' + (lr.idx + 1) + esc(t.changePost) + '</label><input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">';
+  if(lr.idx > 0) h += '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous pair</button></div>';
+  else h += '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>';
+  h += '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + (lr.idx + 1 >= Y ? '✓ Final — finish literature review' : esc(t.finalBtn)) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div></div>';
+  box.innerHTML = h;
+  $("wiz-final-btn").addEventListener("click", wizFinal);
+  $("wiz-revise-btn").addEventListener("click", wizRevise);
+  $("wiz-prev-btn").addEventListener("click", wizPrevHeading);
+  wizBindFallback("lr");
+  box.scrollIntoView({ block:"start" });
+}
+function wizLRNext(){
+  const d = compDraftFor(WIZ.kind);
+  const lr = d.lr;
+  const qEl = $("wiz-lr-quote");
+  if(qEl) lr.pairTexts[lr.idx].quote = qEl.value.trim();
+  lr.idx++;
+  if(lr.idx >= lr.pairs.length) wizLRFinish();
+  else wizLRShow();
+}
+function wizLRFinish(){
+  const d = compDraftFor(WIZ.kind);
+  const lr = d.lr;
+  const out = deepLiteratureText(WIZ.topic, lr.pairs, WIZ.lang, i => (lr.pairTexts[i] || {}).quote || "");
+  d.heads.literature = { text: out, status: "drafted" };
+  const rb = deepBuildReferences(WIZ.ctx, d.userSources || [], COMP_STATE.style, WIZ.lang);
+  d.heads.references = { text: rb.text, status: "drafted" };
+  const rows = lr.pairs.map((pair, i) => {
+    const pt = lr.pairTexts[i] || {};
+    const names = pair.map(deepPairLabel).join(" + ");
+    const focus = (pair[0] && pair[0].desc) ? pair[0].desc.slice(0, 120) : "";
+    const key = (pt.review || "").split(/(?<=[.!?])\s+/)[0] || "";
+    const gap = (pt.gap || "").slice(0, 140);
+    return [names, focus, key, gap];
+  });
+  if(!d.tables) d.tables = {};
+  d.tables.literature = { headers: ["Source", "Focus", "Key point", "Gap"], rows: rows };
+  d.lrDone = true;
+  WIZ.lrReview = true;
+  renderCompDraft();
+  const f = draftFields(WIZ.kind).find(x => x[0] === "literature");
+  wizShowCurrent(f, out);
+}
+/* ---- v43: Expand / Condense / table proposals ---- */
+function wizDeepenPool(key, lang){
+  return (DEEP_DEEPEN[key] || {})[lang === "ur" ? "ur" : (lang === "ar" ? "ar" : "en")] || [];
+}
+function wizExpand(){
+  const d = compDraftFor(WIZ.kind);
+  const f = draftFields(WIZ.kind)[WIZ.buildIdx]; if(!f) return;
+  const pool = wizDeepenPool(f[0], WIZ.lang);
+  const text = (d.heads[f[0]].text || "");
+  const next = pool.find(p => text.indexOf(p) < 0);
+  if(!next){ toast("No further deepening paragraph saved for this heading."); return; }
+  d.heads[f[0]].text = text + "\n\n" + next;
+  renderCompDraft(); wizShowCurrent(f, d.heads[f[0]].text);
+}
+function wizCondense(){
+  const d = compDraftFor(WIZ.kind);
+  const f = draftFields(WIZ.kind)[WIZ.buildIdx]; if(!f) return;
+  const paras = (d.heads[f[0]].text || "").split("\n\n").filter(p => p.trim());
+  if(paras.length <= 1){ toast("Nothing left to condense."); return; }
+  d.heads[f[0]].text = paras.slice(0, Math.max(1, Math.ceil(paras.length * 0.6))).join("\n\n");
+  renderCompDraft(); wizShowCurrent(f, d.heads[f[0]].text);
+}
+function wizProposeTable(key, headers){
+  const d = compDraftFor(WIZ.kind);
+  if(!d.tables) d.tables = {};
+  d.tables[key] = { headers: headers, rows: headers.map(() => "") };
+  d.tables[key].rows = [d.tables[key].rows.slice(), d.tables[key].rows.slice()];
+  renderCompDraft();
+  const f = draftFields(WIZ.kind)[WIZ.buildIdx];
+  if(f) wizShowCurrent(f, (d.heads[f[0]].text || ""));
+  toast("Table added — edit its cells in the draft panel (See full draft).");
+}
+function wizCleanTable(tbl){
+  return { headers: tbl.headers.slice(), rows: (tbl.rows || []).filter(r => r.some(c => (c || "").trim())) };
+}
+function wizTableHtml(key, tbl){
+  let h = '<div style="overflow-x:auto;margin-top:8px"><table style="border-collapse:collapse;width:100%" data-table="' + key + '"><thead><tr>';
+  tbl.headers.forEach(hd => { h += '<th style="border:1px solid var(--line);padding:6px;text-align:left">' + esc(hd) + '</th>'; });
+  h += '</tr></thead><tbody>';
+  tbl.rows.forEach((row, ri) => {
+    h += '<tr>';
+    tbl.headers.forEach((hd, ci) => { h += '<td contenteditable="true" style="border:1px solid var(--line);padding:6px" data-table-cell="' + key + '" data-table-row="' + ri + '" data-table-col="' + ci + '">' + esc(row[ci] || "") + '</td>'; });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div><div style="margin-top:6px"><button class="btn ghost sm" data-table-add="' + key + '">＋ Add row</button><span class="small"> Edit cells directly; the table travels to Write &amp; Export with this heading.</span></div>';
+  return h;
+}
+function wizReadTables(){
+  const d = compDraftFor(COMP_STATE.kind);
+  if(!d.tables) return;
+  Object.keys(d.tables).forEach(key => {
+    const tbl = document.querySelector('table[data-table="' + key + '"]');
+    if(!tbl) return;
+    const rows = [];
+    tbl.querySelectorAll("tbody tr").forEach(tr => {
+      const row = [];
+      tr.querySelectorAll("td").forEach(td => row.push(td.textContent));
+      rows.push(row);
+    });
+    d.tables[key].rows = rows;
+  });
+}
+function wizBindTables(){
+  document.querySelectorAll("[data-table-add]").forEach(btn => btn.addEventListener("click", () => {
+    const d = compDraftFor(COMP_STATE.kind);
+    const key = btn.dataset.tableAdd;
+    if(!d.tables || !d.tables[key]) return;
+    wizReadTables();
+    d.tables[key].rows.push(d.tables[key].headers.map(() => ""));
+    renderCompDraft();
+  }));
+  document.querySelectorAll("[data-table-cell]").forEach(cell => cell.addEventListener("blur", () => wizReadTables()));
+}
+
+function wizDraftTrailHtml(kind, d){
+  if(!d.trail || !d.trail.length) return "";
+  let h = '<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px"><h3 style="margin-bottom:6px">📂 Sources opened (in order)</h3>';
+  d.trail.forEach((t, i) => {
+    h += '<p class="small" style="margin-bottom:4px">' + (i + 1) + '. ' + esc(fieldLabel(kind, t.heading)) + ' — <a href="' + esc(t.url) + '" target="_blank" rel="noopener">' + esc(t.name) + ' ↗</a> ' + (t.opened ? 'Opened ✓' : 'not opened yet') + '</p>';
+  });
+  h += '<p class="small" style="margin-bottom:0">The app presents each real source for you to open; it cannot read inside NotebookLM or Shamila pages.</p></div>';
+  return h;
+}
 function wizShowCurrent(f, text){
   wizNarrate(f[0]);
   wizBuildProgress();
   const box = $("wiz-current");
   const label = wizLabel(f);
   const t = wizT();
-  box.innerHTML = '<div class="card accent"><h3>✍️ ' + esc(label) + t.draftSuffix + '</h3><div class="draft-text">' + esc(text) + '</div>'
+  const d = compDraftFor(WIZ.kind);
+  const key = f[0];
+  const head = d.heads[key] || {};
+  const pool = wizDeepenPool(key, WIZ.lang);
+  const usedDeepen = pool.filter(p => (text || "").indexOf(p) >= 0).length;
+  const paras = String(text || "").split("\n\n").filter(p => p.trim());
+  let extra = "";
+  extra += '<p class="small" style="margin-top:0">' + esc(deepMeterText(d, WIZ.kind, key)) + '</p>';
+  extra += '<p class="small" style="color:var(--mut)">' + esc(deepPromptLine(WIZ.kind, key)) + '</p>';
+  extra += wizTrailHtml(key);
+  if(head.revNote) extra += '<p class="small">✓ ' + esc(head.revNote) + '</p>';
+  let actions = "";
+  if(key !== "literature" && usedDeepen < pool.length) actions += '<button class="btn ghost sm" id="wiz-expand-btn">＋ Expand this heading</button>';
+  if(key !== "literature" && paras.length > 1) actions += '<button class="btn ghost sm" id="wiz-condense-btn">－ Condense this heading</button>';
+  if(key === "methodology" && !(d.tables && d.tables.methodology)) actions += '<button class="btn ghost sm" id="wiz-add-vartable-btn">▦ Add variables table</button>';
+  if(key === "discussion" && !(d.tables && d.tables.discussion)) actions += '<button class="btn ghost sm" id="wiz-add-comptable-btn">▦ Add comparison table</button>';
+  if(actions) extra += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + actions + '</div>';
+  let fb = "";
+  if(key === "references" && deepPairPool(WIZ.ctx, d.userSources || []).length === 0) fb = wizFallbackHtml("ref");
+  box.innerHTML = '<div class="card accent"><h3>✍️ ' + esc(label) + t.draftSuffix + '</h3><div class="draft-text">' + deepRenderDraftHtml(text) + '</div>'
+    + extra
     + '<p class="small"><b>' + esc(t.approve) + '</b> ' + esc(t.approveSub) + '</p>'
     + '<label for="wiz-revise-in">' + esc(t.changePre) + esc(label) + esc(t.changePost) + '</label>'
     + '<input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">'
     + (WIZ.buildIdx > 0 ? '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>' : '')
-    + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + esc(t.finalBtn) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div></div>';
+    + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + esc(t.finalBtn) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div>'
+    + fb + '</div>';
   $("wiz-final-btn").addEventListener("click", wizFinal);
   $("wiz-revise-btn").addEventListener("click", wizRevise);
   const pv = $("wiz-prev-btn");
   if(pv) pv.addEventListener("click", wizPrevHeading);
+  const ex = $("wiz-expand-btn"); if(ex) ex.addEventListener("click", wizExpand);
+  const co = $("wiz-condense-btn"); if(co) co.addEventListener("click", wizCondense);
+  const vt = $("wiz-add-vartable-btn"); if(vt) vt.addEventListener("click", () => wizProposeTable("methodology", ["Variable", "Definition", "Measure"]));
+  const ct = $("wiz-add-comptable-btn"); if(ct) ct.addEventListener("click", () => wizProposeTable("discussion", ["Aspect", "This study", "Earlier work"]));
+  wizBindTrail();
+  if(fb) wizBindFallback("ref");
   box.scrollIntoView({ block:"start" });
 }
+
 function wizBuildNext(){
   const d = compDraftFor(WIZ.kind);
   const fields = draftFields(WIZ.kind);
@@ -4664,13 +5433,21 @@ function wizBuildNext(){
   const f = fields[WIZ.buildIdx];
   const stored = (d.heads[f[0]] && d.heads[f[0]].text) || "";
   if(stored.trim()){ wizShowCurrent(f, stored); return; }
-  const text = compDraftText(f[0], WIZ.ctx);
+  if(f[0] === "literature"){
+    if(d.lr && !d.lrDone){ wizLRShow(); return; }
+    wizLRStart(); return;
+  }
+  wizGrowTrail(f[0]);
+  const text = compDeepDraft(f[0], WIZ.ctx);
   d.heads[f[0]] = { text: text, status: "drafted" };
   renderCompDraft();
   wizShowCurrent(f, text);
 }
+
 function wizFinal(){
   const d = compDraftFor(WIZ.kind);
+  if(wizInLR()){ wizLRNext(); return; }
+  if(WIZ.lrReview){ WIZ.lrReview = false; }
   const fields = draftFields(WIZ.kind);
   const f = fields[WIZ.buildIdx];
   if(f) d.heads[f[0]].status = "ready";
@@ -4679,6 +5456,7 @@ function wizFinal(){
   if(WIZ.buildIdx >= fields.length) wizFinish();
   else wizBuildNext();
 }
+
 function wizRevise(){
   const note = ($("wiz-revise-in").value || "").trim();
   if(!note){ toast("Write what should change, then tap Revise."); return; }
@@ -4686,12 +5464,26 @@ function wizRevise(){
   const fields = draftFields(WIZ.kind);
   const f = fields[WIZ.buildIdx];
   if(!f) return;
+  if(wizInLR()){
+    const lr = d.lr;
+    const qEl = $("wiz-lr-quote");
+    if(qEl) lr.pairTexts[lr.idx].quote = qEl.value.trim();
+    const pt = lr.pairTexts[lr.idx] || {};
+    const res = deepReviseText(pt.review || "", note, "literature", WIZ.kind, WIZ.lang);
+    pt.review = res.text; pt.note = res.note;
+    renderCompDraft();
+    wizLRShow();
+    toast(res.note);
+    return;
+  }
   const old = d.heads[f[0]].text || "";
-  d.heads[f[0]] = { text: "✏️ Revision note: " + note + "\n" + old, status: "drafted" };
+  const res = deepReviseText(old, note, f[0], WIZ.kind, WIZ.lang);
+  d.heads[f[0]] = { text: res.text, status: "drafted", revNote: res.note };
   renderCompDraft();
-  wizShowCurrent(f, d.heads[f[0]].text);
-  toast("Only this heading was updated — the rest of your draft is untouched.");
+  wizShowCurrent(f, res.text);
+  toast(res.note);
 }
+
 function wizFinish(){
   WIZ.building = false;
   compSetFocus("done");
@@ -4763,9 +5555,21 @@ function wizBuildProgress(){
   bar.style.width = pct + "%";
 }
 function wizPrevHeading(){
+  const d = compDraftFor(WIZ.kind);
+  if(WIZ.lrReview){
+    WIZ.lrReview = false; d.lrDone = false;
+    if(d.lr) d.lr.idx = d.lr.pairs.length - 1;
+    wizLRShow(); return;
+  }
+  if(wizInLR()){
+    if(d.lr.idx > 0){
+      const qEl = $("wiz-lr-quote");
+      if(qEl) d.lr.pairTexts[d.lr.idx].quote = qEl.value.trim();
+      d.lr.idx--; wizLRShow(); return;
+    }
+  }
   if(WIZ.buildIdx <= 0) return;
   WIZ.buildIdx--;
-  const d = compDraftFor(WIZ.kind);
   const fields = draftFields(WIZ.kind);
   const f = fields[WIZ.buildIdx];
   if(!f) return;
@@ -4773,6 +5577,7 @@ function wizPrevHeading(){
   if(stored.trim()){ wizShowCurrent(f, stored); return; }
   wizBuildNext();
 }
+
 function compBindFocus(){
   const dt = $("comp-draft-toggle");
   if(dt) dt.addEventListener("click", () => {
@@ -4826,12 +5631,14 @@ function compSendDraft(){
   }
   if(!WD.compFields) WD.compFields = {};
   const filled = [], skipped = [];
+  const tableKeys = [];
   nonEmpty.forEach(f => {
     const key = f[0];
     const draftText = (d.heads[key].text || "").trim();
     const cur = (WD.fields[key] || "").trim();
     if(!cur || WD.compFields[key] === cur){ WD.fields[key] = draftText; WD.compFields[key] = draftText; filled.push(f[1]); }
     else skipped.push(f[1]);
+    if(filled.indexOf(f[1]) >= 0 && d.tables && d.tables[key]){ if(!WD.tables) WD.tables = {}; WD.tables[key] = wizCleanTable(d.tables[key]); tableKeys.push(f[1]); }
   });
   const secs = writeSections();
   if(secs.length) WD.step = secs[0][0];
@@ -4840,6 +5647,7 @@ function compSendDraft(){
   note.innerHTML = '<div class="notice">✓ <b>Full draft sent.</b> Your draft is now in Write &amp; Export → ' + esc(kindLabel) + '.'
     + (filled.length ? ' Filled: <b>' + esc(filled.join(", ")) + '</b>.' : '')
     + (skipped.length ? ' Skipped (your own writing kept untouched): <b>' + esc(skipped.join(", ")) + '</b>.' : '')
+    + (tableKeys.length ? ' Tables included: <b>' + esc(tableKeys.join(", ")) + '</b>.' : '')
     + ' Open it below and work heading by heading — tap “Heading complete” to move on automatically.'
     + '<div style="margin-top:10px"><button class="btn goldb" data-comp-open-write>✍️ Open Write &amp; Export →</button></div></div>';
   toast("Full draft sent to Write & Export.");
@@ -5064,11 +5872,81 @@ function dxPara(runs, o){
     + '<w:spacing w:line="' + (o.line || 360) + '" w:lineRule="auto" w:after="' + (o.after == null ? 120 : o.after) + '"/>'
     + '<w:jc w:val="' + (o.jc || 'both') + '"/></w:pPr>' + runs + '</w:p>';
 }
+
+/* ---- v43: docx footnotes / block quotes / native tables ---- */
+function dxParseFootnotes(refsVal){
+  const lines = String(refsVal || "").split("\n");
+  const heads = ["Works cited:", "حوالہ جات — اصل مآخذ:", "المراجع — المصادر الأصلية:"];
+  const collHeads = ["Collections and tools consulted", "مشاورتی مجموعے", "المجموعات المستشارة"];
+  let inWorks = false; const out = [];
+  lines.forEach(ln => {
+    const t = ln.trim();
+    if(heads.indexOf(t) >= 0){ inWorks = true; return; }
+    if(collHeads.some(h => t.indexOf(h) === 0)){ inWorks = false; return; }
+    if(inWorks){
+      const m = t.match(/^(\d+)\.\s+(.*)$/);
+      if(m) out.push(m[2]);
+    }
+  });
+  return out;
+}
+function dxLineRuns(line, footnotes){
+  const parts = String(line).split(/\[(\d+)\]/g);
+  let runs = "";
+  for(let i = 0; i < parts.length; i++){
+    if(i % 2 === 1){
+      const n = parseInt(parts[i], 10);
+      if(n >= 1 && n <= footnotes.length) runs += '<w:r><w:rPr><w:rStyle w:val="FootnoteReference"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="' + (n + 1) + '"/></w:r>';
+      else runs += dxRun("[" + parts[i] + "]", { sz:24 });
+    } else if(parts[i]) runs += dxRun(parts[i], { sz:24 });
+  }
+  return runs;
+}
+function dxQuotePara(text){
+  return '<w:p><w:pPr>' + (DX_RTL ? '<w:bidi/>' : '')
+    + '<w:spacing w:line="360" w:lineRule="auto" w:after="120"/>'
+    + '<w:ind w:left="720"/>'
+    + '<w:jc w:val="both"/></w:pPr>' + dxRun(text, { sz:24, i:1 }) + '</w:p>';
+}
+function dxFootnotesXml(entries){
+  const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  let x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:footnotes xmlns:w="' + W + '">';
+  x += '<w:footnote w:id="0"><w:p><w:r><w:separator/></w:r></w:p></w:footnote>';
+  x += '<w:footnote w:id="1"><w:p><w:r><w:continuationSeparator/></w:r></w:p></w:footnote>';
+  entries.forEach((e, i) => {
+    x += '<w:footnote w:id="' + (i + 2) + '"><w:p><w:pPr><w:pStyle w:val="FootnoteText"/><w:spacing w:line="240" w:lineRule="auto" w:after="40"/></w:pPr>' + dxRun(e, { sz:20 }) + '</w:p></w:footnote>';
+  });
+  return x + '</w:footnotes>';
+}
+function dxTableXml(tbl){
+  const headers = tbl.headers || [];
+  const rows = (tbl.rows || []).filter(r => r.some(c => (c || "").trim()));
+  if(!headers.length || !rows.length) return "";
+  const n = headers.length;
+  const w = Math.floor(9026 / n);
+  let x = '<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="0" w:type="auto"/><w:tblBorders>'
+    + '<w:top w:val="single" w:sz="4" w:color="A6A6A6"/><w:left w:val="single" w:sz="4" w:color="A6A6A6"/><w:bottom w:val="single" w:sz="4" w:color="A6A6A6"/><w:right w:val="single" w:sz="4" w:color="A6A6A6"/><w:insideH w:val="single" w:sz="4" w:color="A6A6A6"/><w:insideV w:val="single" w:sz="4" w:color="A6A6A6"/>'
+    + '</w:tblBorders></w:tblPr><w:tblGrid>';
+  for(let i = 0; i < n; i++) x += '<w:gridCol w:w="' + w + '"/>';
+  x += '</w:tblGrid>';
+  const rowXml = (cells, bold) => {
+    let r = '<w:tr>';
+    cells.forEach((c, i) => {
+      r += '<w:tc><w:tcPr><w:tcW w:w="' + w + '" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:line="240" w:lineRule="auto" w:after="40"/><w:jc w:val="left"/></w:pPr>' + dxRun(c || "", { sz:22, b: bold ? 1 : 0 }) + '</w:p></w:tc>';
+    });
+    return r + '</w:tr>';
+  };
+  x += rowXml(headers, true);
+  rows.forEach(r => { x += rowXml(headers.map((h, i) => r[i] || ""), false); });
+  return x + '</w:tbl>';
+}
 function buildWriteDocx(doc){
   const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
   DX_FONT = doc.lang === "ur" ? "Jameel Noori Nastaleeq" : "Times New Roman";
   DX_RTL = doc.lang === "ur";
   const f = doc.fields || {};
+  const footnoteEntries = dxParseFootnotes(f.references || "");
+  const footnotesXml = dxFootnotesXml(footnoteEntries);
   let body = '';
   body += dxPara(dxRun(APP_NAME.toUpperCase(), { sz:20, color:'9A7B14' }), { jc:'center', after:60 });
   body += dxPara(dxRun(f.title || 'Untitled', { b:1, sz:32, color:'0A2A4D' }), { jc:'center', line:300 });
@@ -5084,7 +5962,13 @@ function buildWriteDocx(doc){
     if(!val) return;
     if(key === 'keywords'){ body += dxPara(dxRun('Keywords: ', { b:1, sz:24 }) + dxRun(val, { sz:24 }), { jc:'both' }); return; }
     body += dxPara(dxRun(fd[1], { b:1, sz:28, color:'0A2A4D' }), { jc:'left', after:60 });
-    val.split('\n').map(s => s.trim()).filter(Boolean).forEach(line => { body += dxPara(dxRun(line, { sz:24 }), { jc:'both' }); });
+    val.split('\n').map(s => s.trim()).filter(Boolean).forEach(line => {
+      if(line.indexOf('QUOTE: ') === 0) body += dxQuotePara(line.slice(7));
+      else if(DEEP_SECTION_TITLES[line]) body += dxPara(dxRun(line, { b:1, sz:24 }), { jc:'left', after:60 });
+      else if(key === 'references' || key === 'keywords') body += dxPara(dxRun(line, { sz:24 }), { jc:'both' });
+      else body += dxPara(dxLineRuns(line, footnoteEntries), { jc:'both' });
+    });
+    if(doc.tables && doc.tables[key]) body += dxTableXml(doc.tables[key]);
   });
   body += dxPara(dxRun('— Prepared with ' + APP_NAME + ' · ' + APP_BRAND, { sz:18, color:'5C6B78' }), { jc:'center' });
   const sect = '<w:sectPr><w:footerReference w:type="default" r:id="rId3"/>'
@@ -5095,7 +5979,9 @@ function buildWriteDocx(doc){
     + '<w:styles xmlns:w="' + W + '"><w:docDefaults><w:rPrDefault><w:rPr>'
     + '<w:rFonts w:ascii="' + DX_FONT + '" w:hAnsi="' + DX_FONT + '" w:cs="' + DX_FONT + '" w:eastAsia="' + DX_FONT + '"/><w:sz w:val="24"/><w:szCs w:val="24"/>' + (DX_RTL ? '<w:rtl/>' : '')
     + '</w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:line="360" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'
-    + '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>';
+    + '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>'
+    + '<w:style w:type="character" w:styleId="FootnoteReference"><w:name w:val="footnote reference"/><w:semiHidden/><w:unhideWhenUsed/><w:rPr><w:vertAlign w:val="superscript"/></w:rPr></w:style>'
+    + '<w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:style></w:styles>';
   const frp = '<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>';
   const footerXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
     + '<w:ftr xmlns:w="' + W + '" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
@@ -5111,6 +5997,7 @@ function buildWriteDocx(doc){
     + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
     + '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles.xml"/>'
     + '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>'
+    + '<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>'
     + '</Types>';
   const rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
     + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
@@ -5119,6 +6006,7 @@ function buildWriteDocx(doc){
     + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
     + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
     + '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>'
+    + '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>'
     + '</Relationships>';
   return makeZipBlob([
     { name:'[Content_Types].xml', data:contentTypes },
@@ -5126,6 +6014,7 @@ function buildWriteDocx(doc){
     { name:'word/document.xml', data:documentXml },
     { name:'word/styles.xml', data:stylesXml },
     { name:'word/footer1.xml', data:footerXml },
+    { name:'word/footnotes.xml', data:footnotesXml },
     { name:'word/_rels/document.xml.rels', data:docRels }
   ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }

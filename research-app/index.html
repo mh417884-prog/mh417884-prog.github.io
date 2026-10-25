@@ -840,6 +840,14 @@ body{background:#E6E2D5}
 #view-companion.focus-build #comp-draft-toggle-wrap{display:block}
 #view-companion.focus-build.draft-open #comp-draft{display:block}
 </style>
+<style id="v44-handoff">
+.ho-card{border:1px solid var(--line-n);border-radius:12px;padding:12px;margin:12px 0;background:var(--paper-warm)}
+.ho-card textarea{box-sizing:border-box}
+.ho-card .ho-prompt{min-height:150px}
+.ho-card .ho-paste{min-height:110px;margin-top:8px}
+.ho-card a{word-break:break-word}
+.ho-card select{margin-top:8px}
+</style>
 </head>
 <body>
 <div id="app">
@@ -4223,7 +4231,7 @@ function compDraftFor(kind){
   if(!COMP_DRAFTS[kind]){
     const heads = {};
     draftFields(kind).forEach(f => { heads[f[0]] = { text:"", status:"empty" }; });
-    COMP_DRAFTS[kind] = { kind:kind, topic:"", heads:heads, trail:[], userSources:[], tables:{}, lr:null, lrDone:false };
+    COMP_DRAFTS[kind] = { kind:kind, topic:"", heads:heads, trail:[], userSources:[], tables:{}, lr:null, lrDone:false, studentBlocks:{}, studentRefsSection:"" };
   }
   return COMP_DRAFTS[kind];
 }
@@ -4329,7 +4337,8 @@ function deepBudgets(kind, target){
 function deepDraftCounts(d, kind){
   const per = {}; let total = 0;
   draftFields(kind).forEach(f => {
-    const w = countWords((d.heads[f[0]] && d.heads[f[0]].text) || "");
+    let w = countWords((d.heads[f[0]] && d.heads[f[0]].text) || "");
+    ((d.studentBlocks && d.studentBlocks[f[0]]) || []).forEach(b => { w += countWords(b.text || ""); });
     per[f[0]] = w; total += w;
   });
   return { total: total, per: per };
@@ -4357,7 +4366,7 @@ function deepCiteLists(ctx, userSources){
     if(it.url && !seen[it.url]){ seen[it.url] = true; works.push({ name: it.name, desc: it.desc || "", publisher: it.publisher || "", url: it.url, from: "journal" }); }
   });
   (userSources || []).forEach(us => {
-    if(us.url && !seen[us.url]){ seen[us.url] = true; works.push({ name: us.title, desc: "", publisher: "", url: us.url, author: us.author || "", year: us.year || "", from: "user" }); }
+    if(us.url && !seen[us.url] && !us.studentProvided){ seen[us.url] = true; works.push({ name: us.title, desc: "", publisher: "", url: us.url, author: us.author || "", year: us.year || "", from: "user" }); }
   });
   (ctx.tk || []).forEach(it => {
     if(it.url && !seen[it.url] && it.sec === "data"){ seen[it.url] = true; consulted.push({ name: it.name, desc: it.desc || "", url: it.url }); }
@@ -4384,6 +4393,8 @@ function deepBuildReferences(ctx, userSources, style, lang){
   const lines = [headW];
   if(lists.works.length) lists.works.forEach((w, i) => lines.push(deepWorkEntry(w, i + 1)));
   else lines.push(noneW);
+  const studSec = compStudentRefsSection(userSources, lang);
+  if(studSec) lines.push(studSec);
   if(lists.consulted.length){
     lines.push(headC);
     lists.consulted.forEach(c => lines.push("- " + c.name + " — " + c.url));
@@ -4702,11 +4713,14 @@ function renderCompDraft(){
   if(dcParts.length) html += '<p class="small" style="margin-top:0">Per heading: ' + dcParts.join(" · ") + '</p>';
   fields.forEach(f => {
     const h = d.heads[f[0]];
-    const hasText = (h.text || "").trim() !== "";
+    const fullText = compHeadingFullText(d, f[0]);
+    const hasText = fullText.trim() !== "";
     const pill = h.status === "ready" ? '<span class="pill ready">✓ ready</span>' : (hasText ? '<span class="pill drafted">drafted</span>' : '<span class="pill empty">empty</span>');
     html += '<div class="draft-head" data-draft-head="' + f[0] + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="color:var(--navy)">' + esc(f[1]) + '</b>' + pill + '</div>';
-    if(hasText) html += '<div class="draft-text">' + deepRenderDraftHtml(h.text) + '</div>' + ((d.tables && d.tables[f[0]]) ? wizTableHtml(f[0], d.tables[f[0]]) : '') + '<div style="margin-top:8px"><button class="btn ghost sm" data-comp-revise="' + f[0] + '">💬 Revise ' + esc(f[1]) + '</button></div>';
+    if(hasText) html += '<div class="draft-text">' + deepRenderDraftHtml(fullText) + '</div>' + ((d.tables && d.tables[f[0]]) ? wizTableHtml(f[0], d.tables[f[0]]) : '') + '<div style="margin-top:8px"><button class="btn ghost sm" data-comp-revise="' + f[0] + '">💬 Revise ' + esc(f[1]) + '</button></div>';
     else html += '<p class="small" style="margin-bottom:0">Empty yet — ask for this heading in the follow-up box below.</p>';
+    html += '<div style="margin-top:8px"><button class="btn ghost sm" data-handoff-toggle="' + f[0] + '">📓 Get data from a notebook</button></div>';
+    html += '<div data-ho-wrap="' + f[0] + '"></div>';
     html += '</div>';
   });
   html += wizDraftTrailHtml(kind, d);
@@ -4714,6 +4728,7 @@ function renderCompDraft(){
   html += '<p class="small" style="margin-bottom:0">One click fills every matching Write &amp; Export box for ' + esc(kindLabel) + '. Boxes that already hold your own writing are left untouched — the notice after sending lists exactly what was filled and what was skipped.</p></div>';
   box.innerHTML = html;
   wizBindTables();
+  compHandoffRestoreDraft(kind);
 }
 function compAsk(followQ){
   const topic = ($("comp-topic").value || "").trim();
@@ -4908,7 +4923,7 @@ function wizStart(){
   $("comp-dept").value = "auto"; COMP_STATE.dept = "auto"; compSuggestHint();
   const d = compDraftFor(WIZ.kind);
   d.topic = finalTopic; d.uni = WIZ.manual ? WIZ.uni : ""; d.degree = WIZ.degree; d.words = words;
-  d.trail = []; d.userSources = []; d.tables = {}; d.lr = null; d.lrDone = false; WIZ.lrReview = false;
+  d.trail = []; d.userSources = []; d.tables = {}; d.lr = null; d.lrDone = false; WIZ.lrReview = false; d.studentBlocks = {}; d.studentRefsSection = ""; HO_OPEN_KEY = null; HO_DRAFT = { platform: "", paste: "", note: "" };
   draftFields(WIZ.kind).forEach(f => { d.heads[f[0]] = { text:"", status:"empty" }; });
   WIZ.ctx = wizBuildCtx(finalTopic, words);
   WIZ.buildIdx = 0; WIZ.building = true;
@@ -5250,6 +5265,7 @@ function wizLRShow(){
   });
   h += '<div class="draft-text">' + esc(pt.review) + '</div>';
   h += '<p class="small"><b>Gap:</b></p><div class="draft-text">' + esc(pt.gap) + '</div>';
+  h += compStudentBlocksHtml(d, "literature");
   if(pt.note) h += '<p class="small">✓ ' + esc(pt.note) + '</p>';
   h += '<label for="wiz-lr-quote">Paste a quotation from this pair (optional — it will appear as a block quote in the Word file):</label><input id="wiz-lr-quote" type="text" value="' + esc(pt.quote || "") + '" placeholder="Paste the exact quotation here">';
   h += wizFallbackHtml("lr");
@@ -5257,12 +5273,13 @@ function wizLRShow(){
   h += '<label for="wiz-revise-in">' + esc(t.changePre) + 'Pair ' + (lr.idx + 1) + esc(t.changePost) + '</label><input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">';
   if(lr.idx > 0) h += '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous pair</button></div>';
   else h += '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>';
-  h += '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + (lr.idx + 1 >= Y ? '✓ Final — finish literature review' : esc(t.finalBtn)) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div></div>';
+  h += '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + (lr.idx + 1 >= Y ? '✓ Final — finish literature review' : esc(t.finalBtn)) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div><div style="margin-top:10px"><button class="btn ghost sm" data-handoff-toggle="literature">📓 Get data from a notebook</button></div><div id="wiz-handoff-wrap"></div></div>';
   box.innerHTML = h;
   $("wiz-final-btn").addEventListener("click", wizFinal);
   $("wiz-revise-btn").addEventListener("click", wizRevise);
   $("wiz-prev-btn").addEventListener("click", wizPrevHeading);
   wizBindFallback("lr");
+  compHandoffRestoreWizard("literature");
   box.scrollIntoView({ block:"start" });
 }
 function wizLRNext(){
@@ -5380,6 +5397,259 @@ function wizDraftTrailHtml(kind, d){
   h += '<p class="small" style="margin-bottom:0">The app presents each real source for you to open; it cannot read inside NotebookLM or Shamila pages.</p></div>';
   return h;
 }
+
+/* ---- v44: notebook handoff ---- */
+let HO_OPEN_KEY = null;
+let HO_DRAFT = { platform: "", paste: "", note: "" };
+function compHandoffKind(){
+  return (typeof WIZ !== "undefined" && WIZ.building) ? WIZ.kind : COMP_STATE.kind;
+}
+function compHandoffTopic(d){
+  const a = $("comp-topic"); const b = $("wiz-topic");
+  return (d.topic || "") || ((typeof WIZ !== "undefined" && WIZ.topic) || "") || (a ? a.value.trim() : "") || (b ? b.value.trim() : "") || "";
+}
+function compHandoffDeptName(d){
+  if(typeof WIZ !== "undefined" && WIZ.ctx && WIZ.ctx.deptName) return WIZ.ctx.deptName;
+  const st = COMP_STATE.dept;
+  if(st && st !== "auto"){ const dd = DISCIPLINES.find(x => x.id === st); if(dd) return dd.name; }
+  const t = (d && d.topic) || "";
+  if(t){ try{ const sug = compSuggestDept(t); if(sug) return sug.name; }catch(err){} }
+  return "";
+}
+function compHandoffStyle(){
+  if(typeof WIZ !== "undefined" && WIZ.building){
+    if(WIZ.manual && WIZ.uni) return "University manual of " + WIZ.uni + " (fallback: " + (WIZ.fallback || "APA") + ")";
+    return WIZ.style || COMP_STATE.style;
+  }
+  return COMP_STATE.style;
+}
+function compHandoffLangName(){
+  const l = (typeof WIZ !== "undefined" && WIZ.building) ? WIZ.lang : COMP_STATE.lang;
+  if(l === "ur") return "Urdu (اردو)";
+  if(l === "ar") return "Arabic (العربية)";
+  return "English";
+}
+function compHandoffPlatforms(){
+  const links = []; const seen = {};
+  ISLAMIC_SOURCES.forEach(it => { if(it[0] && it[2] && !seen[it[2]]){ seen[it[2]] = true; links.push({ name: it[0], url: it[2] }); } });
+  return links;
+}
+function compHandoffExtraLinks(d){
+  const links = []; const seen = {};
+  const push = (name, url) => { if(name && url && !seen[url]){ seen[url] = true; links.push({ name: name, url: url }); } };
+  try{
+    let tk = [], jn = [];
+    if(typeof WIZ !== "undefined" && WIZ.ctx){ tk = WIZ.ctx.tk || []; jn = WIZ.ctx.jn || []; }
+    else {
+      const t = (d && d.topic) || "";
+      if(t){
+        const sug = compSuggestDept(t);
+        if(sug){ tk = compToolkit(sug.id, compTokens(t), 3); jn = compJournals(sug.name, compTokens(t), 3); }
+      }
+    }
+    tk.forEach(it => push(it.name, it.url));
+    jn.forEach(it => push(it.name, it.url));
+  }catch(err){}
+  return links;
+}
+function compHandoffPrompt(kind, key){
+  const d = compDraftFor(kind);
+  const topic = compHandoffTopic(d) || "my research topic";
+  const label = fieldLabel(kind, key);
+  const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
+  const dept = compHandoffDeptName(d);
+  const style = compHandoffStyle();
+  const lang = compHandoffLangName();
+  const bank = deepBank(kind, key);
+  const structure = (bank && bank.structure) ? bank.structure.join("; ") : "";
+  const must = (bank && bank.must) ? bank.must.join("; ") : "";
+  const lines = [];
+  lines.push("You are helping me write one heading of my " + kindLabel.toLowerCase() + ".");
+  lines.push("Topic: " + topic + ".");
+  if(dept) lines.push("Field / department: " + dept + ".");
+  lines.push("Heading to complete: " + label + ".");
+  lines.push("Reference style: " + style + ".");
+  lines.push("Answer in " + lang + ".");
+  if(structure) lines.push("Structure this heading as follows: " + structure + ".");
+  if(must) lines.push("This heading must cover: " + must + ".");
+  lines.push("Use ONLY material from the sources in this notebook or platform. Do NOT invent any reference, book, author, volume, page number, or quotation.");
+  lines.push("Give EXACT quotations with the full source details: book name, author, volume and page number. Where a detail is not found in the source, write 'not found' — never guess.");
+  lines.push("Return: (1) organised material for this heading, (2) the exact quotations with full source details, (3) a list of the ORIGINAL books or articles used, each with author, title, volume and page.");
+  return lines.join("\n");
+}
+function compHandoffCardHtml(kind, key){
+  const d = compDraftFor(kind);
+  const label = fieldLabel(kind, key);
+  const platforms = compHandoffPlatforms();
+  const extra = compHandoffExtraLinks(d);
+  const prompt = compHandoffPrompt(kind, key);
+  const lang = (typeof WIZ !== "undefined" && WIZ.building) ? WIZ.lang : COMP_STATE.lang;
+  const note = lang === "ur" ? "ایپ کی تصدیق شدہ نہیں: یہاں جو کچھ آپ پیسٹ کریں گے وہ ایپ سے باہر سے آپ کا اپنا مواد ہے۔ ایپ کبھی یہ دعویٰ نہیں کرتی کہ اس نے نوٹ بک کا صفحہ پڑھا ہے — جمع کرانے سے پہلے ہر اقتباس اور حوالہ خود جانچیں۔"
+    : lang === "ar" ? "غير موثقة من التطبيق: ما تلصقه هنا مادة من خارج التطبيق. التطبيق لا يدعي أبداً أنه قرأ صفحة دفتر — تحقق من كل اقتباس ومرجع بنفسك قبل التقديم."
+    : "Not verified by the app: anything you paste here is YOUR material from outside the app. The app never claims to have read a notebook page — check every quotation and reference yourself before submission. References from your pasted text join References marked student-provided / unverified.";
+  let opts = '<option value="">Platform you used…</option>';
+  platforms.forEach(p => { opts += '<option value="' + esc(p.name) + '"' + (HO_DRAFT.platform === p.name ? ' selected' : '') + '>' + esc(p.name) + '</option>'; });
+  ["ChatGPT", "Gemini", "Another AI"].forEach(n => { opts += '<option value="' + n + '"' + (HO_DRAFT.platform === n ? ' selected' : '') + '>' + n + '</option>'; });
+  let html = '<div class="ho-card" data-ho-key="' + key + '">';
+  html += '<p class="small" style="margin-top:0"><b>📓 Get data for: ' + esc(label) + '</b></p>';
+  html += '<p class="small">Open one of these (real links from this app only):</p>';
+  html += '<p class="small ho-platforms">' + platforms.map(p => '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + '</a>').join(' · ') + '</p>';
+  html += '<p class="small">Inside the Al-Turath NotebookLM Hub, pick the notebook for your field — this app does not hold a separate notebook link per field.</p>';
+  if(extra.length) html += '<p class="small">Also relevant to your topic — open and read: ' + extra.map(p => '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + '</a>').join(' · ') + '</p>';
+  html += '<p class="small">Or open any AI yourself (ChatGPT / Gemini) and paste the prompt there.</p>';
+  html += '<p class="small"><b>Copy this prompt, paste it there, and bring the answer back:</b></p>';
+  html += '<textarea class="ho-prompt" readonly>' + esc(prompt) + '</textarea>';
+  html += '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn goldb" data-handoff-copy="' + key + '">📋 Copy prompt</button></div>';
+  html += '<p class="small" style="margin-top:12px"><b>Paste the data you got:</b></p>';
+  html += '<select class="ho-platform">' + opts + '</select>';
+  html += '<textarea class="ho-paste" placeholder="Paste the material here…">' + esc(HO_DRAFT.paste || "") + '</textarea>';
+  html += '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn goldb" data-handoff-add="' + key + '">➕ Add to this heading</button></div>';
+  html += '<p class="small ho-note" style="margin-top:8px;margin-bottom:0">' + esc(HO_DRAFT.note || "") + '</p>';
+  html += '<p class="small" style="margin-top:8px;margin-bottom:0">⚠️ ' + note + '</p>';
+  html += '</div>';
+  return html;
+}
+function compStudentBlocksHtml(d, key){
+  const blocks = (d.studentBlocks && d.studentBlocks[key]) || [];
+  if(!blocks.length) return "";
+  return blocks.map(b => '<p class="small" style="margin-top:10px;margin-bottom:4px"><b>📥 Provided by the student from ' + esc(b.platform || "a notebook / AI") + ' (not verified by the app — check every quotation and reference before submission):</b></p><div class="draft-text">' + esc(b.text) + '</div>').join("");
+}
+function compHeadingFullText(d, key){
+  const base = (d.heads[key] && d.heads[key].text) || "";
+  const blocks = (d.studentBlocks && d.studentBlocks[key]) || [];
+  if(!blocks.length) return base;
+  return blocks.reduce((acc, b) => acc + "\n\n📥 Provided by the student from " + (b.platform || "a notebook / AI") + " (not verified by the app — check every quotation and reference before submission):\n" + b.text, base);
+}
+function compStudentRefsSection(userSources, lang){
+  const stud = (userSources || []).filter(u => u.studentProvided);
+  if(!stud.length) return "";
+  const head = lang === "ur" ? "طالب علم کی فراہم کردہ حوالہ جات (غیر تصدیق شدہ — جمع کرانے سے پہلے ہر اقتباس اور حوالہ جانچیں):" : lang === "ar" ? "مراجع قدمها الطالب (غير موثقة — تحقق من كل اقتباس ومرجع قبل التقديم):" : "References provided by the student (unverified — check every quotation and reference before submission):";
+  return head + "\n" + stud.map((u, i) => (i + 1) + ". " + u.title + (u.author ? " by " + u.author : "") + (u.year ? " (" + u.year + ")" : "") + (u.url ? " " + u.url : "") + " (Provided by the student — unverified)").join("\n");
+}
+function compParsePastedRefs(pasted){
+  const lines = String(pasted || "").split("\n");
+  const out = []; const seen = {};
+  let inRefs = false;
+  const headerRe = /^\s*(references|works cited|bibliography|حوالہ جات|المراجع|المصادر|مصادر)\s*:?\s*$/i;
+  const bulletRe = /^\s*(?:\d+[.)]|[-•*])\s+(.+)$/;
+  lines.forEach(ln => {
+    const t = ln.trim();
+    if(!t) return;
+    if(headerRe.test(t)){ inRefs = true; return; }
+    let cand = null;
+    if(inRefs) cand = t;
+    else { const m = t.match(bulletRe); if(m && /(https?:\/\/\S+|\b(19|20)\d{2}\b)/.test(m[1])) cand = m[1]; }
+    if(!cand) return;
+    const urlM = cand.match(/https?:\/\/[^\s\)\],;]+/);
+    const url = urlM ? urlM[0].replace(/[.,;]+$/, "") : "";
+    let title = cand.replace(/https?:\/\/[^\s\)\],;]+/g, "").replace(/\s{2,}/g, " ").trim().replace(/^[•\-\*]\s*/, "");
+    if(title.length > 200) title = title.slice(0, 200);
+    if(!title && !url) return;
+    const key = (url || title).toLowerCase();
+    if(seen[key]) return; seen[key] = true;
+    const yM = cand.match(/\b(19|20)\d{2}\b/);
+    out.push({ title: title || url, url: url, author: "", year: yM ? yM[0] : "" });
+  });
+  return out.slice(0, 20);
+}
+function compRefreshReferences(d, kind){
+  const lang = (typeof WIZ !== "undefined" && WIZ.building) ? WIZ.lang : COMP_STATE.lang;
+  if(typeof WIZ !== "undefined" && WIZ.ctx){
+    const rb = deepBuildReferences(WIZ.ctx, d.userSources, COMP_STATE.style, lang);
+    const old = d.heads.references;
+    d.heads.references = { text: rb.text, status: (old && old.status === "ready") ? "ready" : "drafted" };
+    return;
+  }
+  const sec = compStudentRefsSection(d.userSources, lang);
+  if(!sec) return;
+  const oldSec = d.studentRefsSection || "";
+  let cur = (d.heads.references && d.heads.references.text) || "";
+  if(oldSec && cur.indexOf(oldSec) >= 0) cur = cur.replace(oldSec, sec);
+  else if(cur.indexOf(sec) < 0) cur = cur ? cur + "\n\n" + sec : sec;
+  d.studentRefsSection = sec;
+  const old = d.heads.references;
+  d.heads.references = { text: cur, status: (old && old.status === "ready") ? "ready" : "drafted" };
+}
+function compHandoffToggle(key){
+  HO_OPEN_KEY = (HO_OPEN_KEY === key) ? null : key;
+  HO_DRAFT.note = "";
+  compHandoffRefresh();
+}
+function compHandoffRefresh(){
+  renderCompDraft();
+  if(typeof WIZ !== "undefined" && WIZ.building){
+    const d = compDraftFor(WIZ.kind);
+    const fields = draftFields(WIZ.kind);
+    const f = fields[WIZ.buildIdx];
+    if(!f) return;
+    if(wizInLR()) wizLRShow();
+    else wizShowCurrent(f, (d.heads[f[0]] && d.heads[f[0]].text) || "");
+  }
+}
+function compHandoffRestoreDraft(kind){
+  if(!HO_OPEN_KEY) return;
+  const wrap = document.querySelector('[data-ho-wrap="' + HO_OPEN_KEY + '"]');
+  if(wrap) wrap.innerHTML = compHandoffCardHtml(kind, HO_OPEN_KEY);
+}
+function compHandoffRestoreWizard(key){
+  if(HO_OPEN_KEY !== key) return;
+  const w = $("wiz-handoff-wrap");
+  if(w) w.innerHTML = compHandoffCardHtml(WIZ.kind, key);
+}
+function compHandoffCopy(btn){
+  const card = btn.closest(".ho-card");
+  if(!card) return;
+  const ta = card.querySelector(".ho-prompt");
+  if(!ta) return;
+  const text = ta.value;
+  const done = () => { btn.setAttribute("data-copy-done", "ok"); toast("Prompt copied — paste it in the notebook or AI."); };
+  const fallback = () => {
+    try{ ta.focus(); ta.select(); document.execCommand("copy"); btn.setAttribute("data-copy-done", "manual"); toast("Prompt selected — press Ctrl+C to copy, then paste it in the notebook or AI."); }
+    catch(err){ btn.setAttribute("data-copy-done", "manual"); toast("Copy failed — select the prompt text manually."); }
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(fallback); }
+  else fallback();
+}
+function compHandoffAdd(btn){
+  const card = btn.closest(".ho-card");
+  if(!card) return;
+  const key = card.getAttribute("data-ho-key");
+  const kind = compHandoffKind();
+  const d = compDraftFor(kind);
+  const pasteEl = card.querySelector(".ho-paste");
+  const platEl = card.querySelector(".ho-platform");
+  const paste = pasteEl ? pasteEl.value.trim() : "";
+  const platform = platEl ? platEl.value : "";
+  if(!paste){ toast("Paste the data first."); return; }
+  d.studentBlocks = d.studentBlocks || {};
+  d.studentBlocks[key] = d.studentBlocks[key] || [];
+  d.studentBlocks[key].push({ platform: platform || "a notebook / AI", text: paste });
+  const refs = compParsePastedRefs(paste);
+  let added = 0;
+  refs.forEach(r => {
+    const dup = (d.userSources || []).some(u => (r.url && u.url === r.url) || (u.title && u.title.toLowerCase() === r.title.toLowerCase()));
+    if(!dup){ d.userSources = d.userSources || []; d.userSources.push({ title: r.title, url: r.url, author: r.author || "", year: r.year || "", studentProvided: true }); added++; }
+  });
+  if(added){
+    if(typeof WIZ !== "undefined" && WIZ.ctx) WIZ.ctx.userSources = d.userSources;
+    compRefreshReferences(d, kind);
+  }
+  const h = d.heads[key];
+  if(h && h.status === "empty") h.status = "drafted";
+  const msg = "Added to " + fieldLabel(kind, key) + "." + (added ? " " + added + " reference(s) from your text joined References (marked student-provided / unverified)." : " No reference list found in your text — References unchanged.");
+  HO_DRAFT = { platform: platform, paste: "", note: msg };
+  toast("Added to " + fieldLabel(kind, key) + ".");
+  renderCompDraft();
+  if(typeof WIZ !== "undefined" && WIZ.building){
+    if(wizInLR()) wizLRShow();
+    else {
+      const fields = draftFields(WIZ.kind);
+      const f = fields[WIZ.buildIdx];
+      if(f) wizShowCurrent(f, (d.heads[f[0]] && d.heads[f[0]].text) || "");
+    }
+  }
+}
+
 function wizShowCurrent(f, text){
   wizNarrate(f[0]);
   wizBuildProgress();
@@ -5405,13 +5675,15 @@ function wizShowCurrent(f, text){
   if(actions) extra += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + actions + '</div>';
   let fb = "";
   if(key === "references" && deepPairPool(WIZ.ctx, d.userSources || []).length === 0) fb = wizFallbackHtml("ref");
-  box.innerHTML = '<div class="card accent"><h3>✍️ ' + esc(label) + t.draftSuffix + '</h3><div class="draft-text">' + deepRenderDraftHtml(text) + '</div>'
+  const dispText = compHeadingFullText(d, key);
+  box.innerHTML = '<div class="card accent"><h3>✍️ ' + esc(label) + t.draftSuffix + '</h3><div class="draft-text">' + deepRenderDraftHtml(dispText) + '</div>'
     + extra
     + '<p class="small"><b>' + esc(t.approve) + '</b> ' + esc(t.approveSub) + '</p>'
     + '<label for="wiz-revise-in">' + esc(t.changePre) + esc(label) + esc(t.changePost) + '</label>'
     + '<input id="wiz-revise-in" type="text" placeholder="' + esc(t.revisePh) + '">'
     + (WIZ.buildIdx > 0 ? '<div style="margin-top:10px"><button class="btn ghost sm" id="wiz-prev-btn">‹ Previous heading</button></div>' : '')
     + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn goldb" id="wiz-final-btn" style="flex:2">' + esc(t.finalBtn) + '</button><button class="btn ghost" id="wiz-revise-btn" style="flex:1">' + esc(t.reviseBtn) + '</button></div>'
+    + '<div style="margin-top:10px"><button class="btn ghost sm" data-handoff-toggle="' + key + '">📓 Get data from a notebook</button></div><div id="wiz-handoff-wrap"></div>'
     + fb + '</div>';
   $("wiz-final-btn").addEventListener("click", wizFinal);
   $("wiz-revise-btn").addEventListener("click", wizRevise);
@@ -5422,6 +5694,7 @@ function wizShowCurrent(f, text){
   const vt = $("wiz-add-vartable-btn"); if(vt) vt.addEventListener("click", () => wizProposeTable("methodology", ["Variable", "Definition", "Measure"]));
   const ct = $("wiz-add-comptable-btn"); if(ct) ct.addEventListener("click", () => wizProposeTable("discussion", ["Aspect", "This study", "Earlier work"]));
   wizBindTrail();
+  compHandoffRestoreWizard(key);
   if(fb) wizBindFallback("ref");
   box.scrollIntoView({ block:"start" });
 }
@@ -5603,6 +5876,17 @@ function compBindFocus(){
       $("comp-wizard").scrollIntoView({ block:"start" });
     }
   });
+  const secHo = $("view-companion");
+  if(secHo){
+    const saveHo = (e) => {
+      const card = e.target.closest ? e.target.closest(".ho-card") : null;
+      if(!card) return;
+      if(e.target.classList.contains("ho-paste")) HO_DRAFT.paste = e.target.value;
+      if(e.target.classList.contains("ho-platform")) HO_DRAFT.platform = e.target.value;
+    };
+    secHo.addEventListener("input", saveHo);
+    secHo.addEventListener("change", saveHo);
+  }
 }
 compBindFocus();
 function persistWD(){
@@ -5622,7 +5906,7 @@ function compSendDraft(){
   const d = compDraftFor(kind);
   const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
   const fields = draftFields(kind);
-  const nonEmpty = fields.filter(f => (d.heads[f[0]].text || "").trim());
+  const nonEmpty = fields.filter(f => compHeadingFullText(d, f[0]).trim());
   if(!nonEmpty.length){ toast("Your draft is empty yet — ask for a heading first."); return; }
   if(!WD) WD = newWD(kind, lang);
   else if(WD.kind !== kind){
@@ -5634,7 +5918,7 @@ function compSendDraft(){
   const tableKeys = [];
   nonEmpty.forEach(f => {
     const key = f[0];
-    const draftText = (d.heads[key].text || "").trim();
+    const draftText = compHeadingFullText(d, key).trim();
     const cur = (WD.fields[key] || "").trim();
     if(!cur || WD.compFields[key] === cur){ WD.fields[key] = draftText; WD.compFields[key] = draftText; filled.push(f[1]); }
     else skipped.push(f[1]);
@@ -6463,6 +6747,12 @@ function wire(){
   $("comp-ask").addEventListener("click", ()=> compAsk(null));
   $("comp-follow-btn").addEventListener("click", ()=> compAsk($("comp-follow").value.trim()));
   $("view-companion").addEventListener("click", (e)=>{
+    const hoT = e.target.closest("[data-handoff-toggle]");
+    if(hoT){ compHandoffToggle(hoT.dataset.handoffToggle); return; }
+    const hoC = e.target.closest("[data-handoff-copy]");
+    if(hoC){ compHandoffCopy(hoC); return; }
+    const hoA = e.target.closest("[data-handoff-add]");
+    if(hoA){ compHandoffAdd(hoA); return; }
     const rv = e.target.closest("[data-comp-revise]");
     if(rv){ compRevise(rv.dataset.compRevise); return; }
     const put = e.target.closest("[data-comp-put]");

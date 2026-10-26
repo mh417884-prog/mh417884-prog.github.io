@@ -511,7 +511,7 @@ window.__fbBoot = new Promise(function(r){ window.__fbResolve = r; });
   <div class="divider"></div>
   <div style="border:1px dashed var(--c-gold-500);border-radius:12px;padding:10px 12px;background:var(--c-paper)">
     <p style="margin:0 0 4px"><b>📲 ایپ کا لنک محفوظ کریں — ساتھی طلبہ کو بھی بھیجیں</b></p>
-    <p dir="ltr" style="text-align:center;margin:2px 0;font-weight:bold;color:var(--c-primary-700)">ilmi-mashghuliyat.web.app</p>
+    <p dir="ltr" style="text-align:center;margin:2px 0;font-weight:bold;color:var(--c-primary-700)">learnwithmuftihassan.com/ilmi-app</p>
     <button class="btn goldb" onclick="copyAppLink(this)">📋 لنک کاپی کریں</button>
     <p class="small" style="margin:6px 0 0">فون میں ایپ کی صورت لگانے کے لیے: یہی لنک براؤزر میں کھول کر مینو (⋮) سے <b>«Install app / Add to Home Screen»</b> دبائیں — ایپ آپ کے فون کی اسکرین پر آ جائے گی، اسٹور سے ڈاؤن لوڈ کی ضرورت نہیں۔</p>
   </div>
@@ -2533,7 +2533,7 @@ function showMsg(id, txt, ok){
 }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function copyAppLink(btn){
-  const url = 'https://ilmi-mashghuliyat.web.app';
+  const url = 'https://learnwithmuftihassan.com/ilmi-app';
   const done = () => { if(btn){ const t = btn.textContent; btn.textContent = '✅ کاپی ہو گیا'; setTimeout(() => btn.textContent = t, 2000); } };
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done).catch(() => { prompt('لنک کاپی کریں:', url); }); }
   else { prompt('لنک کاپی کریں:', url); }
@@ -3287,7 +3287,7 @@ function resetErrText(e){
    (ایسے صارف کو طالب علم والے گیٹس میں نہیں دھکیلا جاتا)۔
    داخلے کے بعد اگر اکاؤنٹ میں پاس ورڈ نہ ہو تو فوراً «پاس ورڈ بنائیں» اسکرین آتی ہے تاکہ اگلی بار
    عام لاگ ان (ای میل + پاس ورڈ) سے بھی داخلہ ہو سکے۔ users ریکارڈ کا ہونا ایڈمن شناخت کے لیے شرط نہیں۔ */
-const STAFF_APP_URL = 'https://ilmi-mashghuliyat.web.app/';
+const STAFF_APP_URL = 'https://learnwithmuftihassan.com/ilmi-app/';
 async function sendStaffLink(){
   window.__authTouched = true;
   const email = document.getElementById('st-email').value.trim().toLowerCase();
@@ -3649,7 +3649,7 @@ function fcmGuideHtml(){
     '<summary style="cursor:pointer;color:var(--c-primary-900);font-weight:bold">ℹ️ اطلاعات آن کرنے کا طریقہ</summary>' +
     '<div style="margin-top:6px;font-size:.94em;line-height:1.9">' +
     '<p style="margin:0 0 6px"><b>پہلا قدم — ایپ کا بٹن:</b> اوپر دیا گیا بٹن دبائیں؛ براؤزر اجازت مانگے تو <b>Allow</b> کریں — بس، اطلاعات آن ہو جائیں گی۔</p>' +
-    '<p style="margin:0 0 6px"><b>💻 لیپ ٹاپ/کمپیوٹر (Chrome):</b> اگر اجازت نہ ملے یا پہلے Block ہو چکی ہو: (۱) ایڈریس بار کے بائیں طرف تالے والے نشان پر کلک کریں ← Site settings ← Notifications ← <b>Allow</b>؛ یا ایڈریس بار میں <span dir="ltr" style="font-size:.92em">chrome://settings/content/notifications</span> کھول کر «Not allowed» فہرست میں <span dir="ltr">ilmi-mashghuliyat.web.app</span> کو <b>Allow</b> کریں۔ (۲) صفحہ تازہ (Reload) کر کے ایپ کا بٹن دوبارہ دبائیں۔ (۳) Windows میں Chrome کی اطلاعات بھی آن ہوں: Settings ← System ← Notifications ← Google Chrome: On۔</p>' +
+    '<p style="margin:0 0 6px"><b>💻 لیپ ٹاپ/کمپیوٹر (Chrome):</b> اگر اجازت نہ ملے یا پہلے Block ہو چکی ہو: (۱) ایڈریس بار کے بائیں طرف تالے والے نشان پر کلک کریں ← Site settings ← Notifications ← <b>Allow</b>؛ یا ایڈریس بار میں <span dir="ltr" style="font-size:.92em">chrome://settings/content/notifications</span> کھول کر «Not allowed» فہرست میں <span dir="ltr">learnwithmuftihassan.com/ilmi-app</span> کو <b>Allow</b> کریں۔ (۲) صفحہ تازہ (Reload) کر کے ایپ کا بٹن دوبارہ دبائیں۔ (۳) Windows میں Chrome کی اطلاعات بھی آن ہوں: Settings ← System ← Notifications ← Google Chrome: On۔</p>' +
     '<p style="margin:0 0 6px"><b>📱 موبائل (Android — Chrome):</b> (۱) اگر اجازت نہ ملے: ایڈریس بار کے بائیں نشان ← Permissions ← Notifications ← <b>Allowed</b>۔ (۲) فون کی ترتیبات سے Chrome کی اطلاعات بھی آن کریں: Settings ← Apps ← Chrome ← Notifications ← آن۔ (۳) ایپ میں واپس آ کر بٹن دوبارہ دبائیں۔</p>' +
     '<p style="margin:0">اطلاعات آن ہو جائیں تو یہ کارڈ خود بدل کر «اطلاعات فعال ہیں» ہو جائے گا۔</p>' +
     '</div></details>';
@@ -6379,7 +6379,7 @@ function starMeetingBody(r, u){
     'سٹار ٹیم ادارے کے ان نمایاں طلبہ کی ٹیم ہے جو ملک و ملت کے لیے بڑا علمی کام کر رہے ہیں یا کر سکتے ہیں۔ حتمی شمولیت سے پہلے مفتی صاحب آپ سے ایک مختصر انفرادی میٹنگ کرنا چاہتے ہیں۔\n' +
     'سٹار ٹیم ارکان کے لیے مدرسہ ڈاٹ پی کے کی معاونت: ادارہ سازی میں مکمل و انفرادی راہنمائی، یونیورسٹی ملازمت میں معاونت، تحقیق کی اشاعت میں مکمل رہنمائی، تھنک ٹینک و تحقیقی اداروں کے قیام میں مدد، اور بڑی کانفرنسز کے انعقاد میں مرکزی کردار۔\n' +
     'براہِ کرم اپنا مناسب وقت اسی ای میل کے جواب میں یا واٹس ایپ (+92 343 9357535) پر بتا دیں۔ میٹنگ زوم پر ہوگی — انفرادی میٹنگ روم: «آچے» (زوم ربط و پاس کوڈ ایپ کے «مشورہ کیجیے» حصے میں بھی درج ہے)۔\n' +
-    'ایپ کا لنک: https://ilmi-mashghuliyat.web.app\n' +
+    'ایپ کا لنک: https://learnwithmuftihassan.com/ilmi-app\n' +
     '— شعبہ علمی مشغولیت، مدرسہ ڈاٹ پی کے';
 }
 function stToggleEl(id){ const e = document.getElementById(id); if(!e) return; e.style.display = (e.style.display === 'block') ? 'none' : 'block'; }
@@ -12215,7 +12215,7 @@ try{
     /* انتظامیہ و ٹیم: ای میل تصدیقی لنک بھیجنا — واپسی ایپ کے لائیو پتے پر، تکمیل اسی ایپ کے اندر (handleCodeInApp) */
     async sendStaffLink(email){
       try{ auth.languageCode = 'ur'; }catch(e){}
-      await authMod.sendSignInLinkToEmail(auth, email, { url: 'https://ilmi-mashghuliyat.web.app/', handleCodeInApp: true });
+      await authMod.sendSignInLinkToEmail(auth, email, { url: 'https://learnwithmuftihassan.com/ilmi-app/', handleCodeInApp: true });
     },
     isEmailLink(url){ try{ return authMod.isSignInWithEmailLink(auth, url); }catch(e){ return false; } },
     /* تصدیقی لنک کی تکمیل: داخلہ + admins جانچ؛ users ریکارڈ نہ ہو تب بھی ایڈمن راستہ درست چلتا ہے (شناخت صرف admins سے) */

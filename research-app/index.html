@@ -2302,6 +2302,57 @@ function expiryEndOf(n){
 }
 function notExpired(n){ const e = expiryEndOf(n); return e === null || Date.now() <= e; }
 function visibleNews(){ return DB.news.filter(notExpired); }
+/* ---------- News pagination + cache (v46, read-audit fix 2) ----------
+   Live reads: the news listener is capped to the newest 20
+   (orderBy createdAt desc, limit 20 — see subNews in the live adapter);
+   older pages arrive only via "Load more". The breaking bar needs no
+   second read: breakingItems() filters the same loaded docs locally
+   and takes the top 5. Expiry exclusion stays client-side
+   (notExpired in visibleNews): no single server-side expiry field
+   covers all docs — see the adapter note for why a where() would
+   silently drop posts. What the cap saves: every expired doc beyond
+   the newest 20 is never read; only expired docs inside a loaded page
+   are read-then-hidden. Cache: page 1 is kept in localStorage for
+   15 minutes; a fresh cache skips the listener attach, and manual
+   Refresh (appRefresh) clears it so the next attach re-reads. */
+const NEWS_PAGE_SIZE = 20;
+const NEWS_CACHE_KEY = "rwmh-news-cache-v46";
+const NEWS_CACHE_TTL_MS = 15 * 60 * 1000;
+let newsShown = NEWS_PAGE_SIZE;
+let newsExhausted = false;
+let newsFromCache = false;
+function readNewsCache(){
+  try{
+    const raw = localStorage.getItem(NEWS_CACHE_KEY); if(!raw) return null;
+    const c = JSON.parse(raw);
+    if(!c || !Array.isArray(c.docs) || !c.savedAt) return null;
+    if(Date.now() - c.savedAt > NEWS_CACHE_TTL_MS) return null;
+    return c;
+  }catch(e){ return null; }
+}
+function writeNewsCache(docs){
+  try{ localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), docs: docs })); }catch(e){}
+}
+function clearNewsCache(){ try{ localStorage.removeItem(NEWS_CACHE_KEY); }catch(e){} }
+function newsCacheInfo(){
+  let c = null;
+  try{ const raw = localStorage.getItem(NEWS_CACHE_KEY); c = raw ? JSON.parse(raw) : null; }catch(e){}
+  return { key: NEWS_CACHE_KEY, ttlMs: NEWS_CACHE_TTL_MS, pageSize: NEWS_PAGE_SIZE,
+    hasCache: !!c, fresh: !!(c && c.savedAt && Date.now() - c.savedAt <= NEWS_CACHE_TTL_MS),
+    savedAt: c ? c.savedAt : 0, count: c && c.docs ? c.docs.length : 0,
+    shown: newsShown, exhausted: newsExhausted, fromCache: newsFromCache, live: !DEMO_MODE };
+}
+window.__newsCacheInfo = newsCacheInfo;
+async function newsLoadMore(){
+  if(!DEMO_MODE && window.__fbAdapter && window.__fbAdapter.loadMoreNews){
+    await window.__fbAdapter.loadMoreNews();
+  } else {
+    newsShown += NEWS_PAGE_SIZE;
+  }
+  const ov = document.getElementById("view-opps");
+  if(ov && ov.classList.contains("active") && typeof renderOpps === "function") renderOpps(OPP_CAT);
+}
+
 /* The trusted-source cards are app content, not postings: they are merged
    into the feed in LIVE mode too (the demo seed already contains them),
    so every category screen shows its own sources on the live app as well. */
@@ -3279,12 +3330,21 @@ function renderOpps(cat){
     return;
   }
   items = items.filter(n => catOf(n) === cat);
-  const posts = items.filter(n => n.kind !== "source"), srcs = items.filter(n => n.kind === "source");
+  /* v46 pagination: render only the newest newsShown items of this
+     category; older items arrive via "Load more" (live: next server
+     page; demo: the rest of the local list). The Saved tab above is
+     exempt — saved posts always show in full. */
+  const shown = items.slice(0, newsShown);
+  const posts = shown.filter(n => n.kind !== "source"), srcs = shown.filter(n => n.kind === "source");
+  const more = items.length > newsShown || (!DEMO_MODE && !newsExhausted);
   document.getElementById("opps-list").innerHTML =
     (posts.map(oppCard).join("") || "")
     + srcs.map(oppCard).join("")
-    + (items.length ? "" : '<div class="empty">Nothing here yet — new posts appear as soon as they are published.</div>');
+    + (items.length ? "" : '<div class="empty">Nothing here yet — new posts appear as soon as they are published.</div>')
+    + (more ? '<button class="btn" id="opps-load-more" style="width:100%;margin-top:10px">Load more — older posts</button>' : "");
   attachOppListeners();
+  const lm = document.getElementById("opps-load-more");
+  if(lm) lm.addEventListener("click", ()=> newsLoadMore());
 }
 /* ---------- Recommended for you ----------
    HONEST SCOPE: matching uses ONLY the profile department, the degree
@@ -3496,6 +3556,10 @@ function renderHome(){
   document.getElementById("demo-note-home").hidden = !DEMO_MODE;
   renderTopStrip();
   renderBreaking();
+  /* v46 demo: prime the news cache once so the TTL / manual-refresh
+     machinery is observable in demo mode too (live mode writes the
+     cache from the listener snapshot instead). */
+  if(DEMO_MODE){ try{ if(!readNewsCache()) writeNewsCache(DB.news.slice()); }catch(e){} }
   const inv = document.getElementById("home-notif-invite");
   if(inv) inv.hidden = !(asStudent() && !(ME.fcmTokens || []).length && !ME.notifInviteDismissed);
 }
@@ -6454,6 +6518,7 @@ async function tryInstall(){
 
 /* ================= Refresh ================= */
 function appRefresh(){
+  clearNewsCache(); /* v46: manual refresh forces a news re-read on the next attach */
   document.querySelectorAll(".refresh-btn").forEach(b => { b.classList.add("spinning"); b.disabled = true; });
   const reload = () => location.reload();
   if("serviceWorker" in navigator){
@@ -7100,7 +7165,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = authMod.getAuth(app);
     const db = fsMod.getFirestore(app);
-    const { collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, arrayUnion, arrayRemove, runTransaction } = fsMod;
+    const { collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, orderBy, limit, startAfter, arrayUnion, arrayRemove, runTransaction } = fsMod;
     const clean = o => JSON.parse(JSON.stringify(o));
     const authErrText = e => (window.authErrText ? window.authErrText(e) : "Something went wrong — please try again.");
     let pendingGoogleCred = null;   // Google credential captured from an account-exists error, spent by linkGoogle()
@@ -7139,11 +7204,86 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       if(key === "users" && ME){ const fresh = DB.users.find(u => u.email === ME.email); if(fresh) ME = fresh; }
       rerender();
     }
+    /* ---------- News pagination + cache, live side (v46) ----------
+       The news listener is capped: orderBy createdAt desc, limit 20 —
+       the breaking bar draws its top 5 from these same loaded docs
+       (breakingItems() is pure local filtering — no second read).
+       Expiry stays CLIENT-side: no single server-side expiry field
+       covers all docs (expiresAt exists only on automation posts;
+       admin posts carry a free-text deadline like "30 Nov 2026" that
+       Firestore cannot filter as a timestamp, and a where() on
+       expiresAt would silently drop every doc lacking it). Expired
+       docs beyond the newest 20 are therefore never read at all;
+       expired docs inside a loaded page are read but hidden by
+       notExpired() in visibleNews() — same as before, for those.
+       Cache: a fresh (<=15 min) localStorage copy of page 1 skips the
+       listener attach entirely; manual Refresh clears it (appRefresh)
+       so the next attach re-reads. Load more fetches the next page
+       with startAfter (snapshot when available, else the createdAt
+       value) and appends deduped docs. Saved posts older than the
+       loaded pages are fetched individually by id (small lookups) so
+       the Saved tab stays complete. */
+    let newsCursorSnap = null, newsCursorVal = "", newsLoadingMore = false;
+    let savedAttempted = new Set();
+    function subNews(){
+      savedAttempted = new Set(); newsCursorSnap = null; newsCursorVal = "";
+      newsShown = NEWS_PAGE_SIZE; newsFromCache = false;
+      const cached = readNewsCache();
+      if(cached){
+        newsFromCache = true;
+        newsCursorVal = cached.docs.length ? (cached.docs[cached.docs.length-1].createdAt || "") : "";
+        newsExhausted = cached.docs.length < NEWS_PAGE_SIZE;
+        applyColl("news", withSources(cached.docs));
+        fetchMissingSaved();
+        return;
+      }
+      unsubs.push(onSnapshot(query(collection(db,"news"), orderBy("createdAt","desc"), limit(NEWS_PAGE_SIZE)), s => {
+        const docs = s.docs.map(d => Object.assign(d.data(), {id:d.id}));
+        if(s.docs.length){ newsCursorSnap = s.docs[s.docs.length-1]; newsCursorVal = newsCursorSnap.data().createdAt || ""; }
+        newsExhausted = docs.length < NEWS_PAGE_SIZE;
+        applyColl("news", withSources(docs));
+        writeNewsCache(docs);
+        fetchMissingSaved();
+      }, e => console.warn("news snap", e && e.code)));
+    }
+    async function fetchMissingSaved(){
+      if(!ME || !ME.activity || !Array.isArray(ME.activity.oppsSaved)) return;
+      const have = {}; DB.news.forEach(d => have[d.id] = true);
+      const missing = ME.activity.oppsSaved.filter(id => !have[id] && !savedAttempted.has(id));
+      if(!missing.length) return;
+      missing.forEach(id => savedAttempted.add(id));
+      for(const id of missing){
+        try{ const s = await getDoc(doc(db,"news",id)); if(s.exists()){ const d = Object.assign(s.data(), {id:s.id}); if(!DB.news.find(x => x.id === d.id)) DB.news.push(d); } }catch(e){}
+      }
+      rerender();
+    }
+    async function loadMoreNews(){
+      if(newsLoadingMore) return; newsLoadingMore = true;
+      try{
+        const q = newsCursorSnap
+          ? query(collection(db,"news"), orderBy("createdAt","desc"), startAfter(newsCursorSnap), limit(NEWS_PAGE_SIZE))
+          : query(collection(db,"news"), orderBy("createdAt","desc"), startAfter(newsCursorVal), limit(NEWS_PAGE_SIZE));
+        const s = await getDocs(q);
+        const docs = s.docs.map(d => Object.assign(d.data(), {id:d.id}));
+        newsShown += NEWS_PAGE_SIZE;
+        if(!docs.length){ newsExhausted = true; }
+        else {
+          if(docs.length < NEWS_PAGE_SIZE) newsExhausted = true;
+          newsCursorSnap = s.docs[s.docs.length-1];
+          newsCursorVal = newsCursorSnap.data().createdAt || "";
+          const ids = {}; DB.news.forEach(d => ids[d.id] = true);
+          const freshDocs = docs.filter(d => !ids[d.id]);
+          if(freshDocs.length) applyColl("news", withSources(DB.news.concat(freshDocs)));
+        }
+        rerender();
+      }catch(e){ console.warn("load more news", e && e.code); }
+      newsLoadingMore = false;
+    }
     function subAll(){
       stopSubs();
       subSettings();
       unsubs.push(onSnapshot(collection(db,"users"), s => applyColl("users", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("users snap", e && e.code)));
-      unsubs.push(onSnapshot(collection(db,"news"), s => applyColl("news", withSources(s.docs.map(d => Object.assign(d.data(), {id:d.id})))), e => console.warn("news snap", e && e.code)));
+      subNews();
       unsubs.push(onSnapshot(collection(db,"requests"), s => applyColl("requests", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("req snap", e && e.code)));
       unsubs.push(onSnapshot(collection(db,"notifications"), s => applyColl("notifications", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("notif snap", e && e.code)));
     }
@@ -7151,7 +7291,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       stopSubs();
       subSettings();
       unsubs.push(onSnapshot(doc(db,"users",uid), s => { if(s.exists()){ const me = Object.assign(s.data(), {id:s.id}); DB.users = [me]; ME = me; rerender(); } }, e => console.warn("me snap", e && e.code)));
-      unsubs.push(onSnapshot(collection(db,"news"), s => applyColl("news", withSources(s.docs.map(d => Object.assign(d.data(), {id:d.id})))), e => console.warn("news snap", e && e.code)));
+      subNews();
       unsubs.push(onSnapshot(query(collection(db,"requests"), where("email","==",email)), s => applyColl("requests", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("req snap", e && e.code)));
       unsubs.push(onSnapshot(query(collection(db,"notifications"), where("to","in",["all",email])), s => applyColl("notifications", s.docs.map(d => Object.assign(d.data(), {id:d.id}))), e => console.warn("notif snap", e && e.code)));
     }
@@ -7353,6 +7493,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       _performers: null,
       async saveSettings(s){ await setDoc(doc(db,"settings","app"), clean(s || { showTop:true, autoCerts:true }), { merge:true }); },
       async fetchPerformers(){ await fetchPerformers(); },
+      async loadMoreNews(){ await loadMoreNews(); },
       async saveUser(u){ if(u && u.id) await setDoc(doc(db,"users",u.id), clean(u), { merge:true }); },
       async saveNews(n){ await setDoc(doc(db,"news",n.id), clean(n), { merge:true }); },
       async saveRequest(r){ await setDoc(doc(db,"requests",r.id), clean(r), { merge:true }); },

@@ -4222,6 +4222,14 @@ function compToolkit(deptId, toks, cap){
     });
   });
   out.sort((a, b) => b.sc - a.sc);
+  if(!out.length && deptId){
+    /* Department fallback: a suggested department with no token overlap
+       still has its own real toolkit — present it rather than nothing. */
+    const dd = DISCIPLINES.find(d => d.id === deptId);
+    if(dd) ["data", "tools", "publish"].forEach(sec => {
+      (dd[sec] || []).forEach(it => out.push({ name: it[0], desc: it[1], url: it[2], sc: 0, sec: sec }));
+    });
+  }
   return out.slice(0, cap);
 }
 function compJournals(deptName, toks, cap){
@@ -4237,6 +4245,15 @@ function compJournals(deptName, toks, cap){
     });
   });
   out.sort((a, b) => b.sc - a.sc);
+  if(!out.length && deptName && JOURNALS[deptName]){
+    /* Department fallback: the department's own verified journals are
+       real works — without them the draft gets no [N] citations and the
+       Word file gets no footnotes for a whole class of topics. */
+    const jj = JOURNALS[deptName];
+    ["international", "pakistani"].forEach(sec => {
+      (jj[sec] || []).forEach(it => out.push({ name: it.name, desc: (it.note || "") + (it.free === true ? " — Free / open access." : ""), url: it.url, sc: 0, publisher: it.publisher || "" }));
+    });
+  }
   return out.slice(0, cap);
 }
 function compTools(type, toks, cap){
@@ -4269,7 +4286,7 @@ function compMentor(topic, words, kind, style){
   const shapes = {
     article:"Title → Abstract → Introduction → Literature Review → Methodology → Analysis / Discussion → Conclusion → References",
     synopsis:"Title → Introduction → Research Questions → Objectives → Literature Review → Methodology → Chapter Outline → References",
-    thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Analysis / Discussion → Conclusion → References"
+    thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Chapter 1 → Chapter 2 → Chapter 3 → Chapter 4 → Chapter 5 → Analysis / Discussion → Conclusion → References"
   };
   const shape = shapes[kind] || shapes.article;
   const kindLabel = (WRITE_KINDS[kind] && WRITE_KINDS[kind].label) || kind;
@@ -4286,7 +4303,7 @@ function compMentor(topic, words, kind, style){
 const COMP_SHAPES = {
   article:"Title → Abstract → Introduction → Literature Review → Methodology → Analysis / Discussion → Conclusion → References",
   synopsis:"Title → Introduction → Research Questions → Objectives → Literature Review → Methodology → Chapter Outline → References",
-  thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Analysis / Discussion → Conclusion → References"
+  thesis:"Title → Abstract → Introduction → Literature Review → Methodology → Chapter Outline → Chapter 1 → Chapter 2 → Chapter 3 → Chapter 4 → Chapter 5 → Analysis / Discussion → Conclusion → References"
 };
 function draftFields(kind){
   return (WRITE_KINDS[kind] ? WRITE_KINDS[kind].fields : []).filter(f => f[0] !== "author" && f[0] !== "affiliation");
@@ -4309,6 +4326,8 @@ function compHeadingOf(q, kind){
   if(t.indexOf("literature") >= 0) return pick("literature");
   if(t.indexOf("reference") >= 0 || t.indexOf("bibliography") >= 0) return pick("references");
   if(t.indexOf("methodology") >= 0 || t.indexOf("method") >= 0) return pick("methodology");
+  const chM = t.match(/chapter\s*([1-5])\b/);
+  if(chM) return pick("chapter" + chM[1]);
   if(t.indexOf("chapter outline") >= 0 || t.indexOf("outline") >= 0){
     if(has("outline")) return "outline";
     if(kind === "article") return "introduction";
@@ -4353,15 +4372,20 @@ const DEEP_PROMPTS = {
   },
   thesis: {
     title: { share: 0, structure: ["A precise, researchable title"], must: ["Names the group, the place and the period studied; no vague nouns"], sources: "none", quotes: false },
-    abstract: { share: 5, structure: ["Purpose", "Questions", "Method", "Expected contribution"], must: ["Stands alone: a stranger grasps the whole study", "No claims the body does not support"], sources: "none", quotes: false },
+    abstract: { share: 4, structure: ["Purpose", "Questions", "Method", "Expected contribution"], must: ["Stands alone: a stranger grasps the whole study", "No claims the body does not support"], sources: "none", quotes: false },
     keywords: { share: 0, structure: ["Keyword list"], must: ["Terms a database search would actually use"], sources: "none", quotes: false },
-    introduction: { share: 15, structure: ["Context and importance", "Problem statement", "Research gap", "Purpose and significance", "Scope and delimitations"], must: ["Opens with why the topic matters in its field", "States one precise problem, who it affects, and what vagueness costs", "Names the exact gap: setting, group and period not yet examined together", "States purpose and twofold contribution (scholarship + practice)", "Delimits setting, group and period as strengths"], sources: "toolkit", quotes: false },
-    literature: { share: 25, structure: ["Pair reviews", "Gap per pair", "Synthesis"], must: ["Sources reviewed TWO at a time, never one-go", "Each pair ends with its own gap", "Quotations in block-quote form where available", "Only real sources; containers are not cited as works"], sources: "journals+toolkit+islamic", quotes: true },
-    methodology: { share: 20, structure: ["Design and rationale", "Data sources", "Procedure", "Analysis", "Ethics and limitations"], must: ["Design justified from the questions, not asserted", "Data sources named with one line of relevance each", "Analysis organised around the questions", "Limits stated plainly"], sources: "toolkit", quotes: false },
-    outline: { share: 10, structure: ["Chapter-by-chapter plan"], must: ["Every chapter states its focus, the questions it answers, and its sources", "Chapters build on each other in order; no chapter repeats another"], sources: "none", quotes: false },
-    discussion: { share: 15, structure: ["Answers in order", "Comparison with the literature", "Limits", "Implications"], must: ["Answers each question from the findings, in order", "Compares with the literature: agreements AND disagreements", "States limits so no claim exceeds the evidence"], sources: "none", quotes: false },
+    introduction: { share: 13, structure: ["Context and importance", "Problem statement", "Research gap", "Purpose and significance", "Scope and delimitations"], must: ["Opens with why the topic matters in its field", "States one precise problem, who it affects, and what vagueness costs", "Names the exact gap: setting, group and period not yet examined together", "States purpose and twofold contribution (scholarship + practice)", "Delimits setting, group and period as strengths"], sources: "toolkit", quotes: false },
+    literature: { share: 22, structure: ["Pair reviews", "Gap per pair", "Synthesis"], must: ["Sources reviewed TWO at a time, never one-go", "Each pair ends with its own gap", "Quotations in block-quote form where available", "Only real sources; containers are not cited as works"], sources: "journals+toolkit+islamic", quotes: true },
+    methodology: { share: 17, structure: ["Design and rationale", "Data sources", "Procedure", "Analysis", "Ethics and limitations"], must: ["Design justified from the questions, not asserted", "Data sources named with one line of relevance each", "Analysis organised around the questions", "Limits stated plainly"], sources: "toolkit", quotes: false },
+    outline: { share: 5, structure: ["Chapter-by-chapter plan"], must: ["Every chapter states its focus, the questions it answers, and its sources", "Chapters build on each other in order; no chapter repeats another"], sources: "none", quotes: false },
+    chapter1: { share: 4, structure: ["Chapter title and focus", "Questions this chapter answers", "Sources and material", "Chapter argument"], must: ["Opens the thesis: states the problem, the questions and the plan", "Every claim tied to a source the reader can open", "Ends by handing over to Chapter 2"], sources: "toolkit", quotes: false },
+    chapter2: { share: 4, structure: ["Chapter title and focus", "Questions this chapter answers", "Sources and material", "Chapter argument"], must: ["Reviews the literature in pairs, each pair ending with its gap", "Only real sources; containers are not cited as works", "Ends with the synthesis the methodology must answer"], sources: "journals+toolkit+islamic", quotes: true },
+    chapter3: { share: 4, structure: ["Chapter title and focus", "Questions this chapter answers", "Sources and material", "Chapter argument"], must: ["Design justified from the questions, not asserted", "Data sources named with one line of relevance each", "Ethics and limits stated plainly"], sources: "toolkit", quotes: false },
+    chapter4: { share: 4, structure: ["Chapter title and focus", "Questions this chapter answers", "Sources and material", "Chapter argument"], must: ["Answers each question from the findings, in order", "Compares with the literature: agreements AND disagreements", "No claim beyond the evidence"], sources: "none", quotes: false },
+    chapter5: { share: 4, structure: ["Chapter title and focus", "Questions this chapter answers", "Sources and material", "Chapter argument"], must: ["Repeats no new evidence", "Recommendations follow from findings, not wishes", "Names the questions left for further research"], sources: "none", quotes: false },
+    discussion: { share: 10, structure: ["Answers in order", "Comparison with the literature", "Limits", "Implications"], must: ["Answers each question from the findings, in order", "Compares with the literature: agreements AND disagreements", "States limits so no claim exceeds the evidence"], sources: "none", quotes: false },
     conclusion: { share: 5, structure: ["Summary", "Contribution", "Recommendations", "Further research"], must: ["Repeats no new evidence", "Recommendations follow from findings, not wishes"], sources: "none", quotes: false },
-    references: { share: 5, structure: ["Works cited (numbered)", "Collections consulted (not works)"], must: ["Works cited are original titles with publisher and link", "Containers (NotebookLM, Shamila, databases) are NEVER cited as works", "Incomplete metadata marked [verify details: author/year]; nothing invented"], sources: "journals+user", quotes: false }
+    references: { share: 4, structure: ["Works cited (numbered)", "Collections consulted (not works)"], must: ["Works cited are original titles with publisher and link", "Containers (NotebookLM, Shamila, databases) are NEVER cited as works", "Incomplete metadata marked [verify details: author/year]; nothing invented"], sources: "journals+user", quotes: false }
   },
   article: {
     title: { share: 0, structure: ["A precise, researchable title"], must: ["Names the group, the place and the period studied; no vague nouns"], sources: "none", quotes: false },
@@ -4512,11 +4536,16 @@ function deepChunkPairs(pool){
 /* Deepening paragraphs: appended by compDeepDraft until a heading reaches
    its word budget (or the pool runs out). Never repeated within a draft. */
 const DEEP_DEEPEN = {
+  abstract: { en: [
+    "The abstract is written last and read first. It therefore states, in miniature, the whole arc of the study: the problem that made the study necessary, the questions it set out to answer, the method by which it answered them, and the contribution it claims. Nothing appears in the abstract that the body does not deliver, and nothing central to the body is missing from it.",
+    "A reader who has only the abstract should still be able to judge whether the full study is worth reading and citing. That is why the abstract names the setting, the group and the period rather than speaking in general terms: precision here is what separates a summary of this study from a summary of any study on the same theme."
+  ], ur: [], ar: [] },
   introduction: { en: [
     "Two terms need fixing before the argument can proceed. The study uses its key terms in fixed senses throughout: wherever it claims something about the topic, it says what was observed, where, and among whom. This discipline about terms is what allows the findings to be checked by another researcher.",
     "The timing of this study matters. The topic has become more prominent in recent discussion, yet the evidence base has not kept pace with the attention. A study conducted now can therefore do work that a study conducted ten years ago could not: it can test claims that have hardened into assumptions, and it can speak to decisions that are being made at present.",
     "The remainder of this proposal follows the logic of the inquiry itself. It states the questions the study will answer, the objectives that will show whether they have been answered, the literature against which the study positions itself, the method by which evidence will be gathered and judged, and the shape of the chapters that will report the work.",
-    "Every substantive claim in this proposal is tied to a source the reader can open and check. Where the proposal states what is known, it says where that knowledge comes from; where it states what is not known, it says so plainly. This habit — cite what you use, admit what you lack — is the proposal's main protection against the vagueness it criticises."
+    "Every substantive claim in this proposal is tied to a source the reader can open and check. Where the proposal states what is known, it says where that knowledge comes from; where it states what is not known, it says so plainly. This habit — cite what you use, admit what you lack — is the proposal's main protection against the vagueness it criticises.",
+    "The proposal also states, briefly, who should care about the answer and why. A study whose beneficiaries cannot be named is usually a study whose problem has not yet been made precise; naming them — a ministry, a school network, a professional body, a scholarly field — disciplines every later choice the researcher makes."
   ], ur: [
     "اس مطالعے کی ایک اور اہمیت یہ ہے کہ یہ موضوع کو صرف نظری سطح پر نہیں بلکہ عملی میدان میں جانچتا ہے۔ جب کوئی تحقیق اپنے دعووں کو قابلِ مشاہدہ شواہد سے جوڑتی ہے تو اس کے نتائج پر بھروسہ کیا جا سکتا ہے، اور یہی بھروسہ اسے آئندہ تحقیق کی بنیاد بناتا ہے۔"
   ], ar: [
@@ -4525,7 +4554,9 @@ const DEEP_DEEPEN = {
   methodology: { en: [
     "The sample is chosen for what it can teach, not for its size alone. A small, well-chosen sample that matches the research questions teaches more than a large, careless one; the study therefore states who or what is included, who or what is excluded, and why each exclusion is justified.",
     "Every instrument — whether a questionnaire, an interview guide, or a set of categories for reading texts — is described plainly enough for another researcher to reuse it. Where an instrument is borrowed, its source is cited; where it is made for this study, its construction is explained and its pilot test reported.",
-    "Validity is built into the study rather than claimed at the end. Findings are checked against more than one kind of evidence where possible, counter-evidence is reported rather than hidden, and the researcher states plainly where personal expectation might have shaped interpretation."
+    "Validity is built into the study rather than claimed at the end. Findings are checked against more than one kind of evidence where possible, counter-evidence is reported rather than hidden, and the researcher states plainly where personal expectation might have shaped interpretation.",
+    "Triangulation is planned, not hoped for. Where a finding rests on a single source, the study says so; where two or more independent sources converge, the finding is stated with more confidence. The analysis reports the strength of each finding alongside the finding itself, so the reader can weigh the evidence rather than merely receive conclusions.",
+    "The researcher's own position is part of the method and is stated as such: what the researcher expected to find, what access they had to the setting, and what they could not access. A declared position can be discounted by the reader; an undeclared one cannot."
   ], ur: [
     "طریقہ تحقیق کی شفافیت اس مطالعے کی جان ہے۔ اگر کوئی دوسرا محقق انہی ذرائع اور اسی طریقے سے یہ کام دہرائے تو اسے انہی نتائج تک پہنچنا چاہیے؛ یہی دہرائے جانے کی صلاحیت ایک دعوے کو علمی ثبوت بناتی ہے۔"
   ], ar: [
@@ -4534,7 +4565,8 @@ const DEEP_DEEPEN = {
   discussion: { en: [
     "Comparison is the heart of discussion. A finding that agrees with earlier work strengthens it; a finding that disagrees does not weaken the study — it refines the field's understanding, provided the disagreement is explained rather than ignored.",
     "The study's limits are reported as findings in their own right. A limit that is named can be addressed by later work; a limit that is hidden misleads every reader who builds on the study.",
-    "Implications are drawn in two directions: for scholarship, what must now be rethought; and for practice, what should now be done differently. Both are stated as consequences of the findings, not as the researcher's general opinions."
+    "Implications are drawn in two directions: for scholarship, what must now be rethought; and for practice, what should now be done differently. Both are stated as consequences of the findings, not as the researcher's general opinions.",
+    "Each finding is also weighed for what it would mean if it is wrong. A study that states the cost of its own possible error — which recommendation would misfire, which claim would fall — gives its readers the means to use it carefully rather than merely to cite it."
   ], ur: [
     "بحث کا کام نتائج کو سجانا نہیں بلکہ ان کا امتحان ہے۔ ہر نتیجے کو پہلے سوال، پھر ادب، پھر حدود کی کسوٹی پر پرکھا جاتا ہے، تاکہ جو کہا جائے وہ ثبوت سے بڑھ کر نہ ہو۔"
   ], ar: [
@@ -4542,7 +4574,8 @@ const DEEP_DEEPEN = {
   ] },
   conclusion: { en: [
     "The recommendations that follow from this study are deliberately modest. They do not promise what the evidence cannot support; they name the smallest changes that the findings justify, and they say who should make them. Modest recommendations that are actually adopted are worth more than ambitious ones that are not.",
-    "Further research should begin where this study stops: in a different setting, with a different group, or over a longer period. Each of those directions tests whether the present findings travel, and each would strengthen — or correct — the account offered here."
+    "Further research should begin where this study stops: in a different setting, with a different group, or over a longer period. Each of those directions tests whether the present findings travel, and each would strengthen — or correct — the account offered here.",
+    "The conclusion also states plainly what the study did NOT establish. Naming the unanswered questions is not an admission of failure; it is the boundary that makes the answered ones trustworthy, and it hands the next researcher a precise place to begin."
   ], ur: [], ar: [] },
   literature: { en: [], ur: [
     "ادب کا جائزہ محض پرانی تحریروں کی فہرست نہیں ہے بلکہ ایک تنقیدی مکالمہ ہے: ہر ماخذ سے یہ پوچھا جاتا ہے کہ اس نے کیا ثابت کیا، کس طریقے سے ثابت کیا، اور کیا چھوڑ دیا۔ اسی سوال و جواب سے وہ خلا نکلتا ہے جس پر یہ مطالعہ کھڑا ہے۔"
@@ -4551,6 +4584,39 @@ const DEEP_DEEPEN = {
   ] }
 };
 function deepSec(title, body){ return title + "\n" + body; }
+const COMP_CHAPTER_ROLES = [
+  { t: "Introduction \u2014 the problem and the plan",
+    focus: "states the problem, fixes the research questions, delimits the setting, the group and the period, and lays out the plan of the whole thesis",
+    qs: "what exactly is the problem, why does it matter now, and what will count as an answer",
+    arg: "The argument of this chapter runs in three steps. First, it establishes that the topic matters \u2014 in scholarship, because the discussion around it remains general; and in practice, because decisions are being made about it now. Second, it narrows that general concern into one precise problem: how the topic operates in a defined setting, among a defined group, over a defined period. Third, it converts the problem into the study's questions and objectives, and states the standard by which the thesis will be judged: each question answered from evidence, in order, with its limits named. A reader who finishes this chapter should be able to say exactly what the thesis will do and why \u2014 and should be able to hold every later chapter to that promise." },
+  { t: "Literature Review \u2014 what is known and what is missing",
+    focus: "reviews the relevant literature two sources at a time, each pair ending with the gap it leaves, and synthesises the pairs into the study's warrant",
+    qs: "what is already established about the topic, what is contested, and what remains unexamined in this study's setting, group and period",
+    arg: "This chapter's argument is built pair by pair. Each pair of sources is read for what it establishes, the method by which it establishes it, and the gap it leaves; the gaps accumulate into a single, precise warrant for the present study. The chapter refuses two common faults: it does not summarise sources one after another without judging them, and it does not cite containers \u2014 a notebook, a database, a library \u2014 as if they were works. By its end, the reader knows what is established about the topic, what is contested, and what has never been examined in the present study's setting \u2014 and the methodology chapter that follows is designed to examine exactly that." },
+  { t: "Methodology \u2014 how the evidence will be gathered and judged",
+    focus: "justifies the research design from the questions, names the data sources and the procedure, and states how the analysis will be organised and its limits handled",
+    qs: "how will evidence about the topic be gathered, by what rules will it be judged, and what are the study's ethical safeguards and limits",
+    arg: "The chapter argues for its design rather than merely naming it. Each choice \u2014 of design, of sources, of procedure, of analysis \u2014 is justified from the research questions: a choice that cannot be traced back to a question does not belong in the chapter. The chapter also states, before any findings exist, how counter-evidence will be treated and how the study's limits will be reported. This is what makes the findings of the next chapter believable: the reader has seen the rules of evidence before seeing the evidence, and can judge whether the study kept its own rules." },
+  { t: "Analysis and Discussion \u2014 findings against the questions",
+    focus: "reports the findings against the questions in order, compares them with the literature, states the limits plainly, and draws the implications for scholarship and practice",
+    qs: "the study's research questions themselves, from the findings: how the topic is understood and practised, what factors shape it, and what follows from a clearer understanding of it",
+    arg: "This chapter answers the research questions in the order they were asked, and it answers them from the findings alone. Each answer is then tested against the literature of Chapter 2: where the findings agree, both are strengthened; where they disagree, the disagreement is explained, not hidden, because an explained disagreement refines the field's understanding of the topic. The chapter closes by stating the study's limits as findings in their own right and by drawing the implications in two directions \u2014 for scholarship, what must now be rethought; for practice, what should now be done differently." },
+  { t: "Conclusion \u2014 contribution, recommendations and what remains",
+    focus: "summarises the contribution, states the recommendations that follow from the findings, and names the questions left for further research",
+    qs: "what the thesis, taken as a whole, establishes \u2014 what should now be done, by whom, and what should be studied next",
+    arg: "The final chapter gathers the thesis into a short, examinable whole. It summarises what was asked, what was found, and what the findings change; it states the study's contribution in one place, without repeating evidence and without claiming more than the findings support. Its recommendations are deliberately modest and traceable: each one names the finding it follows from and the actor who should carry it out. The chapter ends by naming the questions this study could not answer \u2014 of setting, of group, of period \u2014 as the honest starting point of the research that should follow." }
+];
+function compChapterTextEN(n, ctx){
+  const T = ctx.topic;
+  const role = COMP_CHAPTER_ROLES[n - 1];
+  const srcLines = compLinkLines(ctx).slice(0, 4);
+  const src = srcLines.length ? srcLines.join("\n") : "No dataset source matched this chapter in the app \u2014 add the chapter's sources with 'Add a source yourself' in the wizard; nothing has been invented for it.";
+  return "Chapter " + n + " \u2014 " + role.t
+    + "\n\n" + deepSec("Chapter title and focus", "This chapter " + role.focus + ". It is a separate, examinable part of the thesis: it can be read on its own, criticised on its own, and revised on its own, and it hands over cleanly to " + (n < 5 ? ("Chapter " + (n + 1)) : "the examiners") + ". The chapter's scope is deliberate: it does the work named here and no other chapter's work, so that the thesis as a whole has no gaps and no repetitions.")
+    + "\n\n" + deepSec("Questions this chapter answers", "This chapter answers: " + role.qs + ". It keeps those questions in front of the reader throughout: each section opens from one of them and closes by stating what has been established toward its answer, so the chapter never drifts into general discussion of " + T + ".")
+    + "\n\n" + deepSec("Sources and material", "The chapter is built from the following sources, each of which can be opened and checked:\n" + src + "\nOnly sources actually read are cited in the thesis itself; a source listed here is a working source for this chapter, and the References collect the works finally cited.")
+    + "\n\n" + deepSec("Chapter argument", role.arg);
+}
 function compDeepTextEN(heading, ctx){
   const T = ctx.topic;
   const D = ctx.deptName || "its field";
@@ -4581,6 +4647,8 @@ function compDeepTextEN(heading, ctx){
         + "\n\n" + deepSec("Analysis", "The analysis will be organised around the research questions: each finding will be reported against the question it answers, compared with the literature reviewed, and its limits stated plainly. Analysis is not decoration added after the findings; it is the disciplined comparison of what was found with what was expected and with what others have found.")
         + "\n\n" + deepSec("Ethics and limitations", "Where human participants are involved, consent, confidentiality, and the right to withdraw are observed, and the relevant institutional approval is obtained before data are gathered. Where the study uses texts rather than participants, the same discipline applies in another form: quotations are exact, attributions are complete, and no source is paraphrased into saying what it does not say. The study's limits — of setting, of group, of period, of method — are stated in the conclusion, so that no claim is made beyond what the evidence supports.");
     }
+    case "chapter1": case "chapter2": case "chapter3": case "chapter4": case "chapter5":
+      return compChapterTextEN(parseInt(heading.slice(7), 10), ctx);
     case "outline": {
       if(ctx.kind === "thesis"){
         return "The thesis is organised in five chapters, each answering the question before it and preparing the one after it.\n\nChapter 1 — Introduction: states the problem of " + T + ", the research questions, and the significance of the study. It answers: why does this study need to exist, and what will count as an answer?\n\nChapter 2 — Literature Review: reviews the relevant sources two at a time, each pair ending with its gap, and synthesises them into the study's warrant. It answers: what is known, what is contested, and what remains unexamined?\n\nChapter 3 — Methodology: justifies the research design from the questions, names the data sources, and states how the analysis will be organised and how its limits will be handled. It answers: how will the evidence be gathered and judged?\n\nChapter 4 — Analysis and Discussion: reports the findings against the questions in order, compares them with the literature, states the limits plainly, and draws implications for scholarship and practice. It answers: what was found, and what does it change?\n\nChapter 5 — Conclusion: summarises the contribution, states the recommendations that follow from the findings, and notes the questions left for further research. It answers: what now follows, and what remains to be done?";
@@ -4705,6 +4773,10 @@ function compDraftTextUR(heading, ctx){
       const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
       return "اس تحقیق کا ڈیزائن اس کے تحقیقی سوالات سے براہ راست نکلتا ہے۔ جو سوالات یہ پوچھتے ہیں کہ کسی چیز کو کیسے سمجھا جاتا ہے اور اس پر کیسے عمل ہوتا ہے، ان کے لیے کیفی ڈیزائن موزوں ہے؛ جو سوالات کسی رجحان کے پھیلاؤ کے بارے میں ہیں، ان کے لیے مقداری ڈیزائن موزوں ہے؛ اور جہاں دونوں طرح کے سوالات ہوں، وہاں مخلوط ڈیزائن موزوں ہے۔ محقق کو اپنا منتخب ڈیزائن اور اس کے انتخاب کی وجہ ایک پیراگراف میں بیان کرنی چاہیے۔\n\nذرائع ڈیٹا\n" + (data ? ("یہ تحقیق درج ذیل ذرائع سے استفادہ کرے گی، جن میں سے ہر ایک کھول کر جانچا جا سکتا ہے:\n" + data + "\nبنیادی اور ثانوی ذرائع الگ الگ درج کرنے چاہئیں۔") : "بنیادی اور ثانوی ذرائع الگ الگ درج کریں، ہر ذریعے کا نام اور تحقیق سے اس کی مناسبت ایک سطر میں بیان کریں۔") + "\n\nتجزیہ\nتجزیہ تحقیقی سوالات کے گرد منظم ہوگا: ہر نتیجہ اس سوال کے مقابل بیان ہوگا جس کا وہ جواب دیتا ہے، اس کا ادب کے جائزے سے موازنہ ہوگا، اور اس کی حدود صاف بیان کی جائیں گی۔";
     }
+    case "chapter1": case "chapter2": case "chapter3": case "chapter4": case "chapter5": {
+      const lblU = WIZ_LABELS_UR[heading] || heading;
+      return lblU + " \u2014 " + T + "\n\nیہ باب تھیسز کا الگ اور قابلِ جانچ حصہ ہے: یہ اپنے سوال کا جواب دیتا ہے، اپنے ذرائع کا نام لیتا ہے، اور اگلے باب کی تیاری کرتا ہے \u2014 تاکہ تھیسز میں نہ کوئی خلا رہے نہ تکرار۔ اس باب میں صرف وہی مواد رکھیں جو اسی باب کے سوال سے متعلق ہو؛ جو بات کسی اور باب کی ہے وہ وہیں لکھیں۔ حوالے ہمیشہ اصل کتاب یا مقالے کے دیں؛ کسی نوٹ بک یا ڈیٹا بیس کو بطورِ ماخذ نقل نہ کریں۔" + (links ? "\n\nاس باب کے ذرائع:\n" + links : "");
+    }
     case "outline": return "یہ تحقیق اس ترتیب سے منظم ہے، تاکہ ہر باب اس سے پہلے والے سوال کا جواب دے اور اگلے کی تیاری کرے:\n" + (ctx.kind ? draftFields(ctx.kind).map(f => WIZ_LABELS_UR[f[0]] || f[1]).join("\n") : ctx.shape.split(" → ").join("\n"));
     case "references":
       return links ? ("نیچے دیے گئے حوالہ جات " + T + " سے متعلق اس ایپ کے حقیقی ذرائع ہیں، جو مصنف کے نام کی حروف تہجی کی ترتیب سے " + ctx.style + " انداز میں لکھے گئے ہیں۔ حتمی فہرست میں صرف وہی ذرائع رہنے چاہئیں جو واقعی پڑھے اور حوالہ دیے گئے ہوں۔\n\n" + links + "\n\n" + styleNote)
@@ -4742,6 +4814,10 @@ function compDraftTextAR(heading, ctx){
     case "methodology": {
       const data = ctx.tk.slice(0, 3).map(it => it.name + " — " + it.url).join("\n");
       return "ينبع تصميم هذه الدراسة مباشرة من أسئلتها البحثية: فالأسئلة التي تسأل عن كيفية فهم شيء ما وممارسته يناسبها التصميم الكيفي؛ والأسئلة التي تسأل عن مدى انتشار ظاهرة يناسبها التصميم الكمي؛ وحيث تُطرح الأسئلة بنوعيها، يناسبها التصميم المختلط. وينبغي للباحث أن يذكر التصميم المختار وسبب اختياره في فقرة واحدة.\n\nمصادر البيانات\n" + (data ? ("ستستفيد هذه الدراسة من المصادر التالية، ويمكن فتح كل منها والتحقق منه:\n" + data + "\nوينبغي إدراج المصادر الأولية والثانوية كل على حدة.") : "أدرج المصادر الأولية والثانوية كل على حدة، مع ذكر اسم كل مصدر وصلته بالدراسة في سطر واحد.") + "\n\nالتحليل\nسيُنظم التحليل حول أسئلة البحث: تُعرض كل نتيجة مقابل السؤال الذي تجيب عنه، وتُقارن بالأدبيات المراجعة، وتُذكر حدودها بصراحة.";
+    }
+    case "chapter1": case "chapter2": case "chapter3": case "chapter4": case "chapter5": {
+      const lblA = WIZ_LABELS_AR[heading] || heading;
+      return lblA + " \u2014 " + T + "\n\nهذا الفصل جزء مستقل قابل للفحص من الأطروحة: يجيب عن سؤاله، ويسمي مصادره، ويُعدّ للفصل الذي يليه \u2014 حتى لا يكون في الأطروحة فراغ ولا تكرار. ضع في هذا الفصل فقط ما يتصل بسؤاله؛ وما يخص فصلاً آخر يُكتب فيه. واستشهد دائماً بالكتاب أو المقالة الأصلية؛ ولا تنقل دفتراً أو قاعدة بيانات بوصفها مصدراً." + (links ? "\n\nمصادر هذا الفصل:\n" + links : "");
     }
     case "outline": return "تُنظم هذه الدراسة على النحو التالي، بحيث يجيب كل فصل عن السؤال الذي قبله ويُعدّ للذي بعده:\n" + (ctx.kind ? draftFields(ctx.kind).map(f => WIZ_LABELS_AR[f[0]] || f[1]).join("\n") : ctx.shape.split(" → ").join("\n"));
     case "references":
@@ -5002,8 +5078,8 @@ function wizStart(){
   compSetFocus("build");
   $("wiz-build").scrollIntoView({ block:"start" });
 }
-const WIZ_LABELS_UR = { title:"عنوان", introduction:"تعارف", questions:"تحقیقی سوالات", objectives:"مقاصد", literature:"ادب کا جائزہ", methodology:"طریقہ تحقیق", outline:"ابواب کا خاکہ", references:"حوالہ جات", abstract:"خلاصہ", keywords:"کلیدی الفاظ", discussion:"تجزیہ و بحث", conclusion:"نتیجہ" };
-const WIZ_LABELS_AR = { title:"العنوان", introduction:"المقدمة", questions:"أسئلة البحث", objectives:"أهداف البحث", literature:"مراجعة الأدبيات", methodology:"المنهجية", outline:"مخطط الفصول", references:"المراجع", abstract:"الملخص", keywords:"الكلمات المفتاحية", discussion:"المناقشة والتحليل", conclusion:"الخاتمة" };
+const WIZ_LABELS_UR = { title:"عنوان", introduction:"تعارف", questions:"تحقیقی سوالات", objectives:"مقاصد", literature:"ادب کا جائزہ", methodology:"طریقہ تحقیق", outline:"ابواب کا خاکہ", chapter1:"باب اول", chapter2:"باب دوم", chapter3:"باب سوم", chapter4:"باب چہارم", chapter5:"باب پنجم", references:"حوالہ جات", abstract:"خلاصہ", keywords:"کلیدی الفاظ", discussion:"تجزیہ و بحث", conclusion:"نتیجہ" };
+const WIZ_LABELS_AR = { title:"العنوان", introduction:"المقدمة", questions:"أسئلة البحث", objectives:"أهداف البحث", literature:"مراجعة الأدبيات", methodology:"المنهجية", outline:"مخطط الفصول", chapter1:"الفصل الأول", chapter2:"الفصل الثاني", chapter3:"الفصل الثالث", chapter4:"الفصل الرابع", chapter5:"الفصل الخامس", references:"المراجع", abstract:"الملخص", keywords:"الكلمات المفتاحية", discussion:"المناقشة والتحليل", conclusion:"الخاتمة" };
 function wizLabel(f){ if(WIZ.lang === "ur") return WIZ_LABELS_UR[f[0]] || f[1]; if(WIZ.lang === "ar") return WIZ_LABELS_AR[f[0]] || f[1]; return f[1]; }
 const WIZ_T = {
   en: { approve:"Is this OK, or anything missing or extra?", approveSub:"Tell me below and I'll fix only this heading — or tap Final and I'll move on to the next heading myself.", changePre:"What should change in ", changePost:"? (optional)", revisePh:"e.g. Make it shorter, or: add the Punjab context", draftSuffix:" — your draft", finalBtn:"✓ Final — next heading", reviseBtn:"💬 Revise this heading", complete:"Your draft is complete — ", completeSub:"Every heading is final. One click below sends the full draft to Write & Export — the same single transfer as before: every matching box is filled, and boxes holding your own writing are left untouched.", sendBtn:"📤 Send full draft to Write & Export", restartBtn:"↺ Start a new guided wizard" },
@@ -6119,6 +6195,7 @@ const WRITE_KINDS = {
     ["title","Title","input"],["author","Author name","input"],["affiliation","Affiliation — university · department","input"],
     ["abstract","Abstract","ta"],["keywords","Keywords (comma-separated)","input"],["introduction","Introduction","ta"],
     ["literature","Literature Review","ta"],["methodology","Methodology","ta"],["outline","Chapter Outline","ta"],
+    ["chapter1","Chapter 1","ta"],["chapter2","Chapter 2","ta"],["chapter3","Chapter 3","ta"],["chapter4","Chapter 4","ta"],["chapter5","Chapter 5","ta"],
     ["discussion","Analysis / Discussion","ta"],["conclusion","Conclusion","ta"],["references","References","ta"] ]}
 };
 let WD = null, WRITE_BACK = "view-toolkit", wdTimer = null;

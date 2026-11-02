@@ -278,6 +278,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .status-pill.responded{background:var(--ok-bg);color:var(--ok)}
 .empty{border:1px dashed var(--line-n);border-radius:12px;padding:18px 14px;text-align:center;color:var(--mut);font-size:15px;margin:10px 0;background:#fff}
 .demo-note{font-size:12.5px;color:var(--mut);text-align:center;padding:14px 8px 4px}
+.saved-note{background:#FBF3D9;color:#6B5510;border-bottom:1px solid #C9A227;font-size:13px;text-align:center;padding:8px 12px;line-height:1.55}
+#saved-data-notice[hidden]{display:none}
 .footer-note{font-size:12.5px;color:var(--mut);text-align:center;padding:10px 8px 0}
 /* ---------- Welcome hero + refresh controls ---------- */
 .hero{
@@ -851,6 +853,7 @@ body{background:#E6E2D5}
 </head>
 <body>
 <div id="app">
+  <div id="saved-data-notice" class="saved-note" hidden>📴 Showing saved information — live updates are unavailable right now. · <span class="urn">محفوظ معلومات دکھائی جا رہی ہیں — لائیو تازہ کاریاں اس وقت دستیاب نہیں ہیں</span></div>
 
 <!-- ================= WELCOME ================= -->
 <section class="view" id="view-welcome">
@@ -2321,6 +2324,7 @@ const NEWS_CACHE_TTL_MS = 15 * 60 * 1000;
 let newsShown = NEWS_PAGE_SIZE;
 let newsExhausted = false;
 let newsFromCache = false;
+let newsFromFallback = false;
 function readNewsCache(){
   try{
     const raw = localStorage.getItem(NEWS_CACHE_KEY); if(!raw) return null;
@@ -2334,6 +2338,58 @@ function writeNewsCache(docs){
   try{ localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), docs: docs })); }catch(e){}
 }
 function clearNewsCache(){ try{ localStorage.removeItem(NEWS_CACHE_KEY); }catch(e){} }
+/* ---------- Last-good fallback (v48, resilience) ----------
+   The v46 cache above is a 15-minute fast path. This store has NO TTL:
+   it keeps the newest 60 posts from the last successful live load so
+   that if Firestore becomes unavailable (e.g. the free quota dies
+   mid-day), the app renders this copy — with one subtle bilingual
+   notice — instead of empty screens. Source cards are never stored
+   (they are in-code content, merged back by withSources at render).
+   readLastGood also honours a pre-v48 page-1 cache (TTL ignored):
+   stale data beats no data. */
+const NEWS_LASTGOOD_KEY = "rwmh-news-lastgood-v48";
+const NEWS_LASTGOOD_MAX = 60;
+function writeLastGood(docs){
+  try{
+    const clean = (docs || []).filter(d => d && d.kind !== "source" && String(d.id || "").indexOf("src-") !== 0)
+      .slice().sort((a,b)=> String(b.createdAt || "").localeCompare(String(a.createdAt || ""))).slice(0, NEWS_LASTGOOD_MAX);
+    if(!clean.length) return;
+    localStorage.setItem(NEWS_LASTGOOD_KEY, JSON.stringify({ savedAt: Date.now(), docs: clean }));
+  }catch(e){}
+}
+function readLastGood(){
+  try{
+    const raw = localStorage.getItem(NEWS_LASTGOOD_KEY);
+    if(raw){ const c = JSON.parse(raw); if(c && Array.isArray(c.docs) && c.docs.length) return c; }
+  }catch(e){}
+  try{
+    const raw = localStorage.getItem(NEWS_CACHE_KEY);
+    if(raw){ const c = JSON.parse(raw); if(c && Array.isArray(c.docs) && c.docs.length) return { savedAt: c.savedAt || 0, docs: c.docs }; }
+  }catch(e){}
+  return null;
+}
+function newsFallbackDocs(){ const c = readLastGood(); return c ? c.docs : null; }
+function showSavedNotice(on){ const el = document.getElementById("saved-data-notice"); if(el) el.hidden = !on; }
+function applyNewsFallback(){
+  const docs = newsFallbackDocs();
+  if(!docs || !docs.length || !DB) return false;
+  newsFromFallback = true;
+  newsExhausted = true; /* no live paging while on saved data */
+  DB.news = withSources(docs.slice());
+  showSavedNotice(true);
+  const v = (document.querySelector(".view.active") || {}).id || "";
+  if(v === "view-home" && window.renderHome) renderHome();
+  else if(v === "view-opps" && typeof renderOpps === "function") renderOpps(OPP_CAT);
+  else if(v === "view-admin" && window.renderAdmin) renderAdmin();
+  return true;
+}
+function newsFallbackInfo(){
+  const c = readLastGood();
+  return { key: NEWS_LASTGOOD_KEY, active: newsFromFallback, hasLastGood: !!c,
+    savedAt: c ? c.savedAt : 0, count: c ? c.docs.length : 0, live: !DEMO_MODE };
+}
+window.__newsFallbackInfo = newsFallbackInfo;
+window.__applyNewsFallback = applyNewsFallback;
 function newsCacheInfo(){
   let c = null;
   try{ const raw = localStorage.getItem(NEWS_CACHE_KEY); c = raw ? JSON.parse(raw) : null; }catch(e){}
@@ -3560,6 +3616,7 @@ function renderHome(){
      machinery is observable in demo mode too (live mode writes the
      cache from the listener snapshot instead). */
   if(DEMO_MODE){ try{ if(!readNewsCache()) writeNewsCache(DB.news.slice()); }catch(e){} }
+  if(DEMO_MODE){ try{ writeLastGood(DB.news.slice()); }catch(e){} }
   const inv = document.getElementById("home-notif-invite");
   if(inv) inv.hidden = !(asStudent() && !(ME.fcmTokens || []).length && !ME.notifInviteDismissed);
 }
@@ -7320,8 +7377,10 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
         newsExhausted = docs.length < NEWS_PAGE_SIZE;
         applyColl("news", withSources(docs));
         writeNewsCache(docs);
+        writeLastGood(docs);
+        if(newsFromFallback){ newsFromFallback = false; showSavedNotice(false); }
         fetchMissingSaved();
-      }, e => console.warn("news snap", e && e.code)));
+      }, e => { console.warn("news snap", e && e.code); applyNewsFallback(); }));
     }
     async function fetchMissingSaved(){
       if(!ME || !ME.activity || !Array.isArray(ME.activity.oppsSaved)) return;
@@ -7332,6 +7391,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       for(const id of missing){
         try{ const s = await getDoc(doc(db,"news",id)); if(s.exists()){ const d = Object.assign(s.data(), {id:s.id}); if(!DB.news.find(x => x.id === d.id)) DB.news.push(d); } }catch(e){}
       }
+      writeLastGood(DB.news);
       rerender();
     }
     async function loadMoreNews(){
@@ -7351,6 +7411,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
           const ids = {}; DB.news.forEach(d => ids[d.id] = true);
           const freshDocs = docs.filter(d => !ids[d.id]);
           if(freshDocs.length) applyColl("news", withSources(DB.news.concat(freshDocs)));
+          if(freshDocs.length) writeLastGood(DB.news);
         }
         rerender();
       }catch(e){ console.warn("load more news", e && e.code); }

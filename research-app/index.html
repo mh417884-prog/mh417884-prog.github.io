@@ -1838,6 +1838,15 @@ body{background:#E6E2D5}
     <div class="stat-chip"><b id="adm-stat-total">0</b>Total members</div>
     <div class="stat-chip"><b id="adm-stat-week">0</b>Joined this week</div>
   </div>
+  <h3>📊 Usage Dashboard <span class="small" style="font-weight:400">· اجمالی و تفصیلی جائزہ — کون، کہاں سے، کیا تلاش کیا، کیا فائدہ پایا</span></h3>
+  <p class="small" style="margin:0 0 8px">Visits, searches and the activity timeline are recorded from this update (v51, Nov 2026) onwards. Benefit counts that the app already kept — guides opened, posts viewed &amp; saved, exports, work shared — are shown for the full history. “Where from” uses the country &amp; city each student gave at registration, plus the site copy (website / app) and device of their latest visit.</p>
+    <div class="stat-row">
+    <div class="stat-chip"><b id="adm-stat-today">0</b>Active today</div>
+    <div class="stat-chip"><b id="adm-stat-active7">0</b>Active in 7 days</div>
+    <div class="stat-chip"><b id="adm-stat-visits">0</b>Total visits (v51+)</div>
+    <div class="stat-chip"><b id="adm-stat-searches">0</b>Searches (v51+)</div>
+  </div>
+  <div id="adm-dash"></div>
   <h3>⚙️ App Settings</h3>
   <div class="card">
     <label class="checkrow" style="margin:2px 0"><input type="checkbox" id="adm-top-toggle"><span><b>Show Top Performers on home</b><br><span class="small">The 🏆 strip and leaderboard, ranked by the My Progress score. Turn off to hide them everywhere.</span></span></label>
@@ -2441,6 +2450,7 @@ function uid(){ return "id" + Date.now().toString(36) + Math.random().toString(3
 function nowISO(){ return new Date().toISOString(); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function fmtDate(iso){ try{ return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); }catch(e){ return ""; } }
+function fmtDT(iso){ if(!iso) return "—"; try{ return new Date(iso).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
 
 function seedDB(){
   const t = Date.now();
@@ -2655,6 +2665,21 @@ function normalizeUser(u){
   if(!Array.isArray(u.certificates)) u.certificates = [];
   if(typeof u.photo !== "string") u.photo = "";
   if(typeof u.memberId !== "string") u.memberId = "";
+  /* v51 usage record (admin dashboard): visits, searches, benefit events.
+     Kept inside the member's own doc — no new collection, no extra reads;
+     the admin already loads every member. Arrays are capped so the doc
+     stays small: last 50 searches, last 120 events, last 90 visit-days. */
+  if(!u.usage || typeof u.usage !== "object") u.usage = {};
+  if(typeof u.usage.loginCount !== "number") u.usage.loginCount = 0;
+  if(!Array.isArray(u.usage.loginDays)) u.usage.loginDays = [];
+  if(typeof u.usage.lastLoginAt !== "string") u.usage.lastLoginAt = "";
+  if(typeof u.usage.lastOrigin !== "string") u.usage.lastOrigin = "";
+  if(typeof u.usage.lastDevice !== "string") u.usage.lastDevice = "";
+  if(!Array.isArray(u.usage.searches)) u.usage.searches = [];
+  if(!Array.isArray(u.usage.events)) u.usage.events = [];
+  if(u.usage.searches.length > 50) u.usage.searches.length = 50;
+  if(u.usage.events.length > 120) u.usage.events.length = 120;
+  if(u.usage.loginDays.length > 90) u.usage.loginDays = u.usage.loginDays.slice(-90);
   if(DEMO_MODE && typeof u.emailVerified !== "boolean") u.emailVerified = false;
   if(!u.lastActive) u.lastActive = u.createdAt || nowISO();
   return u;
@@ -2662,6 +2687,61 @@ function normalizeUser(u){
 function touch(){
   if(!ME) return;
   ME.lastActive = nowISO(); persist(); if(FB) FB.saveUser(ME);
+}
+/* ================= v51 — usage tracking (admin dashboard) =================
+   Everything lands on ME.usage and rides the normal saveUser flow.
+   logEvent only mutates — its call sites already persist via touch() or
+   their own save; logSearch and recordVisit persist themselves because a
+   search / a visit may be the only action of a session. */
+function usageOf(u){
+  if(!u) return { loginCount:0, loginDays:[], lastLoginAt:"", lastOrigin:"", lastDevice:"", searches:[], events:[] };
+  if(!u.usage || typeof u.usage !== "object") u.usage = { loginCount:0, loginDays:[], lastLoginAt:"", lastOrigin:"", lastDevice:"", searches:[], events:[] };
+  if(!Array.isArray(u.usage.searches)) u.usage.searches = [];
+  if(!Array.isArray(u.usage.events)) u.usage.events = [];
+  if(!Array.isArray(u.usage.loginDays)) u.usage.loginDays = [];
+  if(typeof u.usage.loginCount !== "number") u.usage.loginCount = 0;
+  return u.usage;
+}
+function deviceLabel(){
+  const ua = String((typeof navigator !== "undefined" && navigator.userAgent) || "");
+  const kind = /Android/i.test(ua) ? "Android phone" : /iPhone/i.test(ua) ? "iPhone" : /iPad/i.test(ua) ? "iPad"
+    : /Windows/i.test(ua) ? "Windows computer" : /Macintosh|Mac OS/i.test(ua) ? "Mac computer"
+    : /Linux/i.test(ua) ? "Linux computer" : (/Mobile/i.test(ua) ? "Mobile" : "Computer / other");
+  const br = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "";
+  return br ? (kind + " · " + br) : kind;
+}
+function logEvent(type, label){
+  if(!ME || !asStudent()) return;
+  const u = usageOf(ME);
+  u.events.unshift({ t:String(type || "use"), label:String(label || "").slice(0, 200), at:nowISO() });
+  if(u.events.length > 120) u.events.length = 120;
+}
+function logSearch(kind, q){
+  q = String(q || "").trim(); if(!q || !ME || !asStudent()) return;
+  const u = usageOf(ME);
+  u.searches.unshift({ q:q.slice(0, 200), kind:String(kind || "Search"), at:nowISO() });
+  if(u.searches.length > 50) u.searches.length = 50;
+  logEvent("search", kind + ": " + q);
+  touch();
+}
+/* One visit per browser session: opening the app while signed in. The
+   sessionStorage guard keeps in-app navigation and reloads of the same
+   session from inflating the count. */
+function recordVisit(){
+  if(!ME || ME.role !== "student") return;
+  try{
+    if(sessionStorage.getItem("rh_visit_v51") === "1") return;
+    sessionStorage.setItem("rh_visit_v51", "1");
+  }catch(e){}
+  const u = usageOf(ME);
+  u.loginCount = (u.loginCount || 0) + 1;
+  const today = new Date().toISOString().slice(0, 10);
+  if(u.loginDays.indexOf(today) < 0){ u.loginDays.push(today); if(u.loginDays.length > 90) u.loginDays = u.loginDays.slice(-90); }
+  u.lastLoginAt = nowISO();
+  try{ u.lastOrigin = location.hostname || ""; }catch(e){ u.lastOrigin = ""; }
+  u.lastDevice = deviceLabel();
+  u.events.unshift({ t:"login", label:"App opened · " + (u.lastOrigin || "app") + " · " + u.lastDevice, at:nowISO() });
+  if(u.events.length > 120) u.events.length = 120;
 }
 /* Assign the next sequential member ID once the profile is complete.
    Demo mode: scanned from the local member list. Live mode: the Firebase
@@ -2685,7 +2765,12 @@ function initialsOf(name){
 function isSaved(id){ return !!(ME && ME.activity && (ME.activity.oppsSaved || []).includes(id)); }
 function trackOppView(id){
   if(!asStudent()) return;
-  if(!ME.activity.oppsViewed.includes(id)){ ME.activity.oppsViewed.push(id); touch(); }
+  if(!ME.activity.oppsViewed.includes(id)){
+    ME.activity.oppsViewed.push(id);
+    const post = (DB.news || []).find(n => n.id === id);
+    logEvent("view", "Opened: " + (post ? post.title : id));
+    touch();
+  }
 }
 function toggleSave(id){
   if(!asStudent()) return;
@@ -2693,6 +2778,7 @@ function toggleSave(id){
   if(ix >= 0){ a.oppsSaved.splice(ix, 1); toast("Removed from your saved list."); }
   else {
     a.oppsSaved.push(id); if(!a.oppsViewed.includes(id)) a.oppsViewed.push(id);
+    { const post = (DB.news || []).find(n => n.id === id); logEvent("save", "Saved: " + (post ? post.title : id)); }
     const post = DB.news.find(n => n.id === id);
     if(post && post.deadline){
       notify(ME.email, "⏰ Deadline reminder — " + post.title,
@@ -3041,7 +3127,7 @@ function recGo(act){
   if(!ME) return;
   if(act === "disc"){
     const id = disciplineOf(ME);
-    if(asStudent() && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
+    if(asStudent() && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); const dd = DISCIPLINES.find(d => d.id === id); logEvent("guide", "Guide opened: " + (dd ? dd.name : id)); touch(); }
     renderDiscipline(id); showView("view-discipline"); return;
   }
   if(act.indexOf("opps:") === 0){ const c = act.slice(5); if(CAT_LABEL[c]){ renderOpps(c); showView("view-opps"); } else { showView("view-hub-opps"); } return; }
@@ -3274,7 +3360,7 @@ function exitPreview(){
 function goAfterLogin(){
   if(!ME) return showView("view-welcome");
   normalizeUser(ME);
-  if(ME.role === "student"){ ME.lastActive = nowISO(); ensureMemberId(ME); persist(); if(FB) FB.saveUser(ME); }
+  if(ME.role === "student"){ ME.lastActive = nowISO(); recordVisit(); ensureMemberId(ME); persist(); if(FB) FB.saveUser(ME); }
   if(ME.role === "admin" && !isPreview()) return showView("view-admin");
   if(isPreview()) return showView("view-home");   /* preview always lands on the student home */
   if(!accessComplete(ME)) return renderGates(), showView("view-gates");
@@ -3644,7 +3730,7 @@ function renderDisciplines(){
   ).join("") + '</div>';
   document.querySelectorAll("[data-disc]").forEach(b => b.addEventListener("click", ()=>{
     const id = b.dataset.disc;
-    if(ME && asStudent() && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); touch(); }
+    if(ME && asStudent() && !ME.activity.guidesOpened.includes(id)){ ME.activity.guidesOpened.push(id); const dd = DISCIPLINES.find(d => d.id === id); logEvent("guide", "Guide opened: " + (dd ? dd.name : id)); touch(); }
     renderDiscipline(id); showView("view-discipline");
   }));
 }
@@ -3701,6 +3787,7 @@ function renderJournalsHome(){
 }
 function openJournalsDept(name){
   const set = JOURNALS[name]; if(!set) return;
+  logEvent("journals", "Journals opened: " + name); if(ME && asStudent()) touch();
   const pk = set.pakistani || [], intl = set.international || [];
   $("jrn-title").textContent = name;
   let html = '<p class="lead">' + pk.length + ' Pakistani and ' + intl.length + ' international journals for ' + esc(name) + ' — tap a journal to open its official site.</p>';
@@ -3924,7 +4011,133 @@ function memberRow(u){
     + (u.memberId ? '<br>Member ID: <b>' + esc(u.memberId) + '</b>' : '')
     + '<br>Registered ' + fmtDate(u.createdAt)
     + (u.role !== "admin" ? ' · WhatsApp: ' + (gatesComplete(u) ? 'joined' : 'not joined') + ' · Identity: ' + (identityComplete(u) ? 'complete' : 'incomplete') : '')
-    + '</div>' + identityBlock(u) + '</div>';
+    + '</div>' + identityBlock(u) + usageDetailHTML(u) + '</div>';
+}
+/* ================= v51 — Admin Usage Dashboard =================
+   Summary + detail, computed live from the member records the admin
+   already loads (DB.users) and DB.news / DB.requests — no extra reads.
+   "Where from" = the country/city given at registration + the site copy
+   and device of the latest recorded visit. Searches & the event timeline
+   exist only from v51 onwards; the older benefit counters (guides,
+   viewed, saved, exports, work) cover the full history. */
+function postTitleById(id){ const n = (DB.news || []).find(x => x.id === id); return n ? n.title : id; }
+function guideNameById(id){ if(id === "islamic") return "Islamic Studies"; const d = DISCIPLINES.find(x => x.id === id); return d ? d.name : id; }
+function topCounts(items, fn, n){
+  const m = new Map();
+  (items || []).forEach(x => { const k = fn(x); if(k == null || String(k).trim() === "") return; const key = String(k); m.set(key, (m.get(key) || 0) + 1); });
+  return Array.from(m.entries()).sort((a, b) => b[1] - a[1]).slice(0, n || 8);
+}
+function dashRows(pairs, total){
+  if(!pairs.length) return '<div class="small">No data yet.</div>';
+  return pairs.map(pr => '<div class="kv"><span>' + esc(pr[0]) + '</span><b>' + pr[1] + (total ? ' · ' + Math.round(pr[1] * 100 / total) + '%' : '') + '</b></div>').join("");
+}
+function usageDetailHTML(u){
+  if(u.role === "admin") return "";
+  const us = usageOf(u), a = u.activity || { guidesOpened:[], oppsViewed:[], oppsSaved:[], exports:0 };
+  const p = computeProgress(u);
+  const titles = (ids, cap) => (ids || []).slice(0, cap).map(id => esc(postTitleById(id))).join(" · ");
+  let h = '<details style="margin-top:8px;border-top:1px solid #e6e9e6;padding-top:6px"><summary class="small" style="cursor:pointer"><b>📊 Usage &amp; benefits — استعمال و فوائد کی تفصیل</b></summary><div class="small" style="margin-top:6px;line-height:1.7">';
+  h += '<div>🕐 Last active: <b>' + esc(fmtDT(u.lastActive)) + '</b>'
+    + (us.lastLoginAt ? ' · Last visit: <b>' + esc(fmtDT(us.lastLoginAt)) + '</b>' : '')
+    + ' · Visits: <b>' + (us.loginCount || 0) + '</b> · Active days: <b>' + (us.loginDays || []).length + '</b>'
+    + (us.lastDevice ? '<br>📱 Latest device: ' + esc(us.lastDevice) : '')
+    + (us.lastOrigin ? ' · Opened from: ' + esc(us.lastOrigin) : '') + '</div>';
+  h += '<div>⭐ Progress: <b>' + p.total + '/100</b> (' + esc(p.level) + ') · Identity: ' + (identityComplete(u) ? 'complete ✓' : 'incomplete')
+    + ' · WhatsApp: ' + ((u.gates && u.gates.group) ? 'group ✓' : 'group —') + ' / ' + ((u.gates && u.gates.channel) ? 'channel ✓' : 'channel —') + '</div>';
+  h += '<div>🎁 <b>Benefits taken:</b> guides opened <b>' + (a.guidesOpened || []).length + '</b>'
+    + ' · posts opened <b>' + (a.oppsViewed || []).length + '</b> · posts saved <b>' + (a.oppsSaved || []).length + '</b>'
+    + ' · Word exports <b>' + (a.exports || 0) + '</b> · documents <b>' + (u.documents || []).length + '</b>'
+    + ' · work shared <b>' + (u.works || []).length + '</b> · researcher accounts <b>' + (u.accounts || []).length + '</b>'
+    + ' · certificates <b>' + (u.certificates || []).length + '</b>'
+    + (u.guideRead ? ' · writing guide completed ✓' : '') + '</div>';
+  if((a.guidesOpened || []).length) h += '<div>🧭 Guides: ' + (a.guidesOpened || []).map(guideNameById).map(esc).join(" · ") + '</div>';
+  if((a.oppsViewed || []).length) h += '<div>👀 Opened: ' + titles(a.oppsViewed, 6) + ((a.oppsViewed || []).length > 6 ? ' · …' : '') + '</div>';
+  if((a.oppsSaved || []).length) h += '<div>★ Saved: ' + titles(a.oppsSaved, 6) + ((a.oppsSaved || []).length > 6 ? ' · …' : '') + '</div>';
+  if((u.documents || []).length) h += '<div>✍️ Documents: ' + (u.documents || []).slice(0, 4).map(d => esc(d.title || d.kind || "document")).join(" · ") + '</div>';
+  if((u.works || []).length) h += '<div>🌟 Work: ' + (u.works || []).slice(0, 4).map(w => esc((w.title || "") + (w.type ? " (" + w.type + ")" : ""))).join(" · ") + '</div>';
+  if((us.searches || []).length){
+    h += '<div>🔎 <b>Recent searches:</b></div>' + (us.searches || []).slice(0, 6).map(s => '<div>• ' + esc(s.q) + ' <span style="color:#8a94a0">— ' + esc(s.kind || "") + ' · ' + esc(fmtDT(s.at)) + '</span></div>').join("");
+  } else {
+    h += '<div>🔎 Searches: none recorded yet (recording started with v51).</div>';
+  }
+  if((us.events || []).length){
+    h += '<div>🕒 <b>Latest activity:</b></div>' + (us.events || []).slice(0, 8).map(e => '<div>• ' + esc(e.label || e.t) + ' <span style="color:#8a94a0">· ' + esc(fmtDT(e.at)) + '</span></div>').join("");
+  }
+  return h + '</div></details>';
+}
+function renderDashboard(){
+  const box = document.getElementById("adm-dash"); if(!box) return;
+  const members = DB.users.filter(u => u.role !== "admin");
+  const total = members.length, now = Date.now(), day = 86400000;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const setChip = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  setChip("adm-stat-today", members.filter(u => String(u.lastActive || "").slice(0, 10) === todayStr || (usageOf(u).loginDays || []).indexOf(todayStr) >= 0).length);
+  setChip("adm-stat-active7", members.filter(u => u.lastActive && (now - new Date(u.lastActive).getTime()) < 7 * day).length);
+  setChip("adm-stat-visits", members.reduce((s, u) => s + (usageOf(u).loginCount || 0), 0));
+  const searchesAll = [];
+  members.forEach(u => (usageOf(u).searches || []).forEach(s => searchesAll.push({ u:u, s:s })));
+  setChip("adm-stat-searches", searchesAll.length);
+  const sumA = fn => members.reduce((s, u) => s + fn(u.activity || { guidesOpened:[], oppsViewed:[], oppsSaved:[], exports:0 }, u), 0);
+  /* --- searches: top queries --- */
+  const qm = new Map();
+  searchesAll.forEach(x => {
+    const k = String(x.s.q || "").trim().toLowerCase(); if(!k) return;
+    if(!qm.has(k)) qm.set(k, { label:x.s.q, n:0, who:new Set() });
+    const e = qm.get(k); e.n++; e.who.add(x.u.email);
+  });
+  const topQ = Array.from(qm.values()).sort((a, b) => b.n - a.n).slice(0, 10);
+  const recentSearches = searchesAll.slice().sort((a, b) => String(b.s.at).localeCompare(String(a.s.at))).slice(0, 12);
+  /* --- benefits aggregates --- */
+  const viewedPairs = topCounts(members.flatMap(u => (u.activity && u.activity.oppsViewed) || []), id => postTitleById(id), 8);
+  const savedPairs = topCounts(members.flatMap(u => (u.activity && u.activity.oppsSaved) || []), id => postTitleById(id), 8);
+  const guidePairs = topCounts(members.flatMap(u => (u.activity && u.activity.guidesOpened) || []), id => guideNameById(id), 8);
+  /* --- recent activity across everyone --- */
+  const eventsAll = [];
+  members.forEach(u => (usageOf(u).events || []).forEach(e => eventsAll.push({ u:u, e:e })));
+  const recentEvents = eventsAll.sort((a, b) => String(b.e.at).localeCompare(String(a.e.at))).slice(0, 20);
+  /* --- progress --- */
+  const scores = members.map(u => computeProgress(u).total);
+  const avg = scores.length ? Math.round(scores.reduce((s, x) => s + x, 0) / scores.length) : 0;
+  const dist = [["Getting Started (<40)", scores.filter(x => x < 40).length], ["Active Researcher (40–74)", scores.filter(x => x >= 40 && x < 75).length], ["Research Star (75+)", scores.filter(x => x >= 75).length]];
+  const benefitTiles = [
+    ["🧭 Discipline guides opened", sumA(a => (a.guidesOpened || []).length)],
+    ["👀 Opportunity posts opened", sumA(a => (a.oppsViewed || []).length)],
+    ["★ Posts saved", sumA(a => (a.oppsSaved || []).length)],
+    ["⬇ Word documents exported", sumA(a => a.exports || 0)],
+    ["✍️ Documents in Write & Export", members.reduce((s, u) => s + (u.documents || []).length, 0)],
+    ["🌟 Academic work shared", members.reduce((s, u) => s + (u.works || []).length, 0)],
+    ["🔗 Researcher accounts ticked", members.reduce((s, u) => s + (u.accounts || []).length, 0)],
+    ["🏅 Certificates earned", members.reduce((s, u) => s + (u.certificates || []).length, 0)],
+    ["💬 Requests sent to Mufti", (DB.requests || []).length],
+    ["🔎 Searches recorded (v51+)", searchesAll.length]
+  ];
+  let h = "";
+  h += '<div class="card"><h3 style="margin-top:0">🌍 کہاں سے؟ — Where students come from</h3>'
+    + '<div class="small" style="margin-bottom:4px"><b>By country</b></div>' + dashRows(topCounts(members, u => u.country, 10), total)
+    + '<div class="small" style="margin:10px 0 4px"><b>By city (top)</b></div>' + dashRows(topCounts(members, u => u.city, 8), 0)
+    + '<div class="small" style="margin:10px 0 4px"><b>By university (top)</b></div>' + dashRows(topCounts(members, u => u.university, 8), 0)
+    + '<div class="small" style="margin:10px 0 4px"><b>By department</b></div>' + dashRows(topCounts(members, u => u.dept, 10), total)
+    + '<div class="small" style="margin:10px 0 4px"><b>By degree level</b></div>' + dashRows(topCounts(members, u => u.degree, 8), total)
+    + '</div>';
+  h += '<div class="card"><h3 style="margin-top:0">🔎 کیا تلاش کیا؟ — What students search</h3>'
+    + (topQ.length
+        ? '<div class="small" style="margin-bottom:4px"><b>Most searched topics / questions</b></div>' + topQ.map(q => '<div class="kv"><span>' + esc(q.label) + '</span><b>' + q.n + '× · ' + q.who.size + ' student' + (q.who.size === 1 ? '' : 's') + '</b></div>').join("")
+          + '<div class="small" style="margin:10px 0 4px"><b>Most recent searches</b></div>' + recentSearches.map(x => '<div class="small" style="padding:3px 0;border-bottom:1px solid #eef1ee"><b>' + esc(x.u.name) + '</b> — ' + esc(x.s.q) + ' <span style="color:#8a94a0">(' + esc(x.s.kind || "") + ' · ' + esc(fmtDT(x.s.at)) + ')</span></div>').join("")
+        : '<div class="small">No searches recorded yet. Recording started with this update (v51) — every Research Companion question and Guided Builder topic will appear here, with the student’s name.</div>')
+    + '</div>';
+  h += '<div class="card"><h3 style="margin-top:0">🎁 کیا فائدہ حاصل کیا؟ — Benefits students take</h3>'
+    + '<div class="stat-row">' + benefitTiles.map(b => '<div class="stat-chip"><b>' + b[1] + '</b>' + esc(b[0]) + '</div>').join("") + '</div>'
+    + '<div class="small" style="margin:10px 0 4px"><b>Most opened posts</b></div>' + dashRows(viewedPairs, 0)
+    + '<div class="small" style="margin:10px 0 4px"><b>Most saved posts</b></div>' + dashRows(savedPairs, 0)
+    + '<div class="small" style="margin:10px 0 4px"><b>Most opened discipline guides</b></div>' + dashRows(guidePairs, 0)
+    + '<div class="small" style="margin:10px 0 4px"><b>Progress scores</b> — average <b>' + avg + '/100</b></div>' + dashRows(dist, total)
+    + '</div>';
+  h += '<div class="card"><h3 style="margin-top:0">🕒 تازہ ترین سرگرمی — Latest activity (all students)</h3>'
+    + (recentEvents.length
+        ? recentEvents.map(x => '<div class="small" style="padding:3px 0;border-bottom:1px solid #eef1ee"><b>' + esc(x.u.name) + '</b> — ' + esc(x.e.label || x.e.t) + ' <span style="color:#8a94a0">· ' + esc(fmtDT(x.e.at)) + '</span></div>').join("")
+        : '<div class="small">No activity timeline yet — it builds from this update (v51) as students open the app, search, open and save posts, export documents and share work.</div>')
+    + '<p class="small" style="margin:8px 0 0">Per-student detail — full profile, searches and activity — is under each name in <b>👥 Members</b> below: tap “📊 Usage &amp; benefits”.</p></div>';
+  box.innerHTML = h;
 }
 function renderAdmin(){
   if(!ME || ME.role !== "admin") return;
@@ -3933,6 +4146,7 @@ function renderAdmin(){
   document.getElementById("adm-stat-total").textContent = members.length;
   document.getElementById("adm-stat-week").textContent = members.filter(u => new Date(u.createdAt).getTime() >= weekAgo).length;
   renderAdminMembers();
+  renderDashboard();
   const reqs = DB.requests.filter(r => ["Consultation","Study Abroad"].indexOf(r.type) >= 0).slice().sort((a,b)=> (a.createdAt < b.createdAt ? 1 : -1));
   document.getElementById("adm-requests").innerHTML = reqs.length ? reqs.map(r => requestHTML(r, true)).join("") : '<div class="empty">No consultation or study-abroad requests yet.</div>';
   document.querySelectorAll("[data-respond]").forEach(b => b.addEventListener("click", ()=> adminRespond(b.dataset.respond)));
@@ -4210,7 +4424,7 @@ function renderHelp(){
   } else {
     w.innerHTML = '<p class="small" style="margin-bottom:8px">Read all ten steps above, then mark it here — it is 5 points of your progress score, and the method you will use for every piece of research from now on.</p><button class="btn goldb" id="guide-done-btn">I have read the full guide ✓</button>';
     $("guide-done-btn").addEventListener("click", async ()=>{
-      ME.guideRead = true; persist();
+      ME.guideRead = true; logEvent("guide", "Completed the Research & Writing Help guide"); persist();
       if(FB) await FB.saveUser(ME);
       renderHelp();
       toast("Guide completed ✓ — 5 points added to your progress.");
@@ -4950,6 +5164,7 @@ function compAsk(followQ){
   const topic = ($("comp-topic").value || "").trim();
   const q = (followQ || topic || "").trim();
   if(!q){ toast("Write your topic or question first."); return; }
+  logSearch(followQ ? "Companion follow-up" : "Research Companion", q);
   const words = parseInt(($("comp-words").value || ""), 10) || null;
   const st = COMP_STATE;
   let deptId = st.dept;
@@ -5125,6 +5340,7 @@ function wizStart(){
     if(!u){ toast("Write your university's name."); wizShow(3); return; }
     WIZ.uni = u;
   }
+  logSearch("Guided builder (" + WIZ.kind + ")", finalTopic);
   WIZ.topic = finalTopic; WIZ.field = field;
   const words = parseInt(($("wiz-words").value || ""), 10) || null;
   WIZ.words = words;
@@ -6892,7 +7108,7 @@ function wire(){
   $("toolkit-islamic-btn").addEventListener("click", ()=> openIslamic("view-toolkit"));
   $("islamic-back").addEventListener("click", ()=> showView(ISLAMIC_BACK));
   $("islamic-disc-btn").addEventListener("click", ()=>{
-    if(ME && asStudent() && !ME.activity.guidesOpened.includes("islamic")){ ME.activity.guidesOpened.push("islamic"); touch(); }
+    if(ME && asStudent() && !ME.activity.guidesOpened.includes("islamic")){ ME.activity.guidesOpened.push("islamic"); logEvent("guide", "Guide opened: Islamic Studies"); touch(); }
     renderDiscipline("islamic"); showView("view-discipline");
   });
   $("home-help-btn").addEventListener("click", ()=> btnHelp("view-hub-research"));
@@ -7000,6 +7216,7 @@ function wire(){
       setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 900);
       WD.exports = (WD.exports || 0) + 1;
       ME.activity.exports = (ME.activity.exports || 0) + 1;
+      logEvent("export", "Document exported: " + (WD.title || WD.kind || "document"));
       ME.lastActive = nowISO();
       const ix = (ME.documents || []).findIndex(d => d.id === WD.id);
       if(ix >= 0) ME.documents[ix] = WD;
@@ -7133,8 +7350,9 @@ function wire(){
     a.href = u.identity.cvData; a.download = u.identity.cvName || "CV"; a.click();
   });
   $("adm-export").addEventListener("click", ()=>{
-    const rows = [["Name","Email","University","Department","Degree","Country","City","WhatsApp","Status","Registered","Gates complete"].join(",")];
-    DB.users.filter(u => u.role !== "admin").forEach(u => rows.push([u.name,u.email,u.university,u.dept,u.degree,u.country,u.city,u.whatsapp,u.status,fmtDate(u.createdAt),accessComplete(u)?"Yes":"No"].map(x => '"' + String(x||"").replace(/"/g,'""') + '"').join(",")));
+    const rows = [["Name","Email","Member ID","University","Department","Degree","Country","City","WhatsApp","Status","Registered","Identity complete","Last active","Last visit","Visits","Active days","Latest device","Opened from","Progress score","Level","Guides opened","Posts opened","Posts saved","Word exports","Documents","Work shared","Accounts ticked","Certificates","Searches recorded","Recent searches"].join(",")];
+    DB.users.filter(u => u.role !== "admin").forEach(u => { const us = usageOf(u), a = u.activity || { guidesOpened:[], oppsViewed:[], oppsSaved:[], exports:0 }, pr = computeProgress(u);
+      rows.push([u.name,u.email,u.memberId || "",u.university,u.dept,u.degree,u.country,u.city,u.whatsapp,u.status,fmtDate(u.createdAt),accessComplete(u)?"Yes":"No",fmtDT(u.lastActive),fmtDT(us.lastLoginAt),(us.loginCount || 0),(us.loginDays || []).length,us.lastDevice || "",us.lastOrigin || "",pr.total,pr.level,(a.guidesOpened || []).length,(a.oppsViewed || []).length,(a.oppsSaved || []).length,(a.exports || 0),(u.documents || []).length,(u.works || []).length,(u.accounts || []).length,(u.certificates || []).length,(us.searches || []).length,(us.searches || []).slice(0, 5).map(s => s.q).join(" ; ")].map(x => '"' + String(x == null ? "" : x).replace(/"/g,'""') + '"').join(",")); });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([rows.join("\n")], {type:"text/csv"})); a.download = "members.csv"; a.click();
     setTimeout(()=> URL.revokeObjectURL(a.href), 3000);
@@ -7173,6 +7391,7 @@ function wire(){
     ok = showErr("err-work-date", !date) && ok;
     if(!ok) return;
     if(!Array.isArray(ME.works)) ME.works = [];
+    logEvent("work", "Work shared: " + title + " (" + type + ")");
     ME.works.push({ id:uid(), title:title, type:type, date:date,
       desc:$("work-desc").value.trim(), link:$("work-link").value.trim(),
       fileName: workFile ? workFile.name : "", fileData: workFile ? workFile.data : "",
@@ -7209,7 +7428,7 @@ function wire(){
     if(!id || !ME) return;
     if(!Array.isArray(ME.accounts)) ME.accounts = [];
     const ix = ME.accounts.indexOf(id);
-    if(e.target.checked && ix < 0) ME.accounts.push(id);
+    if(e.target.checked && ix < 0){ ME.accounts.push(id); const acc = HUB_ACCOUNTS.find(a => a[0] === id); logEvent("account", "Must-have account ticked: " + (acc ? acc[1] : id)); }
     if(!e.target.checked && ix >= 0) ME.accounts.splice(ix, 1);
     touch();
     renderHubAccounts();
@@ -7238,6 +7457,7 @@ function wire(){
       status:"open", response:"", createdAt:nowISO() };
     DB.requests.unshift(r); persist(); if(FB) FB.saveRequest(r);
     notifyAdmin("New Study Abroad request", ME.name + " — " + r.topic); persist();
+    logEvent("request", "Study Abroad request: " + r.topic);
     const m = $("hub-sa-ok"); m.className = "msg ok";
     m.textContent = "Sent to Mufti. His reply will appear under My Profile → My Requests.";
     e.target.reset(); $("hub-sa-other-wrap").hidden = true;
@@ -7253,6 +7473,7 @@ function submitRequest(o){
   if(!ok || !ME) return;
   const r = { id:uid(), email:ME.email, name:ME.name, topic:o.topic, type:o.type, lang:o.lang, message:o.message,
               status:"open", response:"", createdAt:nowISO() };
+  logEvent("request", o.type + " request: " + o.topic);
   DB.requests.unshift(r); persist(); if(FB) FB.saveRequest(r);
   notifyAdmin("New " + o.type + " request", ME.name + " — " + o.topic); persist();
   const m = $(o.okEl); m.className = "msg ok";
@@ -7564,6 +7785,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
           degree:data.degree, country:data.country, city:data.city, whatsapp:data.whatsapp,
           gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""},
           memberId:"", photo:"", lastActive:new Date().toISOString(),
+          usage:{loginCount:0,loginDays:[],lastLoginAt:"",lastOrigin:"",lastDevice:"",searches:[],events:[]},
           activity:{guidesOpened:[],oppsViewed:[],oppsSaved:[],exports:0}, documents:[], works:[], accounts:[], certificates:[],
           createdAt:new Date().toISOString(), fcmTokens:[] };
         await setDoc(doc(db,"users",c.user.uid), clean(u));
@@ -7624,6 +7846,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
           degree:data.degree, country:data.country, city:data.city, whatsapp:data.whatsapp,
           gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""},
           memberId:"", photo:data.photo || "", lastActive:new Date().toISOString(),
+          usage:{loginCount:0,loginDays:[],lastLoginAt:"",lastOrigin:"",lastDevice:"",searches:[],events:[]},
           activity:{guidesOpened:[],oppsViewed:[],oppsSaved:[],exports:0}, documents:[], works:[], accounts:[], certificates:[],
           createdAt:new Date().toISOString(), fcmTokens:[] };
         await setDoc(doc(db, "users", user.uid), clean(u));

@@ -855,6 +855,15 @@ body{background:#E6E2D5}
 <div id="app">
   <div id="saved-data-notice" class="saved-note" hidden>📴 Showing saved information — live updates are unavailable right now. · <span class="urn">محفوظ معلومات دکھائی جا رہی ہیں — لائیو تازہ کاریاں اس وقت دستیاب نہیں ہیں</span></div>
 
+<!-- ================= SPLASH (live session restore, v50) ================= -->
+<section class="view" id="view-splash">
+  <div class="center" style="padding-top:16vh">
+    <img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="" style="width:96px;height:96px;border-radius:20px">
+    <h1 style="margin-top:12px">Research with Mufti Hassan</h1>
+    <p class="small">Loading… · <span class="ur" style="font-size:15px">لوڈ ہو رہا ہے…</span></p>
+  </div>
+</section>
+
 <!-- ================= WELCOME ================= -->
 <section class="view" id="view-welcome">
   <div class="hero">
@@ -874,11 +883,11 @@ body{background:#E6E2D5}
   <button class="btn ghost info-btn" id="btn-howto" aria-expanded="false" aria-controls="howto-panel"><span>📖 How to use</span><span class="ht-chev" aria-hidden="true">▾</span></button>
   <div class="info-panel" id="howto-panel" hidden>
     <div class="guide-step"><div class="gn">1</div><div class="gt"><b>Create your free account</b> — tap the button above; it takes a minute.</div></div>
-    <div class="guide-step"><div class="gn">2</div><div class="gt"><b>Verify your email</b> — tap the link we send you, then press “I've verified”.</div></div>
+    <div class="guide-step"><div class="gn">2</div><div class="gt"><b>No email verification</b> — register and start right away; there is nothing to wait for.</div></div>
     <div class="guide-step"><div class="gn">3</div><div class="gt"><b>Join the WhatsApp group &amp; follow the channel</b> (optional — recommended).</div></div>
     <div class="guide-step"><div class="gn">4</div><div class="gt"><b>Complete your profile</b> — CV, LinkedIn &amp; Google Scholar (required).</div></div>
     <div class="guide-step"><div class="gn">5</div><div class="gt"><b>Explore</b> jobs, scholarships, conferences &amp; your discipline's research toolkit.</div></div>
-    <div class="ur guide-ur">پہلے اکاؤنٹ بنائیں، ای میل کی تصدیق کریں، پھر چاہیں تو واٹس ایپ گروپ و چینل سے جُڑیں، اور اپنی پروفائل مکمل کریں — اور مواقع سے فائدہ اٹھائیں۔</div>
+    <div class="ur guide-ur">پہلے اکاؤنٹ بنائیں — ای میل کی تصدیق کی ضرورت نہیں — پھر چاہیں تو واٹس ایپ گروپ و چینل سے جُڑیں، اور اپنی پروفائل مکمل کریں — اور مواقع سے فائدہ اٹھائیں۔</div>
   </div>
   <button class="btn ghost info-btn" id="btn-who" aria-expanded="false" aria-controls="who-panel"><span>🎓 Who is this app for?</span><span class="ht-chev" aria-hidden="true">▾</span></button>
   <div class="info-panel" id="who-panel" hidden>
@@ -895,7 +904,8 @@ body{background:#E6E2D5}
 <section class="view" id="view-register">
   <div class="topbar"><button class="tbtn" data-back="view-welcome">‹ Back</button><div class="ttl">Create Account</div><span style="width:44px"></span></div>
   <h2>Register — it takes a minute</h2>
-  <p class="small">Fill in your details. After registering, we email you a verification link — tap it, then complete two quick steps (community + academic identity) and you are in.</p>
+  <p class="small">Fill in your details. <b>No email verification is needed</b> — after registering, complete two quick steps (community + academic identity) and you are in.</p>
+  <div class="ur" style="font-size:15px">ای میل کی تصدیق کی ضرورت نہیں — رجسٹر کریں اور فوراً شروع کریں۔</div>
   <div class="notice"><p style="margin:0"><b>Just for non-Ulama university students.</b></p><p style="margin:6px 0 0">Ulama university students — please log in with the <a id="register-ulama-link" href="#" target="_blank" rel="noopener">Ilmi Mashghuliyat app</a>.</p></div>
   <div class="notice" id="reg-google-note" hidden><p style="margin:0"><b>✓ Signed in with Google</b> as <b id="reg-google-email"></b>. Just complete your student profile below — no password and no email verification needed, because Google has already verified your email.</p><div class="ur" style="font-size:15px;margin-top:6px">آپ Google سے سائن اِن ہیں — بس ذیل میں طالب علم پروفائل مکمل کریں؛ نہ پاس ورڈ چاہیے نہ ای میل تصدیق، کیونکہ Google آپ کی ای میل پہلے ہی تصدیق کر چکا ہے۔</div></div>
   <form id="reg-form" novalidate>
@@ -995,31 +1005,10 @@ body{background:#E6E2D5}
   </div>
 </section>
 
-<!-- ================= VERIFY EMAIL ================= -->
-<section class="view pad-top" id="view-verify">
-  <div class="center">
-    <img src="https://research-with-mufti-hassan.web.app/assets/logo.png" alt="" style="width:84px;height:84px;border-radius:18px">
-    <h1 style="margin-top:10px">Verify your email</h1>
-  </div>
-  <div class="card accent">
-    <p>We have sent a verification link to <b id="verify-email"></b>. Open your inbox (and check the spam / promotions folder), tap the link, then come back here and press the button below.</p>
-    <div class="ur" style="font-size:15.5px">آپ کی ای میل پر تصدیقی لنک بھیج دیا گیا ہے۔ ان باکس (یا سپام فولڈر) کھول کر لنک دبائیں، پھر یہاں واپس آ کر «میں نے تصدیق کر لی ہے» والا بٹن دبائیں۔</div>
-    <div class="msg" id="verify-msg"></div>
-  </div>
-  <button class="btn" id="verify-continue">I've verified — Continue</button>
-  <button class="btn ghost" id="verify-resend">Resend verification email</button>
-  <div id="verify-demo" hidden>
-    <div class="divider"></div>
-    <p class="small center" style="margin-bottom:6px">Preview build only — no real email is sent in this demo:</p>
-    <button class="btn goldb" id="verify-simulate">Simulate verification (demo)</button>
-  </div>
-  <button class="btn danger" id="verify-logout">Log out</button>
-</section>
-
 <!-- ================= GATES ================= -->
 <section class="view" id="view-gates">
   <div class="topbar"><span style="width:44px"></span><div class="ttl">Enter the App</div><button class="tbtn" id="gates-logout">Log out</button></div>
-  <p class="lead">Welcome — your email is verified. Step 2 (your academic identity) unlocks the app; Step 1 is an optional invitation.</p>
+  <p class="lead">Welcome! Step 2 (your academic identity) unlocks the app; Step 1 is an optional invitation.</p>
   <div class="gate-step" id="gateA-step"><div class="n">1</div><b>Join the community</b> <span class="small">(optional · اختیاری)</span></div>
   <div class="card accent">
     <p class="small" style="margin-bottom:6px">Optional, and warmly recommended — the group is where students discuss, and the channel carries announcements. Join now or any time later; the app never waits for it.</p>
@@ -1855,7 +1844,7 @@ body{background:#E6E2D5}
     <label class="checkrow" style="margin:10px 0 2px"><input type="checkbox" id="adm-certs-toggle"><span><b>Auto-issue Top Performer certificates</b><br><span class="small">Each month's Top 3 automatically receive a Certificate of Achievement (one per member per month) with a notification. Turn off to stop issuance.</span></span></label>
   </div>
   <h3>👥 Members</h3>
-  <p class="small" style="margin:0 0 6px">Everyone who has registered — no approval step. Members marked <b>unverified</b> have not tapped their email verification link yet; they enter automatically once they do.</p>
+  <p class="small" style="margin:0 0 6px">Everyone who has registered — there is no approval step and no email verification: every member is active as soon as they register.</p>
   <input id="adm-search" type="search" placeholder="Search by name, university, department, email…">
   <div id="adm-members" style="margin-top:8px"></div>
   <button class="btn ghost" id="adm-export">⬇ Export members (CSV)</button>
@@ -3288,17 +3277,9 @@ function goAfterLogin(){
   if(ME.role === "student"){ ME.lastActive = nowISO(); ensureMemberId(ME); persist(); if(FB) FB.saveUser(ME); }
   if(ME.role === "admin" && !isPreview()) return showView("view-admin");
   if(isPreview()) return showView("view-home");   /* preview always lands on the student home */
-  if(ME.status !== "approved") return renderVerify(), showView("view-verify");
   if(!accessComplete(ME)) return renderGates(), showView("view-gates");
   showView("view-home");
 }
-function renderVerify(){
-  document.getElementById("verify-email").textContent = ME ? (ME.email || "") : "";
-  const msg = document.getElementById("verify-msg"); msg.className = "msg"; msg.textContent = "";
-  document.getElementById("verify-demo").hidden = !DEMO_MODE;
-  const rb = document.getElementById("verify-resend"); rb.disabled = false; rb.textContent = "Resend verification email";
-}
-
 /* ================= Validation helpers ================= */
 function showErr(id, bad){ const e = document.getElementById(id); if(e) e.classList.toggle("show", !!bad); return !bad; }
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||"").trim()); }
@@ -6807,12 +6788,12 @@ function wire(){
         goAfterLogin();
         return;
       }
-      const u = normalizeUser({ id:uid(), role:"student", status:"unverified", emailVerified:false, name:v("reg-name"), email:email, pass:v("reg-pass"),
+      const u = normalizeUser({ id:uid(), role:"student", status:"approved", emailVerified:false, name:v("reg-name"), email:email, pass:v("reg-pass"),
         university:v("reg-uni"), dept:v("reg-dept"), degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"),
         whatsapp:v("reg-wa"), gates:{group:false,channel:false},
         identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""}, createdAt:nowISO(), fcmTokens:[] });
-      DB.users.push(u); ME = u; setSession(email); notifyAdmin("New registration", u.name + " (" + u.university + ") has registered; their email verification is pending."); saveDB();
-      renderVerify(); showView("view-verify");
+      DB.users.push(u); ME = u; setSession(email); notifyAdmin("New registration", u.name + " (" + u.university + ") has registered."); saveDB();
+      toast("Welcome, " + u.name.split(" ")[0] + "!"); goAfterLogin();
     } else {
       try{
         if(GOOGLE_PROFILE){
@@ -6825,7 +6806,7 @@ function wire(){
         } else {
           const u = await FB.signUp({ name:v("reg-name"), email:email, pass:v("reg-pass"), university:v("reg-uni"), dept:v("reg-dept"),
             degree:v("reg-degree"), country:v("reg-country"), city:v("reg-city"), whatsapp:v("reg-wa") });
-          ME = u; notifyAdmin("New registration", u.name + " (" + u.university + ") has registered; their email verification is pending."); persist(); renderVerify(); showView("view-verify");
+          ME = u; notifyAdmin("New registration", u.name + " (" + u.university + ") has registered."); persist(); toast("Welcome, " + (u.name || "").split(" ")[0] + "!"); goAfterLogin();
         }
       }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); if(err && err.code === "auth/email-already-in-use") $("reg-goto-login").hidden = false; }
     }
@@ -6850,37 +6831,9 @@ function wire(){
     $("demo-admin-btn").addEventListener("click", ()=>{ ME = findUser(DEMO_ADMIN_EMAIL); setSession(ME.email); goAfterLogin(); });
   }
   function logout(){ try{ sessionStorage.removeItem("rh_preview"); }catch(e){} ME = null; setSession(null); exitGoogleProfileMode(); applyPreview(); if(FB) FB.signOut(); showView("view-welcome"); }
-  $("verify-logout").addEventListener("click", logout);
   $("gates-logout").addEventListener("click", logout);
   $("profile-logout").addEventListener("click", logout);
   $("admin-logout").addEventListener("click", logout);
-  $("verify-continue").addEventListener("click", async ()=>{
-    const msg = $("verify-msg");
-    if(DEMO_MODE){
-      if(ME && ME.emailVerified){ ME.status = "approved"; persist(); toast("Email verified — welcome!"); goAfterLogin(); }
-      else { msg.className = "msg err"; msg.textContent = "Not verified yet. This demo sends no real email — press “Simulate verification (demo)” below, then Continue."; }
-      return;
-    }
-    try{
-      const fresh = await FB.checkVerified(); if(fresh) ME = fresh;
-      if(ME && ME.status === "approved"){ toast("Email verified — welcome!"); goAfterLogin(); }
-      else { msg.className = "msg err"; msg.textContent = "Not verified yet — tap the link in the email we sent you first (check the spam / promotions folder), then press Continue again."; }
-    }catch(err){ msg.className = "msg err"; msg.textContent = authErrText(err); }
-  });
-  $("verify-resend").addEventListener("click", async e => {
-    const btn = e.currentTarget;
-    if(DEMO_MODE){ toast("Demo build — no email is sent. Use “Simulate verification (demo)” below."); return; }
-    btn.disabled = true; btn.textContent = "Sending…";
-    try{ await FB.resendVerification(); btn.textContent = "Verification email sent ✓"; toast("Verification email sent — check your inbox."); }
-    catch(err){ btn.textContent = "Resend verification email"; toast(authErrText(err)); }
-    setTimeout(()=>{ btn.disabled = false; btn.textContent = "Resend verification email"; }, 30000);
-  });
-  $("verify-simulate").addEventListener("click", ()=>{
-    if(!ME) return;
-    ME.emailVerified = true; persist();
-    const msg = $("verify-msg"); msg.className = "msg ok"; msg.textContent = "Verified (demo). Now press “I've verified — Continue” above.";
-  });
-
   /* ---- Gates ---- */
   let gateCv = null;
   $("gate-cv-file").addEventListener("change", e => {
@@ -7316,9 +7269,13 @@ function boot(){
     if(em){ ME = findUser(em); if(ME){ goAfterLogin(); return; } }
     showView("view-welcome");
   } else {
-    /* Live mode: the Firebase module script (below) resolves the session and calls window.__fbReady. */
-    showView("view-welcome");
-    window.__fbReady = function(user){ ME = user; if(ME) goAfterLogin(); };
+    /* Live mode (v50): hold the splash until the Firebase module resolves
+       the persisted session and calls window.__fbReady — a signed-in member
+       never sees the login screen flash. A long safety timer falls back to
+       the welcome screen if Firebase itself cannot start. */
+    showView("view-splash");
+    setTimeout(()=>{ const sv = document.getElementById("view-splash"); if(sv && sv.classList.contains("active")) showView("view-welcome"); }, 15000);
+    window.__fbReady = function(user){ ME = user; if(ME) goAfterLogin(); else showView("view-welcome"); };
   }
 }
 document.addEventListener("DOMContentLoaded", boot);
@@ -7338,6 +7295,9 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     const fsMod   = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = authMod.getAuth(app);
+    /* v50 — stay signed in: pin the session to local persistence
+       explicitly, so a login survives browser restarts on this device. */
+    try{ await authMod.setPersistence(auth, authMod.browserLocalPersistence); }catch(e){ console.warn("auth persistence", e && e.code); }
     const db = fsMod.getFirestore(app);
     const { collection, doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, orderBy, limit, startAfter, arrayUnion, arrayRemove, runTransaction } = fsMod;
     const clean = o => JSON.parse(JSON.stringify(o));
@@ -7508,25 +7468,24 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     }
     async function startFor(user){
       /* Always re-read the account and force a fresh ID token BEFORE any
-         routing or promotion decision. The persisted session's token is
-         minted at sign-in: a member who clicks the verification link in a
-         mail app (a different context) stays "unverified" as far as this
-         client and the Firestore rules (which read the token claim) are
-         concerned — the promotion write was denied and the member looped
-         on the verify screen forever. Reload + getIdToken(true) fixes the
-         claim everywhere this flow runs (startup, sign-in, Continue). */
+         routing decision. The persisted session's token is minted at
+         sign-in and can be stale after a long sleep; reload +
+         getIdToken(true) refreshes it everywhere this flow runs (startup,
+         sign-in, refresh). A transient failure here must never eject the
+         member — callers go through startForWithRetry and the login
+         itself stays untouched. */
       try{ await user.reload(); await user.getIdToken(true); }catch(e){}
       const isAdmin = await fetchIsAdmin(user.email);
       let doc = await fetchUser(user.uid);
       if(isAdmin){ if(doc){ doc.role = "admin"; } else { doc = { id:user.uid, role:"admin", status:"approved", name:"Admin", email:user.email, gates:{group:true,channel:true}, identity:{}, createdAt:new Date().toISOString() }; } }
-      /* Email-verification promotion: a student whose Auth email is verified
-         is promoted from "unverified" to "approved" on any sign-in / app
-         start (covers verifying in another tab or browser). The Firestore
-         rules allow this one transition only when the ID token carries
-         email_verified == true. Admins never pass through here. */
-      if(doc && doc.role === "student" && doc.status === "unverified" && user.emailVerified){
+      /* v50 — no verification, no approval: a legacy doc still sitting at
+         "unverified" (created before v50, or not reached by the one-time
+         batch migration) is healed to "approved" on any sign-in / app
+         start. The Firestore rules allow this one self-transition with
+         no token claim required. Admins never pass through here. */
+      if(doc && doc.role === "student" && doc.status === "unverified"){
         try{ await fsMod.updateDoc(fsMod.doc(db, "users", user.uid), { status:"approved" }); doc.status = "approved"; }
-        catch(e){ console.warn("verification promotion failed", e && e.code); }
+        catch(e){ console.warn("legacy status heal failed", e && e.code); }
       }
       if(!doc) return null;
       normalizeUser(doc);
@@ -7536,6 +7495,19 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       fetchPerformers();
       registerFCM(user.uid, doc);
       return doc;
+    }
+    /* v50: one forced retry for transient token/network failures during
+       session restore / sign-in, so a hiccup never ejects a member whose
+       login is still valid. Only the explicit Logout buttons (and the
+       deliberate account-linking sign-out) ever end a session. */
+    async function startForWithRetry(user){
+      try{ return await startFor(user); }
+      catch(e){
+        console.warn("startFor retry after transient failure", e && e.code);
+        await new Promise(r => setTimeout(r, 1200));
+        try{ await user.getIdToken(true); }catch(e2){}
+        return await startFor(user);
+      }
     }
     async function registerFCM(uidUser, userDoc){
       /* Silent refresh ONLY: never prompt at sign-in (the browser prompt now
@@ -7571,13 +7543,11 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
                    password once, then links Google onto the same UID.
          profile — a genuinely new Google user: no doc yet; the UI sends
                    them through the same profile form as email registrants
-                   (completeGoogleProfile writes the doc), and startFor()
-                   promotes them instantly because Google tokens arrive
-                   with email_verified == true. */
+                   (completeGoogleProfile writes the doc, already active). */
     async function resolveGoogleUser(user){
       const isAdmin = await fetchIsAdmin(user.email);
       const doc = await fetchUser(user.uid);
-      if(doc || isAdmin){ const u = await startFor(user); return { status:"ok", user:u }; }
+      if(doc || isAdmin){ const u = await startForWithRetry(user); return { status:"ok", user:u }; }
       let methods = [];
       try{ methods = await authMod.fetchSignInMethodsForEmail(auth, user.email); }catch(e){}
       const providers = (user.providerData || []).map(p => p.providerId);
@@ -7590,20 +7560,20 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     window.__fbAdapter = {
       async signUp(data){
         const c = await authMod.createUserWithEmailAndPassword(auth, data.email, data.pass);
-        const u = { role:"student", status:"unverified", name:data.name, email:data.email, university:data.university, dept:data.dept,
+        const u = { role:"student", status:"approved", name:data.name, email:data.email, university:data.university, dept:data.dept,
           degree:data.degree, country:data.country, city:data.city, whatsapp:data.whatsapp,
           gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""},
           memberId:"", photo:"", lastActive:new Date().toISOString(),
           activity:{guidesOpened:[],oppsViewed:[],oppsSaved:[],exports:0}, documents:[], works:[], accounts:[], certificates:[],
           createdAt:new Date().toISOString(), fcmTokens:[] };
         await setDoc(doc(db,"users",c.user.uid), clean(u));
-        try{ await authMod.sendEmailVerification(c.user); }catch(e){ console.warn("verification email failed to send", e && e.code); }
+        /* v50: no verification email is sent — the member is active now. */
         subMine(data.email, c.user.uid);
         return Object.assign(u, { id:c.user.uid });
       },
       async signIn(email, pass){
         const c = await authMod.signInWithEmailAndPassword(auth, email, pass);
-        const u = await startFor(c.user);
+        const u = await startForWithRetry(c.user);
         if(!u) throw new Error("Account record not found. Please register first.");
         return u;
       },
@@ -7640,32 +7610,28 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
           if(pendingGoogleCred){ await authMod.linkWithCredential(c.user, pendingGoogleCred); pendingGoogleCred = null; }
           else { await authMod.linkWithPopup(c.user, new authMod.GoogleAuthProvider()); }
         }catch(e){ console.warn("Google link note:", e && e.code); }
-        const u = await startFor(c.user);
+        const u = await startForWithRetry(c.user);
         if(!u) throw new Error("Account record not found. Please register first.");
         return u;
       },
       /* Brand-new Google user: write the member doc for the already
-         signed-in Google UID (same shape and same "unverified" start as
-         email registration — the rules require it), then let startFor()
-         promote it: the Google token carries email_verified == true, so
-         the member lands approved and never sees the verify screen. */
+         signed-in Google UID — already active ("approved"), exactly like
+         email registration since v50: no verification round exists. */
       async completeGoogleProfile(data){
         const user = auth.currentUser;
         if(!user) throw new Error("Your Google session has ended — please tap “Continue with Google” again.");
-        const u = { role:"student", status:"unverified", name:data.name, email:user.email, university:data.university, dept:data.dept,
+        const u = { role:"student", status:"approved", name:data.name, email:user.email, university:data.university, dept:data.dept,
           degree:data.degree, country:data.country, city:data.city, whatsapp:data.whatsapp,
           gates:{group:false,channel:false}, identity:{cvLink:"",cvName:"",cvData:"",linkedin:"",scholar:""},
           memberId:"", photo:data.photo || "", lastActive:new Date().toISOString(),
           activity:{guidesOpened:[],oppsViewed:[],oppsSaved:[],exports:0}, documents:[], works:[], accounts:[], certificates:[],
           createdAt:new Date().toISOString(), fcmTokens:[] };
         await setDoc(doc(db, "users", user.uid), clean(u));
-        const fresh = await startFor(user);
+        const fresh = await startForWithRetry(user);
         return fresh || Object.assign(u, { id:user.uid });
       },
       async signOut(){ stopSubs(); try{ await authMod.signOut(auth); }catch(e){} },
-      async refreshMe(){ const u = auth.currentUser; return u ? startFor(u) : null; },
-      async resendVerification(){ const u = auth.currentUser; if(!u) throw new Error("Not signed in."); await authMod.sendEmailVerification(u); },
-      async checkVerified(){ const u = auth.currentUser; if(!u) return null; try{ await u.reload(); await u.getIdToken(true); }catch(e){} return startFor(u); },
+      async refreshMe(){ const u = auth.currentUser; return u ? startForWithRetry(u) : null; },
       async claimMemberId(u){ await claimMemberId(u); },
       async claimCertId(u, cert){ await claimCertId(u, cert); },
       _performers: null,
@@ -7708,14 +7674,15 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       }
     };
     FB = window.__fbAdapter;
-    /* restore an existing session */
+    /* Restore an existing session — ALWAYS resolves the splash, whether
+       a session exists (bootUser) or not (null → welcome). A restore
+       failure after the retry leaves bootUser null but does NOT sign the
+       member out; the next open picks the persisted session up again. */
     const first = await new Promise(res => { const un = authMod.onAuthStateChanged(auth, u => { un(); res(u); }); });
     let bootUser = null;
-    if(first){
-      bootUser = await startFor(first);
-      const deliver = ()=>{ if(window.__fbReady) window.__fbReady(bootUser); else setTimeout(deliver, 300); };
-      deliver();
-    }
+    if(first){ try{ bootUser = await startForWithRetry(first); }catch(e){ console.warn("session restore failed", e && e.code); } }
+    const deliverBoot = ()=>{ if(window.__fbReady) window.__fbReady(bootUser); else setTimeout(deliverBoot, 300); };
+    deliverBoot();
     /* Google REDIRECT sign-in return (the pop-up fallback): route what
        came back — a brand-new member goes to the profile form, an email
        collision goes to the linking prompt. A plain returning member was

@@ -285,6 +285,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 #welcome-preview .wpv-h{font-size:19px;color:var(--navy-text);margin:0 0 2px}
 #welcome-preview .wpv-ur{font-size:15px;margin-bottom:6px}
 #welcome-preview .wpv-note{margin:10px 0 0}
+#welcome-preview .wpv-loading{margin:6px 0 0}
 .footer-note{font-size:12.5px;color:var(--mut);text-align:center;padding:10px 8px 0}
 /* ---------- Welcome hero + refresh controls ---------- */
 .hero{
@@ -3680,10 +3681,26 @@ function renderIIUM(){
 
 /* ---------- Breaking-news band (home + admin share one renderer) ---------- */
 const BRK = { home:{ i:0, items:[] }, adm:{ i:0, items:[] } };
+/* ---------- Demo/seed exclusion (v53, Mufti 2026-11-17) ----------
+   The in-code demo dataset (post-demo-* docs, "(demo)" titles, source
+   cards) seeds DB.news at boot in BOTH modes until the first live read
+   lands. In LIVE mode those docs must never render anywhere a student
+   looks — the welcome preview or the signed-in breaking bar. DEMO_MODE
+   (FIREBASE_CONFIG === null, local preview builds only) keeps showing
+   the demo set, by design. */
+function isRealPost(n){
+  if(DEMO_MODE) return true;
+  if(!n) return false;
+  if(n.kind === "source") return false;
+  const id = String(n.id || "");
+  if(id.indexOf("post-demo-") === 0 || id.indexOf("src-") === 0) return false;
+  if(String(n.title || "").indexOf("(demo)") >= 0) return false;
+  return true;
+}
 function breakingItems(){
   const dl = n => { const t = Date.parse((n && (n.deadline || n.expiresAt)) || ""); return isNaN(t) ? Infinity : t; };
   return visibleNews()
-    .filter(n => n.kind !== "source" && ["job","scholarship","conference"].indexOf(catOf(n)) >= 0)
+    .filter(n => isRealPost(n) && ["job","scholarship","conference"].indexOf(catOf(n)) >= 0)
     .slice()
     .sort((a,b)=>{
       const ca = Date.parse(a.createdAt || ""), cb = Date.parse(b.createdAt || "");
@@ -3735,10 +3752,19 @@ function brkOpen(p){
    posts the breaking bar uses (breakingItems), inside view-welcome, for
    signed-out visitors. Read-only: each card links to the post's official
    page. With no items (live read failed AND no saved copy) the section
-   stays hidden — sign-in is never blocked. */
+   stays hidden — sign-in is never blocked.
+   v53: never renders before the first real data load — a loading line
+   shows until subPublicNews() lands (live mode only); the demo seed
+   must never flash first. */
+let publicNewsReady = DEMO_MODE; /* first real public-news load done? */
 function renderWelcomePreview(){
   const sec = document.getElementById("welcome-preview"); if(!sec) return;
   const list = document.getElementById("welcome-preview-list"); if(!list) return;
+  if(!DEMO_MODE && !publicNewsReady){
+    sec.hidden = false;
+    list.innerHTML = '<p class="small wpv-loading">Loading latest opportunities… <span class="ur">تازہ ترین مواقع لوڈ ہو رہے ہیں…</span></p>';
+    return;
+  }
   const items = (typeof breakingItems === "function") ? breakingItems() : [];
   if(!items.length){ sec.hidden = true; list.innerHTML = ""; return; }
   sec.hidden = false;
@@ -7718,6 +7744,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
           newsFromCache = true;
           newsCursorVal = cached.docs.length ? (cached.docs[cached.docs.length-1].createdAt || "") : "";
           newsExhausted = cached.docs.length < NEWS_PAGE_SIZE;
+          publicNewsReady = true; /* before applyColl: its rerender shows items, not the loading line */
           applyColl("news", withSources(cached.docs));
           if(window.renderWelcomePreview) renderWelcomePreview();
           return;
@@ -7726,13 +7753,16 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
         const docs = s.docs.map(d => Object.assign(d.data(), {id:d.id}));
         if(s.docs.length){ newsCursorSnap = s.docs[s.docs.length-1]; newsCursorVal = newsCursorSnap.data().createdAt || ""; }
         newsExhausted = docs.length < NEWS_PAGE_SIZE;
+        publicNewsReady = true; /* before applyColl: its rerender shows items, not the loading line */
         applyColl("news", withSources(docs));
         writeNewsCache(docs);
         writeLastGood(docs);
         if(window.renderWelcomePreview) renderWelcomePreview();
       }catch(e){
         console.warn("public news", e && e.code);
-        if(applyNewsFallback() && window.renderWelcomePreview) renderWelcomePreview();
+        const fellBack = applyNewsFallback();
+        publicNewsReady = true; /* first load over — fallback items render, or the section hides */
+        if(fellBack && window.renderWelcomePreview) renderWelcomePreview();
         /* no cache at all: the preview section stays hidden */
       }
     }

@@ -280,6 +280,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-col
 .demo-note{font-size:12.5px;color:var(--mut);text-align:center;padding:14px 8px 4px}
 .saved-note{background:#FBF3D9;color:#6B5510;border-bottom:1px solid #C9A227;font-size:13px;text-align:center;padding:8px 12px;line-height:1.55}
 #saved-data-notice[hidden]{display:none}
+/* ---------- Welcome public preview (v52, Mufti 2026-11-17) ---------- */
+#welcome-preview{margin:22px 0 4px;text-align:left}
+#welcome-preview .wpv-h{font-size:19px;color:var(--navy-text);margin:0 0 2px}
+#welcome-preview .wpv-ur{font-size:15px;margin-bottom:6px}
+#welcome-preview .wpv-note{margin:10px 0 0}
 .footer-note{font-size:12.5px;color:var(--mut);text-align:center;padding:10px 8px 0}
 /* ---------- Welcome hero + refresh controls ---------- */
 .hero{
@@ -853,7 +858,7 @@ body{background:#E6E2D5}
 </head>
 <body>
 <div id="app">
-  <div id="saved-data-notice" class="saved-note" hidden>📴 Showing saved information — live updates are unavailable right now. · <span class="urn">محفوظ معلومات دکھائی جا رہی ہیں — لائیو تازہ کاریاں اس وقت دستیاب نہیں ہیں</span></div>
+  <div id="saved-data-notice" class="saved-note" hidden>📴 <span id="saved-notice-en">Showing saved information — live updates are unavailable right now.</span> · <span class="urn" id="saved-notice-ur">محفوظ معلومات دکھائی جا رہی ہیں — لائیو تازہ کاریاں اس وقت دستیاب نہیں ہیں</span></div>
 
 <!-- ================= SPLASH (live session restore, v50) ================= -->
 <section class="view" id="view-splash">
@@ -880,6 +885,14 @@ body{background:#E6E2D5}
   <button class="btn ghost" id="welcome-login-btn">I already have an account — Log in</button>
   <div class="or-divider"><span>or</span></div>
   <button class="btn btn-google" id="welcome-google-btn"><span class="gmark"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34.5 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34.5 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg></span> Continue with Google</button>
+  <!-- Public preview (v52, Mufti 2026-11-17): the 5 newest non-expired
+       opportunities for signed-out visitors — read-only, no sign-in needed. -->
+  <div id="welcome-preview" hidden>
+    <h2 class="wpv-h">Latest opportunities</h2>
+    <div class="ur wpv-ur">تازہ ترین مواقع — اسکالرشپس، ملازمتیں اور کانفرنسیں</div>
+    <div id="welcome-preview-list"></div>
+    <p class="small wpv-note">Create your free account to see all opportunities, save them and get research guidance.</p>
+  </div>
   <button class="btn ghost info-btn" id="btn-howto" aria-expanded="false" aria-controls="howto-panel"><span>📖 How to use</span><span class="ht-chev" aria-hidden="true">▾</span></button>
   <div class="info-panel" id="howto-panel" hidden>
     <div class="guide-step"><div class="gn">1</div><div class="gt"><b>Create your free account</b> — tap the button above; it takes a minute.</div></div>
@@ -2377,7 +2390,33 @@ function readLastGood(){
   return null;
 }
 function newsFallbackDocs(){ const c = readLastGood(); return c ? c.docs : null; }
-function showSavedNotice(on){ const el = document.getElementById("saved-data-notice"); if(el) el.hidden = !on; }
+/* ---------- Dated saved-data notice (v52, Mufti 2026-11-17) ----------
+   When the fallback is active, name the date of the saved copy so nobody
+   mistakes old data for fresh. A missing/unparseable savedAt keeps the
+   dateless text — never a wrong date, never a crash. */
+const UR_MONTHS = ["جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"];
+function fmtSavedDate(ms){
+  if(!ms) return null;
+  const d = new Date(Number(ms));
+  if(isNaN(d.getTime())) return null;
+  return {
+    en: d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}),
+    ur: d.getDate() + " " + UR_MONTHS[d.getMonth()] + " " + d.getFullYear()
+  };
+}
+function showSavedNotice(on){
+  const el = document.getElementById("saved-data-notice"); if(!el) return;
+  el.hidden = !on;
+  if(!on) return;
+  const c = readLastGood();
+  const f = c && c.savedAt ? fmtSavedDate(c.savedAt) : null;
+  const enEl = document.getElementById("saved-notice-en");
+  const urEl = document.getElementById("saved-notice-ur");
+  if(f && enEl && urEl){
+    enEl.textContent = "Showing saved information from " + f.en + " — live updates are unavailable right now. Sign in again to refresh.";
+    urEl.textContent = "محفوظ معلومات (" + f.ur + " کی) دکھائی جا رہی ہیں — لائیو تازہ کاریاں اس وقت دستیاب نہیں ہیں۔ تازہ معلومات کے لیے دوبارہ سائن ان کریں۔";
+  }
+}
 function applyNewsFallback(){
   const docs = newsFallbackDocs();
   if(!docs || !docs.length || !DB) return false;
@@ -3199,6 +3238,7 @@ function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   window.scrollTo(0,0);
   if(id === "view-home" || id === "view-hub-space" || id === "view-hub-opps" || id === "view-hub-research" || id === "view-hub-more") renderHome();
+  if(id === "view-welcome") renderWelcomePreview();
   if(id === "view-profile") renderProfile();
   if(id === "view-admin") renderAdmin();
   if(id === "view-notifications") renderNotifications();
@@ -3688,6 +3728,29 @@ function brkGo(p, d){
 function brkOpen(p){
   const st = BRK[p]; const n = st && st.items[st.i]; if(!n) return;
   renderOpps(catOf(n)); showView("view-opps");
+}
+
+/* ---------- Welcome public preview (v52, Mufti 2026-11-17) ----------
+   Renders the same 5 newest non-expired job/scholarship/conference
+   posts the breaking bar uses (breakingItems), inside view-welcome, for
+   signed-out visitors. Read-only: each card links to the post's official
+   page. With no items (live read failed AND no saved copy) the section
+   stays hidden — sign-in is never blocked. */
+function renderWelcomePreview(){
+  const sec = document.getElementById("welcome-preview"); if(!sec) return;
+  const list = document.getElementById("welcome-preview-list"); if(!list) return;
+  const items = (typeof breakingItems === "function") ? breakingItems() : [];
+  if(!items.length){ sec.hidden = true; list.innerHTML = ""; return; }
+  sec.hidden = false;
+  list.innerHTML = items.map(n => {
+    const dl = brkDeadlineText(n);
+    const link = String(n.link || "").trim();
+    const title = esc(n.title || "");
+    const inner = link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener">' + title + ' ↗</a>' : title;
+    const meta = [esc(n.org || ""), dl ? ("⏰ " + esc(dl)) : ""].filter(Boolean).join(" · ");
+    return '<div class="opp-card"><h3 style="font-size:16.5px">' + inner + '</h3>'
+      + (meta ? '<div class="opp-meta">' + meta + '</div>' : '') + '</div>';
+  }).join("");
 }
 
 function renderHome(){
@@ -7532,6 +7595,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
       const v = currentView();
       if(v === "view-admin" && window.renderAdmin) renderAdmin();
       if(v === "view-home" && window.renderHome) renderHome();
+      if(v === "view-welcome" && window.renderWelcomePreview) renderWelcomePreview();
       if(v === "view-profile" && window.renderProfile) renderProfile();
       if(v === "view-notifications" && window.renderNotifications) renderNotifications();
       if(v === "view-leaderboard" && window.renderLeaderboard) renderLeaderboard();
@@ -7637,6 +7701,40 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
         rerender();
       }catch(e){ console.warn("load more news", e && e.code); }
       newsLoadingMore = false;
+    }
+    /* ---------- Public preview (v52, Mufti 2026-11-17) ----------
+       Signed-out visitors see the 5 newest non-expired opportunities on
+       the welcome screen. The /news read rule is public, so this one-time
+       read works without auth — no user data, no other collection. A
+       fresh 15-minute cache is reused; on failure the last-good copy
+       fills the preview (with the dated notice) and a total miss hides
+       the preview section instead of erroring. */
+    let publicNewsDone = false;
+    async function subPublicNews(){
+      if(publicNewsDone) return; publicNewsDone = true;
+      try{
+        const cached = readNewsCache();
+        if(cached){
+          newsFromCache = true;
+          newsCursorVal = cached.docs.length ? (cached.docs[cached.docs.length-1].createdAt || "") : "";
+          newsExhausted = cached.docs.length < NEWS_PAGE_SIZE;
+          applyColl("news", withSources(cached.docs));
+          if(window.renderWelcomePreview) renderWelcomePreview();
+          return;
+        }
+        const s = await getDocs(query(collection(db,"news"), orderBy("createdAt","desc"), limit(NEWS_PAGE_SIZE)));
+        const docs = s.docs.map(d => Object.assign(d.data(), {id:d.id}));
+        if(s.docs.length){ newsCursorSnap = s.docs[s.docs.length-1]; newsCursorVal = newsCursorSnap.data().createdAt || ""; }
+        newsExhausted = docs.length < NEWS_PAGE_SIZE;
+        applyColl("news", withSources(docs));
+        writeNewsCache(docs);
+        writeLastGood(docs);
+        if(window.renderWelcomePreview) renderWelcomePreview();
+      }catch(e){
+        console.warn("public news", e && e.code);
+        if(applyNewsFallback() && window.renderWelcomePreview) renderWelcomePreview();
+        /* no cache at all: the preview section stays hidden */
+      }
     }
     function subAll(){
       stopSubs();
@@ -7853,7 +7951,7 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
         const fresh = await startForWithRetry(user);
         return fresh || Object.assign(u, { id:user.uid });
       },
-      async signOut(){ stopSubs(); try{ await authMod.signOut(auth); }catch(e){} },
+      async signOut(){ stopSubs(); try{ await authMod.signOut(auth); }catch(e){} publicNewsDone = false; subPublicNews(); },
       async refreshMe(){ const u = auth.currentUser; return u ? startForWithRetry(u) : null; },
       async claimMemberId(u){ await claimMemberId(u); },
       async claimCertId(u, cert){ await claimCertId(u, cert); },
@@ -7906,6 +8004,8 @@ if(typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG){
     if(first){ try{ bootUser = await startForWithRetry(first); }catch(e){ console.warn("session restore failed", e && e.code); } }
     const deliverBoot = ()=>{ if(window.__fbReady) window.__fbReady(bootUser); else setTimeout(deliverBoot, 300); };
     deliverBoot();
+    /* No session: load the public preview for the welcome screen. */
+    if(!bootUser) subPublicNews();
     /* Google REDIRECT sign-in return (the pop-up fallback): route what
        came back — a brand-new member goes to the profile form, an email
        collision goes to the linking prompt. A plain returning member was
